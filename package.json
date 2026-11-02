@@ -1,0 +1,13 @@
+{
+  "name": "astrocompose",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Composable astrophysics visualizations for exploration and explanation",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "node --test",
+    "capabilities": "node scripts/agent.mjs capabilities"
+  }
+}

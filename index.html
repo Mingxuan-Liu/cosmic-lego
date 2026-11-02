@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>AstroCompose — Composable astrophysics visualizations</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">✦</span><div><h1>AstroCompose</h1><p>Composable astrophysics visualizations</p></div></div>
+      <div class="header-right"><span class="pill">EXOPLANET LAB · v0.1</span><span id="connection" class="connection">Connecting…</span></div>
+    </header>
+    <main>
+      <section class="intro">
+        <div><p class="eyebrow">ONE MODEL, CONNECTED VIEWS</p><h2>Build a system.<br /><span>See what an observer measures.</span></h2><p class="lede">Combine stars, planets, and observers. Follow the same physical model from an orbit to a light curve and a stellar velocity measurement.</p></div>
+        <div class="preset-box"><label for="preset">Start with an example</label><select id="preset"><option value="">Choose a scene…</option><option value="single-transit.json">A transiting planet</option><option value="viewing-angles.json">One system, different viewpoints</option><option value="planet-comparison.json">Compare mass and radius</option></select><p>Examples replace the current scene. Save your scene first to keep a copy.</p></div>
+      </section>
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+      <div class="lab-layout">
+        <aside class="inspector" aria-label="Scene controls">
+          <div class="section-heading"><h3>Scene</h3><span id="revision" class="muted">—</span></div>
+          <label for="scene-title">Title</label><input id="scene-title" type="text" maxlength="160" />
+          <div class="divider"></div>
+          <div class="section-heading"><h3>Physical system</h3><span class="section-number">01</span></div>
+          <label for="system-select">Edit system</label><select id="system-select"></select>
+          <label for="system-label">System label</label><input id="system-label" type="text" maxlength="100" />
+          <div class="field-grid">
+            <div><label for="star-mass">Star mass <span>M☉</span></label><input id="star-mass" type="number" min="0.01" step="0.1" /></div>
+            <div><label for="star-radius">Star radius <span>R☉</span></label><input id="star-radius" type="number" min="0.01" step="0.1" /></div>
+            <div><label for="planet-mass">Planet mass <span>M♃</span></label><input id="planet-mass" type="number" min="0" step="0.1" /></div>
+            <div><label for="planet-radius">Planet radius <span>R♃</span></label><input id="planet-radius" type="number" min="0.001" step="0.1" /></div>
+          </div>
+          <label for="period">Orbital period <span>days</span></label><input id="period" type="number" min="0.01" step="0.1" />
+          <button id="duplicate-system" class="secondary full">＋ Duplicate system for comparison</button>
+          <div class="divider"></div>
+          <div class="section-heading"><h3>Observer</h3><span class="section-number">02</span></div>
+          <label for="observer-select">Edit observer</label><select id="observer-select"></select>
+          <label for="observer-label">Observer label</label><input id="observer-label" type="text" maxlength="100" />
+          <label for="inclination">Orbital inclination <output id="inclination-value" for="inclination">90°</output></label><input id="inclination" type="range" min="0" max="180" step="0.1" value="90" />
+          <p class="hint">90° is edge-on. 0° is face-on.</p>
+          <button id="add-observer" class="secondary full">＋ Add observer and view</button>
+          <button id="add-view" class="text-button full">Connect selected system + observer</button>
+          <div class="divider"></div>
+          <div class="section-heading"><h3>Presentation</h3><span class="section-number">03</span></div>
+          <label for="display-scale">Planet size in orbit overview <output id="display-scale-value" for="display-scale">5×</output></label><input id="display-scale" type="range" min="1" max="20" step="1" />
+          <p class="hint">Visual enlargement affects only the orbit overview. Measurements and transit geometry use physical radii.</p>
+          <div class="assumption-box"><strong>Model assumptions</strong><p>Circular two-body orbit · Uniform stellar disk · Dark planet</p><p>Independent systems share a physical clock. No planet–planet interactions.</p></div>
+        </aside>
+        <section class="workspace" aria-label="Interactive visualization">
+          <div class="transport"><button id="play" class="play-button" aria-label="Pause animation">Ⅱ</button><div class="timeline"><div class="timeline-label"><label for="phase">Reference orbital phase</label><output id="time-value">0.00 days</output></div><input id="phase" type="range" min="0" max="1" step="0.001" value="0" /><div class="timeline-ends"><span>0</span><span id="clock-label">One orbit of the first system</span><span>1</span></div></div><button id="reset" class="secondary">Reset</button></div>
+          <div class="workspace-title"><h3 id="active-title">Loading scene…</h3><span id="view-count" class="muted"></span></div>
+          <div id="views" class="views"></div>
+          <p class="plot-note">Gold marks the current state. Matching plots share vertical scales across views; phase 0 is inferior conjunction. Radial velocity is positive away from the observer. All signals are model predictions.</p>
+          <details class="json-panel"><summary><span>Scene specification</span><span class="muted">Inspect · edit · share</span></summary><p class="hint">The scene is a portable description of physical systems, observers, and views. An external agent can edit the same scene through the local API.</p><label class="sr-only" for="scene-json">Scene JSON</label><textarea id="scene-json" spellcheck="false"></textarea><div class="json-actions"><button id="apply-json" class="primary">Apply JSON</button><button id="copy-json" class="secondary">Copy</button><button id="download-json" class="secondary">Download</button><label class="button secondary" for="import-json">Import file</label><input id="import-json" type="file" accept=".json,application/json" class="sr-only" /><button id="restore-json" class="text-button">Restore current</button></div><p id="json-status" class="hint" role="status"></p></details>
+        </section>
+      </div>
+      <footer><span>AstroCompose · A small, inspectable model library</span><span>Physical logic stays in the model. The interface composes it.</span></footer>
+    </main>
+    <script type="module" src="/src/app.js"></script>
+  </body>
+</html>

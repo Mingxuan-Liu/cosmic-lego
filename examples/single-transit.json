@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "0.1",
+  "title": "One planet, three connected views",
+  "systems": [
+    { "id": "hot-jupiter", "label": "Hot Jupiter", "starMassSolar": 1, "starRadiusSolar": 1, "planetMassJupiter": 1, "planetRadiusJupiter": 1, "periodDays": 3 }
+  ],
+  "observers": [
+    { "id": "edge-on", "label": "Edge-on observer", "inclinationDeg": 90 }
+  ],
+  "views": [
+    { "id": "transit", "systemId": "hot-jupiter", "observerId": "edge-on" }
+  ],
+  "presentation": { "orbitSeconds": 20, "planetDisplayScale": 5 }
+}

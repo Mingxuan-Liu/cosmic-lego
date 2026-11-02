@@ -1,0 +1,34 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { once } from 'node:events';
+import { createApp } from '../src/server.js';
+const root = fileURLToPath(new URL('..', import.meta.url));
+const scene = JSON.parse(readFileSync(new URL('../examples/viewing-angles.json', import.meta.url), 'utf8'));
+
+test('agent HTTP contract applies valid scenes and preserves state on rejected updates', async t => {
+  const server = createApp({ root, initialScene: scene });
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  t.after(() => server.close());
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const get = route => fetch(base + route);
+  const post = (route, data, extra = {}) => fetch(base + route, { method: 'POST', headers: { 'Content-Type': 'application/json', ...extra }, body: JSON.stringify(data) });
+  assert.equal((await (await get('/api/capabilities')).json()).name, 'AstroCompose');
+  const initial = await (await get('/api/scene')).json();
+  const changed = structuredClone(scene); changed.observers[1].inclinationDeg = 0;
+  const accepted = await post('/api/scene', { scene: changed, baseRevision: initial.revision });
+  assert.equal(accepted.status, 200);
+  const next = await accepted.json(); assert.equal(next.revision, initial.revision + 1);
+  const invalid = structuredClone(changed); invalid.systems[0].eccentricity = 0.5;
+  assert.equal((await post('/api/scene', { scene: invalid })).status, 422);
+  assert.deepEqual(await (await get('/api/scene')).json(), next);
+  assert.equal((await post('/api/scene', { scene, baseRevision: initial.revision })).status, 409);
+  const calculated = await (await post('/api/evaluate', { scene: changed, timeDays: 0.75 })).json();
+  assert.ok(Math.abs(calculated.views[1].state.stellarRVMps) < 1e-10);
+  assert.equal((await post('/api/sample', { scene, samples: 1000000 })).status, 400);
+  assert.equal((await post('/api/scene', { scene }, { Origin: 'https://unrelated.example' })).status, 403);
+  assert.equal((await get('/.git/config')).status, 404);
+  assert.equal((await get('/examples/viewing-angles.json')).status, 200);
+  assert.equal((await get('/api/schema')).status, 200);
+});

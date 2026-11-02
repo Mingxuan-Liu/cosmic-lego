@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "0.1",
+  "title": "Mass changes the wobble; radius changes the dip",
+  "systems": [
+    { "id": "reference", "label": "Reference planet", "starMassSolar": 1, "starRadiusSolar": 1, "planetMassJupiter": 1, "planetRadiusJupiter": 1, "periodDays": 3 },
+    { "id": "larger", "label": "Twice the radius", "starMassSolar": 1, "starRadiusSolar": 1, "planetMassJupiter": 1, "planetRadiusJupiter": 2, "periodDays": 3 },
+    { "id": "heavier", "label": "Twice the mass", "starMassSolar": 1, "starRadiusSolar": 1, "planetMassJupiter": 2, "planetRadiusJupiter": 1, "periodDays": 3 }
+  ],
+  "observers": [ { "id": "edge-on", "label": "Edge-on", "inclinationDeg": 90 } ],
+  "views": [
+    { "id": "reference", "systemId": "reference", "observerId": "edge-on" },
+    { "id": "larger", "systemId": "larger", "observerId": "edge-on" },
+    { "id": "heavier", "systemId": "heavier", "observerId": "edge-on" }
+  ],
+  "presentation": { "orbitSeconds": 20, "planetDisplayScale": 5 }
+}

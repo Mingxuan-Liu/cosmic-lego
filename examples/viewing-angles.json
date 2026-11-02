@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "0.1",
+  "title": "One system, two observers",
+  "systems": [
+    { "id": "hot-jupiter", "label": "Hot Jupiter", "starMassSolar": 1, "starRadiusSolar": 1, "planetMassJupiter": 1, "planetRadiusJupiter": 1, "periodDays": 3 }
+  ],
+  "observers": [
+    { "id": "edge-on", "label": "Edge-on", "inclinationDeg": 90 },
+    { "id": "tilted", "label": "Tilted observer", "inclinationDeg": 80 }
+  ],
+  "views": [
+    { "id": "transit", "systemId": "hot-jupiter", "observerId": "edge-on" },
+    { "id": "miss", "systemId": "hot-jupiter", "observerId": "tilted" }
+  ],
+  "presentation": { "orbitSeconds": 20, "planetDisplayScale": 5 }
+}
