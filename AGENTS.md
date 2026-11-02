@@ -4,7 +4,14 @@ User clarification, 2026-11-02: the goal is an extensible construction environme
 Agents must create bodies, attach physical relationships, create measurements,
 and arrange explanations. A fixed experiment with exposed parameters is insufficient.
 
-- Start with README.md, docs/physics.md and docs/agent-interface.md.
+- Read README.md first: it defines the enduring purpose and design commitments.
+  It is a blueprint, not a promise that every described capability exists.
+  Practical instructions belong in docs/getting-started.md; current scope and
+  evidence belong in docs/demo-status.md. Read docs/physics.md and
+  docs/agent-interface.md when working with the present model or authoring API.
+- The implementation-specific exoplanet rules below apply to that model only.
+  They must not become universal restrictions on future domains. New domains
+  need their own explicit contracts, coupling rules and independent checks.
 - Author with the public `World` SDK in `src/sdk.js` or discover semantic tools
   with `node scripts/agent.mjs tools`. JSON is persistence/transport, not the
   intended limit of the authoring vocabulary. Do not hand-edit numerical kernels
