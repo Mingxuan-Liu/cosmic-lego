@@ -1,148 +1,205 @@
 # AstroCompose
 
-**Composable astrophysics visualizations for exploration and explanation.**
+**Agent-built worlds for astrophysical explanation.**
 
-Build a model. Connect observers. See the signal.
+AstroCompose is a rough authoring toolkit for constructing physical scenes from
+reusable objects and relationships. Its first model pack lets an author create a
+star, add planets with independent elliptical orbits, place observers, and connect
+those observers to composite transit measurements.
 
-AstroCompose is an experimental toolkit for assembling scientific explanations
-from explicit physical models, measurements, and views. Its first domain is
-**exoplanet detection**: an orbit, a transit light curve, and stellar radial velocity
-all derive from one circular two-body model and one physical clock.
+The primary authoring interface is a JavaScript SDK with stable handles. An agent
+can add a planet, attach its orbit, rewire a measurement, or remove a component
+without changing the engine. The browser presents the resulting world, its
+measurements, and its source. JSON is the saved graph and transport format.
 
-The prototype demonstrates a small composition language. A scene can contain
-several independent systems, several observers, and any supported pairing of them.
-The browser, command line, and local agent API share the same validation and physics.
-There is no embedded LLM, API key, account, dependency installation, or network
-service required for playback. Internet access is not needed once the repo and
-Node.js are available.
+**Status: v0.2, local research prototype.** The implementation covers one bounded
+physical domain. It is not a general astronomy simulator or a validated teaching
+product. No embedded LLM, API key, account, package installation, or internet
+connection is required for playback once Node.js is available.
 
-**Status:** local research/authoring prototype, v0.1. Architecture is provisional.
-This is an idealized model, not observational data or a complete detection pipeline.
+## Open the demo
 
-## Try it
-
-Requires **Node.js 20 or later** and a modern browser.
+Requires **Node.js 20 or later** and a modern browser:
 
 ```sh
 node scripts/serve.mjs
 ```
 
-Open **http://127.0.0.1:4317**. Stop the server with Ctrl+C.
-On macOS, double-click **Start AstroCompose.command** to start the local server and
-open your browser. The launcher also recognizes the bundled Codex Node runtime
-when Node is not on PATH; `ASTROCOMPOSE_NODE` can select an explicit executable.
+Open **http://127.0.0.1:4317**. On macOS, double-click
+**Start AstroCompose.command** instead. The launcher can use the bundled Codex
+Node runtime when Node is not on PATH; `ASTROCOMPOSE_NODE` selects an explicit
+executable. In commands below, `bash scripts/node.sh` can replace `node`.
 
-The launcher resumes `.local/live-scene.json` if it exists. The plain server
-command starts with the two-observer example; `--resume` restores saved edits.
-To select an example or another port:
+The plain server starts the `cosmic-clockwork` world. The macOS launcher resumes
+`.local/world-v2.json` when available. To resume or select another starting world:
 
 ```sh
-node scripts/serve.mjs --scene examples/planet-comparison.json --port 4318
+node scripts/serve.mjs --resume
+node scripts/serve.mjs --example tilted-orbits --port 4318
 ```
 
-### Three things to try
+Use the scene menu to explore authored worlds. Drag the stage to rotate the
+presentation camera, scroll to zoom, click an object to inspect its handle, and
+play or scrub physical time. Switch observer feeds to inspect different
+measurements of the same world. **Scene & agent** exposes the source, object graph,
+and available agent tools. After graph edits or resuming saved state, the source
+may be an equivalent generated SDK program rather than the original recipe.
 
-1. **One system, different viewpoints:** at phase zero, the edge-on observer sees
-   a transit; the 80° observer misses it. Press Play or scrub phase.
-2. **Compare mass and radius:** twice the radius produces four times the central
-   transit depth in this uniform-star model. Twice the mass changes the stellar
-   velocity. The paired charts use common vertical scales.
-3. **Compose your own scene:** duplicate a system, add an observer, or connect a
-   different system–observer pair. No physics or drawing code changes are needed.
+Body markers are enlarged in the orbital stage. Orbital distances remain linear,
+and the observer close-up uses physical radius ratios. Rotating the camera cannot
+change a measured transit.
 
-The orbit overview uses schematic body sizes; the close-up uses physical radius
-ratios. The display-size control cannot change a light curve or radial velocity.
-Physical parameter edits create a new idealized configuration at the same time;
-they do not represent an in-flight impulse or a conserving physical intervention.
+## Construct a world
 
-Open **Scene specification** to inspect, edit, import, or download JSON. Unsupported
-fields and invalid configurations are rejected while the last accepted scene remains
-visible. Saved JSON contains configuration, not the current playhead position.
+Save a recipe such as `experiments/my-world.mjs`:
 
-## Bring your own agent
+```js
+import { World } from '../src/sdk.js';
 
-Use any agent that can read local files and run commands, or call local HTTP tools:
+const world = new World({ title: 'A world assembled from handles' });
+const sun = world.star({ id: 'sun', name: 'Host star' });
+
+// Measurements can be connected before their orbiting planets exist.
+for (const [id, direction] of [
+  ['earthward', [0, 0, 1]],
+  ['displaced', [0.1, 0.1, 1]],
+]) {
+  const observer = world.observer({ id, direction });
+  world.transits(sun, observer, { id: `${id}-flux` });
+}
+
+for (const [index, a] of [0.04, 0.07, 0.11].entries()) {
+  const planet = world.planet({
+    id: `planet-${index}`, name: `Planet ${index + 1}`,
+    massJupiter: 0.1, radiusJupiter: 0.8,
+  });
+  planet.orbit(sun, {
+    id: `orbit-${index}`, semiMajorAxisAU: a,
+    eccentricity: 0.1 * index,
+    inclinationDeg: 90 - 3 * index,
+    longitudeAscendingNodeDeg: 20 * index,
+    meanAnomalyDegAtEpoch: 35 * index,
+  });
+}
+
+// State which quantity the edit preserves.
+world.get('orbit-0').eccentricity(0.6, { hold: 'semimajorAxis' });
+world.get('orbit-1').eccentricity(0.55, { hold: 'periapsis' });
+world.present({ startDays: -0.1, durationDays: 20, playbackSeconds: 80 });
+export default world;
+```
+
+Validate the recipe, then apply it to the running local viewer:
 
 ```sh
-node scripts/agent.mjs capabilities
-node scripts/agent.mjs schema
-node scripts/agent.mjs validate examples/viewing-angles.json
-node scripts/agent.mjs evaluate examples/viewing-angles.json --time-days 0.75
+node scripts/agent.mjs run experiments/my-world.mjs --dry-run
+node scripts/agent.mjs run experiments/my-world.mjs
+```
+
+A recipe executes in your local authoring process. The web server receives the
+validated graph and displays the source as text; it does not execute submitted
+JavaScript. Accepted changes appear in the browser automatically.
+
+Orbit period follows the semimajor axis and stellar mass. Raising eccentricity at
+**fixed semimajor axis** preserves the period. At **fixed periapsis**, it changes
+the semimajor axis and hence the period. The API requires this choice explicitly.
+Structural edits create new configurations; they are not physical impulses.
+
+## Connect your own agent
+
+The SDK, CLI, and local HTTP semantic tools expose the same model constraints:
+
+```sh
+node scripts/agent.mjs tools
 node scripts/agent.mjs inspect
-node scripts/agent.mjs apply examples/viewing-angles.json
+node scripts/agent.mjs evaluate --time-days 0
+node scripts/agent.mjs transact operations.json --base-revision 2
 ```
 
-The last two commands address a running local demo. Accepted changes appear in the
-browser automatically. Scene JSON may also be read from stdin using `-` as the path.
-For machines using the bundled runtime, replace `node` with `bash scripts/node.sh`.
+Tools support body creation, orbit attachment, observer creation, measurement
+rewiring, explicit eccentricity edits, removal with dependency checks, and
+annotations. Operation batches validate and commit atomically. A failed operation
+leaves the accepted world intact; optional revision checks prevent stale edits.
 
-A chat-only assistant can produce scene JSON for manual import. A remote agent
-cannot reach your computer's loopback API without a separately configured bridge.
-**MCP is not implemented yet.** This prototype establishes the underlying operations
-that an MCP adapter could expose later.
+Read [the agent interface](docs/agent-interface.md) for exact handle methods,
+operations, payloads, and errors. Remote chat-only clients cannot directly reach
+your loopback server. **MCP is not implemented**; an adapter could wrap the same
+operations later.
 
-See [the agent interface](docs/agent-interface.md) for commands, HTTP payloads,
-structured errors, and an example instruction to give your agent.
+## What the author challenges demonstrate
 
-## Scientific scope
+Two separate agents used the public SDK to construct unanticipated cases without
+editing the engine:
 
-- One spherical star and one opaque, dark planet per independent system.
-- Newtonian circular two-body motion, including the stellar barycentric motion.
-- Stellar disk has uniform brightness; transit flux uses analytic disk overlap.
-- Distant observers with inclination 0° (face-on) through 90° (edge-on).
-- Period and masses determine the orbit size; positive RV means receding.
+- [Overlapping shadows](experiments/agent-a-report.md): three planets, selective
+  and combined photometers, a second observer, and cascading removal. Adding
+  individual transit deficits overcounted the shared shadow; union photometry
+  handled it once.
+- [Eccentricity and preserved distances](experiments/agent-b-report.md): four
+  independently oriented planets, temporary-object removal, and observer/
+  measurement rewiring. Fixed-a eccentricity kept the period at 8.264820151 days;
+  fixed-q eccentricity doubled a and multiplied the period by 2√2.
 
-No eccentricity, multiple interacting planets, limb darkening, stellar activity,
-atmospheric transmission, instrumental noise, finite exposure, light-time effects,
-or relativistic corrections are included. Independent mass/radius controls do not
-enforce stellar or planetary structure. Bounds limit the supported demonstration
-space; they are not a claim that all allowed configurations occur in nature.
+These exercises demonstrate specific structural compositions through the public
+interface. They are not two-model scientific validation, a novice-user study, or
+evidence of learning gains. Their numerical assertions and dry-runs passed; see
+[demo status](docs/demo-status.md) for the broader verification record.
 
-Read [the physics contract](docs/physics.md) and [source references](docs/references.md).
+## Physical scope
 
-## Why this implementation?
+The active model is a **fixed star with independent Keplerian planets**. Each
+planet has its own semimajor axis, eccentricity, orbital plane, periapsis
+orientation, and phase. All share a physical clock. Planet masses are metadata
+and do not affect trajectories in this approximation.
 
-The first experiment keeps the physics independent of rendering and uses a local
-browser interface. Manim remains a possible later export adapter. The LLM composes
-declarative data through a checked interface; physical laws live in tested numerical
-code rather than being enforced by prompting alone.
+The total planetary mass must be at most **1% of the host mass**. This is a model
+guard, not an error bound or a stability guarantee. The model has no mutual
+planetary gravity, collisions, resonant dynamics, stellar reflex motion, or
+radial-velocity observable.
 
-[Architecture decisions](docs/architecture.md) address Manim, component coupling,
-agent constraints, delivery options, and future integrations. [Demo status](docs/demo-status.md)
-records what has actually been checked and which decisions remain open.
+Transit flux is the unblocked fraction of a uniformly bright stellar disk.
+Foreground planet silhouettes are combined through an analytic boundary integral
+for their clipped union, so overlapping silhouettes are not double-counted.
+Floating-point calculations still require numerical checks. Limb darkening,
+stellar activity, planetary light, atmospheres, finite exposure, and measurement
+noise are absent.
 
-```text
-src/physics.js       pure physical model and observables
-src/contract.js      machine-readable authoring capabilities and schema
-src/scene.js         validation, references and scene evaluation
-src/app.js           browser interaction and Canvas rendering
-src/server.js        local HTTP transport
-scene.schema.json   portable scene contract
-scripts/agent.mjs    agent-facing command line
-examples/           reusable scene compositions
-test/               scientific, composition and transport checks
-docs/               assumptions, references and decisions
-```
+Read [the physics contract](docs/physics.md), [architecture decisions](docs/architecture.md),
+and [source references](docs/references.md). Validation enforces the declared
+contract; it does not establish general scientific validity.
 
-## Check the prototype
+## Development and next steps
 
 ```sh
 node --test
+# Or on the original workstation:
+bash scripts/node.sh --test
 ```
 
-Tests cover conservation, reference scales, transit limits, grazing geometry,
-inclination and mass dependence, display/physics isolation, cross-references,
-unsupported physics, CLI errors and HTTP state preservation. Tests are conditional
-on the declared model; they do not prove general physical or pedagogical correctness.
+The numerical, composition, SDK, and transport checks are separate from visual and
+pedagogical review. The current viewer is intentionally limited: custom derived
+plots/equation overlays, saved authoring snapshots, richer explanation timelines,
+and deterministic video export remain open work. New model packs need their own
+physical contracts and verification; more presets alone do not supply that
+capability.
 
-## Collaboration and release
+```text
+src/sdk.js          public World and semantic handles
+src/contract.js     discoverable tools and structural rules
+src/scene.js        composition, operations and shared evaluation
+src/physics.js      Kepler motion and composite shadow geometry
+src/app.js          interactive presentation
+src/server.js       local HTTP transport
+examples/          authored SDK worlds
+experiments/       independent author recipes and reports
+docs/              contracts, decisions and verification record
+```
 
-Useful next contributions begin with a concrete explanatory need, a reproducible
-scene, and a reference case. Read [AGENTS.md](AGENTS.md) before changing behavior.
-New physics should be a documented model extension with meaningful tests.
+The previous parameter dashboard, v0.1 JSON schema, and circular two-body/RV model
+were replaced. The old prototype is preserved at Git tag **`prototype-v0.1`**;
+its scenes are not the active v0.2 contract. The new persistence path keeps the
+old saved state separate.
 
-The repository is currently local and unpublished. No public license has been
-selected; choose one before inviting public reuse/contributions. The package's
-`private` flag prevents accidental npm publication and does not control Git hosting.
-The name had no obvious exact software collision in a limited 2026-11-01 search;
-this is not trademark or package-name clearance.
+This repository is local and unpublished. A public license, contribution policy,
+and release/distribution plan remain undecided. See [AGENTS.md](AGENTS.md) before
+changing behavior.

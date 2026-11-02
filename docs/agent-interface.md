@@ -1,109 +1,137 @@
-# Agent interface v0.1
+# Agent construction interface v0.2
 
-AstroCompose accepts **scene data**, never executable code in a scene. The same
-validator and physics run through the UI, CLI, and local HTTP API. Provider choice
-is external to this project. Keep credentials with your chosen agent client.
+Start with semantic handles and operations. JSON is used to serialize a world or
+tool request; it does not define the ceiling of the authoring workflow.
 
-## Minimal authoring workflow
+## Public JavaScript SDK
 
-1. Read `AGENTS.md`, run `node scripts/agent.mjs capabilities`, and inspect
-   `scene.schema.json`.
-2. Read the current scene (`inspect`) or an example file. Select supported
-   parameters and connections; identify any unsupported part of the request.
-3. Write a candidate JSON file. Run `validate` and repair explicit errors.
-4. Use `evaluate` or `sample` to inspect the predicted measurements.
-5. Apply the scene through the running local API, then inspect the rendered output.
+An agent can write an ordinary local `.mjs` script. For scripts in `examples/` or
+`experiments/`, import `World` from `../src/sdk.js`. Export a World, or a function
+returning one. Execute with `node scripts/agent.mjs run path/to/recipe.mjs`.
+Use `--dry-run` to validate and print the scene without a running server.
 
-For example, give a locally capable agent this instruction:
+```js
+import { World } from '../src/sdk.js';
 
-> Read AstroCompose's AGENTS.md and capabilities. Starting from the current scene,
-> add a face-on observer of the same system and a linked view. Preserve the other
-> observers. Use the supported scene schema, validate the candidate, inspect its
-> flux and stellar RV at a quarter orbit, and apply it with the current revision.
-> Do not change the physics implementation. Explain the model's limitations.
+const world = new World({ title: 'A system I constructed' });
+const sun = world.star({ id: 'sun', name: 'Host', massSolar: 1, radiusSolar: 1 });
+const earthward = world.observer({ id: 'observer', direction: [0, 0, 1] });
 
-This is a useful request because it can be fulfilled by composition alone. A request
-for eccentricity, limb darkening, or mutual perturbations must be reported as
-unsupported by the current domain contract. Writing a new field will not activate it.
+// This is a live relationship: future orbiting planets also enter this measurement.
+world.transits(sun, earthward, { id: 'flux', name: 'Combined starlight' });
 
-## Command line
+for (const [index, a] of [0.04, 0.07, 0.1].entries()) {
+  const planet = world.planet({ id: `p${index}`, name: `Planet ${index + 1}`,
+    radiusJupiter: 0.8, massJupiter: 0.1 });
+  planet.orbit(sun, { id: `orbit${index}`, semiMajorAxisAU: a,
+    eccentricity: index * 0.15, inclinationDeg: 90 - index * 4 });
+}
 
-Run from the repository root with Node.js 20+. `bash scripts/node.sh` is an optional
-runtime-discovery wrapper. All successful machine operations print JSON.
+world.present({ startDays: -0.1, durationDays: 15, playbackSeconds: 80 });
+world.annotate({ timeDays: 0, title: 'One star, several independent orbits',
+  text: 'Every planet contributes its foreground silhouette to the same signal.' });
+export default world;
+```
 
-| Command | Result |
+### Handles
+
+| Method | Meaning |
 | --- | --- |
-| `node scripts/agent.mjs capabilities` | Supported model, operations, assumptions and API routes |
-| `node scripts/agent.mjs schema` | Complete scene JSON Schema |
-| `node scripts/agent.mjs validate scene.json` | `{valid, errors, warnings}`; invalid scene exits 1 |
-| `node scripts/agent.mjs evaluate scene.json --time-days 0.75` | Every view's physical state and measurements at the same time |
-| `node scripts/agent.mjs sample scene.json --samples 721` | Each view sampled over one of its own periods |
-| `node scripts/agent.mjs inspect` | Running demo's `{revision, scene}` |
-| `node scripts/agent.mjs apply scene.json --base-revision 3` | Apply if revision 3 is still current |
+| `world.star({id?,name?,massSolar?,radiusSolar?,color?})` | Create the fixed stellar host; defaults 1 solar mass/radius |
+| `world.planet({id?,name?,massJupiter?,radiusJupiter?,color?})` | Create a separate body; defaults zero mass metadata and one Jupiter radius |
+| `planet.orbit(star,{id?,semiMajorAxisAU,...})` | Attach the body to a new orbit handle |
+| `world.observer({id?,name?,direction?})` | Physical sightline from star toward observer; default +z |
+| `world.transits(star,observer,{id?,name?,occulters?})` | Measurement handle; default `occulters:'orbiting'`, or explicit planet handles/ids |
+| `handle.set(patch)` | Revise supported fields on body/orbit/observer/measurement |
+| `orbit.eccentricity(e,{hold:'semimajorAxis'})` | Change e while preserving a, hence period |
+| `orbit.eccentricity(e,{hold:'periapsis'})` | Preserve q=a(1−e); update a and derived period |
+| `handle.remove({cascade:true})` | Explicitly remove dependencies too; omission rejects referenced removals |
+| `world.get(id)` | Reacquire a body, orbit, observer, or measurement handle |
+| `World.from(scene)` | Edit a saved/current graph with the same public handles |
+| `world.present({...})` | Set shared time window, playback duration, stage scale/camera |
+| `world.title(text)` | Rename the world |
+| `world.annotate({id?,timeDays,title,text,focusId?})` | Author a time-based explanatory cue; focus may be a body handle |
+| `world.build()` | Validate and return a serializable graph |
+| `world.at(timeDays)` | Evaluate the shared state and all measurements |
+| `world.sample({samples:721})` | Sample all measurements with this baseline cadence plus event-guided refinement |
 
-`inspect` and `apply` accept `--url http://127.0.0.1:4317`; only loopback HTTP is
-supported. Read `inspect` immediately before a revision-guarded edit. Omitting
-`--base-revision` intentionally allows replacement of the latest scene. Malformed,
-duplicate, or unknown flags are errors. Use `-` instead of a file path for stdin.
+Orbit fields: `semiMajorAxisAU`, `eccentricity` (0–0.85), `inclinationDeg` (0–180),
+`longitudeAscendingNodeDeg`, `argumentPeriapsisDeg`, `meanAnomalyDegAtEpoch`,
+`epochDays`. Defaults: a=.05 AU, e=0, i=90°, node=0°, periapsis argument=90°,
+mean anomaly=0°, epoch=0 d. Inclination belongs to the orbital plane relative to
+world xy, not to the presentation camera. With observer +z, defaults transit at t=0.
+Period derives from a and stellar GM. Changing e via `set()` is rejected: use the
+explicit method above. Radius is in Jupiter equatorial nominal radii.
 
-## Local HTTP
+Presentation fields: `startDays`, `durationDays`, `playbackSeconds`, `bodyScale`,
+`camera:{azimuthDeg,elevationDeg,zoom}`. Structural/parameter edits describe a new
+configuration, not physical impulses. Current browser playhead is runtime state.
 
-Start `node scripts/serve.mjs`. The listener binds only to `127.0.0.1`.
+Sampling accepts 3–4097 baseline samples and adds points around predicted transit
+windows. Each track has at most 8192 points and 160 refined event instances.
+Read the returned `sampling` metadata: budget limits can omit events, and curves
+remain approximate for grazing or mutual-overlap details. The instantaneous
+`world.at(t)` measurement is evaluated independently of this plot grid.
 
-| Method / path | Request | Response |
-| --- | --- | --- |
-| `GET /api/capabilities` | — | Capabilities object |
-| `GET /api/schema` | — | JSON Schema |
-| `GET /api/scene` | — | `{revision, scene}` |
-| `POST /api/validate` | `{scene}` | `{valid, errors, warnings}` |
-| `POST /api/evaluate` | `{scene, timeDays}` | `{timeDays, views}` |
-| `POST /api/sample` | `{scene, samples}` | `{views: [{id, ..., points}]}` |
-| `POST /api/scene` | `{scene, baseRevision?}` | Accepted `{revision, scene}` |
+The fixed-star approximation ignores planet masses in motion, uses at most 16
+planets, and requires total planet/host mass ≤1%. This is not a stability guarantee.
+The core has no limb darkening, interacting N-body dynamics, or RV observable.
+See `docs/physics.md` for equations and conventions.
 
-POST requests use `Content-Type: application/json`; the body limit is 128 KiB.
-Validation failures on evaluation or application return HTTP 422:
+## Discoverable tools and atomic edits
+
+```sh
+node scripts/agent.mjs tools
+node scripts/agent.mjs inspect
+node scripts/agent.mjs run experiments/my-world.mjs --dry-run
+node scripts/agent.mjs run experiments/my-world.mjs --base-revision 1
+node scripts/agent.mjs transact operations.json --base-revision 2
+node scripts/agent.mjs evaluate --time-days 0
+```
+
+`bash scripts/node.sh` can replace `node` on the original workstation.
+`--url http://127.0.0.1:4317` selects a different local server for commands requiring
+one. `tools` and SDK dry-runs work offline. CLI flags are checked; use `help` to list
+commands. The server serves only loopback HTTP and does not execute submitted JS.
+
+`GET /api/tools` returns tool descriptions and physical capabilities.
+Its argument descriptions are human/agent-readable metadata, not provider-specific
+function-calling JSON Schemas. A provider adapter must supply its own binding.
+Annotation cues have stable IDs and can be removed with a semantic `remove`
+operation; editable annotation handles are not yet part of the SDK.
+`GET /api/scene` returns `{revision,scene,source,history}`.
+`POST /api/commands` accepts `{baseRevision?,commands:[...]}`. For example:
 
 ```json
 {
-  "error": "INVALID_SCENE",
-  "validation": {
-    "valid": false,
-    "errors": [{
-      "path": "$.systems[0].eccentricity",
-      "code": "UNSUPPORTED_FIELD",
-      "message": "This field is not supported. Do not silently introduce new physics."
-    }],
-    "warnings": []
-  }
+  "baseRevision": 1,
+  "commands": [
+    {"op":"add_body","body":{"id":"new-planet","kind":"planet","name":"New planet","radiusJupiter":0.7,"massJupiter":0.1}},
+    {"op":"attach_orbit","orbit":{"id":"new-orbit","bodyId":"new-planet","hostId":"sun","semiMajorAxisAU":0.08,"eccentricity":0.2,"inclinationDeg":86}}
+  ]
 }
 ```
 
-HTTP 409 indicates a stale revision. Read the updated scene and reconcile the edit.
-Rejected requests do not replace the current scene. The browser polls revisions
-once per second while visible, preserving unapplied JSON drafts.
+Both operations commit together, or neither does. Existing `'orbiting'` photometers
+automatically include the attached body. API errors return structured validation
+details; HTTP 409 means a stale revision. Re-read and reconcile before retrying.
 
-The local launcher saves accepted scenes to ignored `.local/live-scene.json`.
-`--resume` restores that configuration on launch. Current playback position is
-runtime-only. This is a single-user local transport, not a multiuser service.
+Other routes: `GET /api/capabilities`, `GET /api/examples`, `POST /api/example {id}`,
+`POST /api/scene {scene,source?,baseRevision?}`, `POST /api/validate {scene}`,
+`POST /api/evaluate {timeDays,scene?}`, `POST /api/sample {samples,scene?}`.
+Use JSON content type. Source is displayed as text, never executed by the server.
 
-## What can connect today?
+`publish(world,{url?,baseRevision?,source?})`, exported by the SDK, applies a world
+directly. External agents can execute scripts in their own authorized process or
+bind these semantic operations as tools. A remote chat assistant may generate a
+script/operation plan for the user to run; it cannot directly reach loopback.
+There is no embedded LLM and no fake natural-language command parser. An MCP adapter
+has not been implemented; these are the operations it would wrap.
 
-- Local coding agents with file/command access: CLI directly.
-- Agents with same-machine HTTP tools: the endpoints above.
-- Chat-only assistants: generate JSON, then the human imports/applies it.
+## Author challenge boundary
 
-No model-provider SDK or account is built in. We tested the file → CLI → HTTP →
-browser path with an agent-authored extra observer. We have not tested every
-third-party agent client. A cloud-only client cannot directly reach this loopback
-server. MCP, public hosting, authentication, and remote bridges are future adapters.
-
-## Trust boundaries
-
-The model implements physical laws; the schema narrows the authoring surface;
-domain checks reject known invalid configurations; tests check conditional
-correctness; human review checks the explanation. Documentation supplies the LLM
-with context, but prompt compliance is not the enforcement mechanism.
-
-The API does not run code from scene JSON. It does not prove the proposed lesson is
-true, useful, or complete. New physical couplings require model development and
-validation, not a more persuasive prompt.
+Use the public SDK and discoverable tools. You may create arbitrary numbers of
+supported bodies/relationships up to the documented resource limits, select
+measurements, write loops, compare constructions, and add explanatory cues. Do not
+modify physics or rendering to make a scenario appear to work. Report missing
+capabilities and errors: a useful abstraction must survive new compositions.

@@ -1,63 +1,58 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark" />
-    <title>AstroCompose — Composable astrophysics visualizations</title>
-    <link rel="stylesheet" href="/styles.css" />
-  </head>
-  <body>
-    <header class="masthead">
-      <div class="brand"><span class="brand-mark" aria-hidden="true">✦</span><div><h1>AstroCompose</h1><p>Composable astrophysics visualizations</p></div></div>
-      <div class="header-right"><span class="pill">EXOPLANET LAB · v0.1</span><span id="connection" class="connection">Connecting…</span></div>
-    </header>
-    <main>
-      <section class="intro">
-        <div><p class="eyebrow">ONE MODEL, CONNECTED VIEWS</p><h2>Build a system.<br /><span>See what an observer measures.</span></h2><p class="lede">Combine stars, planets, and observers. Follow the same physical model from an orbit to a light curve and a stellar velocity measurement.</p></div>
-        <div class="preset-box"><label for="preset">Start with an example</label><select id="preset"><option value="">Choose a scene…</option><option value="single-transit.json">A transiting planet</option><option value="viewing-angles.json">One system, different viewpoints</option><option value="planet-comparison.json">Compare mass and radius</option></select><p>Examples replace the current scene. Save your scene first to keep a copy.</p></div>
-      </section>
-      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
-      <div class="lab-layout">
-        <aside class="inspector" aria-label="Scene controls">
-          <div class="section-heading"><h3>Scene</h3><span id="revision" class="muted">—</span></div>
-          <label for="scene-title">Title</label><input id="scene-title" type="text" maxlength="160" />
-          <div class="divider"></div>
-          <div class="section-heading"><h3>Physical system</h3><span class="section-number">01</span></div>
-          <label for="system-select">Edit system</label><select id="system-select"></select>
-          <label for="system-label">System label</label><input id="system-label" type="text" maxlength="100" />
-          <div class="field-grid">
-            <div><label for="star-mass">Star mass <span>M☉</span></label><input id="star-mass" type="number" min="0.01" step="0.1" /></div>
-            <div><label for="star-radius">Star radius <span>R☉</span></label><input id="star-radius" type="number" min="0.01" step="0.1" /></div>
-            <div><label for="planet-mass">Planet mass <span>M♃</span></label><input id="planet-mass" type="number" min="0" step="0.1" /></div>
-            <div><label for="planet-radius">Planet radius <span>R♃</span></label><input id="planet-radius" type="number" min="0.001" step="0.1" /></div>
-          </div>
-          <label for="period">Orbital period <span>days</span></label><input id="period" type="number" min="0.01" step="0.1" />
-          <button id="duplicate-system" class="secondary full">＋ Duplicate system for comparison</button>
-          <div class="divider"></div>
-          <div class="section-heading"><h3>Observer</h3><span class="section-number">02</span></div>
-          <label for="observer-select">Edit observer</label><select id="observer-select"></select>
-          <label for="observer-label">Observer label</label><input id="observer-label" type="text" maxlength="100" />
-          <label for="inclination">Orbital inclination <output id="inclination-value" for="inclination">90°</output></label><input id="inclination" type="range" min="0" max="180" step="0.1" value="90" />
-          <p class="hint">90° is edge-on. 0° is face-on.</p>
-          <button id="add-observer" class="secondary full">＋ Add observer and view</button>
-          <button id="add-view" class="text-button full">Connect selected system + observer</button>
-          <div class="divider"></div>
-          <div class="section-heading"><h3>Presentation</h3><span class="section-number">03</span></div>
-          <label for="display-scale">Planet size in orbit overview <output id="display-scale-value" for="display-scale">5×</output></label><input id="display-scale" type="range" min="1" max="20" step="1" />
-          <p class="hint">Visual enlargement affects only the orbit overview. Measurements and transit geometry use physical radii.</p>
-          <div class="assumption-box"><strong>Model assumptions</strong><p>Circular two-body orbit · Uniform stellar disk · Dark planet</p><p>Independent systems share a physical clock. No planet–planet interactions.</p></div>
-        </aside>
-        <section class="workspace" aria-label="Interactive visualization">
-          <div class="transport"><button id="play" class="play-button" aria-label="Pause animation">Ⅱ</button><div class="timeline"><div class="timeline-label"><label for="phase">Reference orbital phase</label><output id="time-value">0.00 days</output></div><input id="phase" type="range" min="0" max="1" step="0.001" value="0" /><div class="timeline-ends"><span>0</span><span id="clock-label">One orbit of the first system</span><span>1</span></div></div><button id="reset" class="secondary">Reset</button></div>
-          <div class="workspace-title"><h3 id="active-title">Loading scene…</h3><span id="view-count" class="muted"></span></div>
-          <div id="views" class="views"></div>
-          <p class="plot-note">Gold marks the current state. Matching plots share vertical scales across views; phase 0 is inferior conjunction. Radial velocity is positive away from the observer. All signals are model predictions.</p>
-          <details class="json-panel"><summary><span>Scene specification</span><span class="muted">Inspect · edit · share</span></summary><p class="hint">The scene is a portable description of physical systems, observers, and views. An external agent can edit the same scene through the local API.</p><label class="sr-only" for="scene-json">Scene JSON</label><textarea id="scene-json" spellcheck="false"></textarea><div class="json-actions"><button id="apply-json" class="primary">Apply JSON</button><button id="copy-json" class="secondary">Copy</button><button id="download-json" class="secondary">Download</button><label class="button secondary" for="import-json">Import file</label><input id="import-json" type="file" accept=".json,application/json" class="sr-only" /><button id="restore-json" class="text-button">Restore current</button></div><p id="json-status" class="hint" role="status"></p></details>
-        </section>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>AstroCompose — Agent-built worlds</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="AstroCompose home"><span class="brand-mark" aria-hidden="true">✦</span><span>AstroCompose<small>Agent-built worlds</small></span></a>
+    <div class="scene-picker"><label class="sr-only" for="example-select">Open an authored scene</label><select id="example-select"><option value="">Loading worlds…</option></select></div>
+    <div class="top-actions"><span id="connection" class="connection">Connecting</span><button id="open-source" class="button outline"><span aria-hidden="true">⌘</span> Scene & agent</button></div>
+  </header>
+  <main class="studio">
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+    <section class="stage" aria-label="Orbital scene">
+      <canvas id="world" aria-label="Interactive three-dimensional orbital scene. Drag to rotate the camera; scroll to zoom. Select objects using the buttons below." role="img" tabindex="0"></canvas>
+      <div class="stage-heading"><p class="eyebrow">A COMPOSED PHYSICAL WORLD</p><h1 id="scene-title">Preparing the scene</h1><p id="scene-description">Stars, orbital paths, and observers share one model.</p></div>
+      <div class="stage-tools"><button id="toggle-orbits" class="icon-button active" aria-pressed="true" title="Toggle orbit paths">Orbits</button><button id="reset-camera" class="icon-button" title="Reset the presentation camera">Reset view</button></div>
+      <div class="stage-bottom">
+        <div id="annotation" class="annotation" hidden><span class="annotation-rule"></span><div><p id="annotation-title"></p><p id="annotation-text"></p></div></div>
+        <div class="selection-card"><div class="selection-header"><span class="eyebrow">SELECTED OBJECT</span><span id="selected-handle" class="handle">—</span></div><div class="selection-main"><span id="selected-dot" class="object-dot"></span><h2 id="selected-name">—</h2><button id="focus-object" class="text-button">Follow object ↗</button></div><p id="selected-details">Click a body or select its handle below.</p></div>
+        <div class="stage-caption"><span>Drag to orbit · Scroll to zoom</span><span>Linear distances · Enlarged body markers</span></div>
       </div>
-      <footer><span>AstroCompose · A small, inspectable model library</span><span>Physical logic stays in the model. The interface composes it.</span></footer>
-    </main>
-    <script type="module" src="/src/app.js"></script>
-  </body>
+    </section>
+    <aside class="observation" aria-label="Observer measurements">
+      <div class="hud-header"><div><p class="eyebrow">A DIFFERENT POINT OF VIEW</p><h2>Observer feed</h2></div><span class="live-dot" aria-hidden="true"></span></div>
+      <label class="sr-only" for="measurement-select">Choose an observer measurement</label><select id="measurement-select"></select>
+      <div class="sky-heading"><span>Projected stellar disk</span><span id="observer-name">—</span></div>
+      <canvas id="sky" role="img" aria-label="Planet silhouettes on the stellar disk using physical radius ratios"></canvas>
+      <div class="sky-foot"><span>Physical radius ratios</span><span id="transit-state">—</span></div>
+      <div class="signal-heading"><div><p class="eyebrow">COMPOSITE LIGHT CURVE</p><h3 id="signal-title">One star. Shared shadows.</h3></div><output id="flux-value">1.000000</output></div>
+      <canvas id="signal" role="img" aria-label="Composite transit flux versus physical time, with current-time cursor"></canvas>
+      <div id="planet-legend" class="planet-legend"></div>
+      <p id="sampling-note" class="drawer-note">Sampled model curve; current flux evaluated at the exact playhead time.</p>
+      <div class="construction"><div class="construction-heading"><h3>Scene construction</h3><span id="revision">—</span></div><div id="history" class="history"><p>Waiting for the scene graph.</p></div></div>
+      <details class="model-details"><summary>What this model means</summary><p>Independent Keplerian orbits around a fixed star. Eccentricity and orbital orientation belong to each planet. Planets do not interact gravitationally.</p><p>The stellar disk is uniformly bright; opaque foreground planets reduce the measured flux. Camera movement changes only your view. Observer direction changes the measurement.</p><p>All signals are model predictions. Body markers are enlarged in the world view; orbital distances remain linear.</p></details>
+    </aside>
+    <section class="transport" aria-label="Playback controls">
+      <div class="object-strip"><span class="strip-label">OBJECTS</span><div id="object-handles" class="object-handles"></div></div>
+      <div class="timeline-row"><button id="play" class="play" aria-label="Play animation">▶</button><button id="restart" class="restart" aria-label="Restart timeline">↶</button><div class="timeline"><div class="timeline-meta"><label for="playhead">Physical time</label><output id="time-value">0.000 days</output></div><input id="playhead" type="range" min="0" max="1000" step="1" value="0" /><div class="timeline-range"><span id="time-start">—</span><div id="cue-buttons" class="cue-buttons"></div><span id="time-end">—</span></div></div><span class="clock-note">One clock<br />for every object</span></div>
+    </section>
+  </main>
+  <div id="drawer-backdrop" class="drawer-backdrop" hidden></div>
+  <aside id="source-drawer" class="source-drawer" aria-label="Scene source and agent interface" aria-hidden="true" hidden>
+    <div class="drawer-heading"><div><p class="eyebrow">THE WORLD IS A PROGRAM</p><h2>Scene & agent</h2></div><button id="close-source" class="close-button" aria-label="Close scene source">×</button></div>
+    <p class="drawer-intro">An agent authors objects, orbital relationships, and measurements. The scene below is the live result of that construction.</p>
+    <div class="drawer-tabs" role="tablist" aria-label="Scene inspection"><button id="tab-source" role="tab" aria-selected="true" aria-controls="panel-source">Authoring source</button><button id="tab-graph" role="tab" aria-selected="false" aria-controls="panel-graph">Object graph</button><button id="tab-agent" role="tab" aria-selected="false" aria-controls="panel-agent">Agent access</button></div>
+    <section id="panel-source" role="tabpanel"><div class="source-heading"><span id="source-kind">Authored scene</span><button id="copy-source" class="text-button">Copy source</button></div><pre id="source-code"><code>Loading source…</code></pre><p class="drawer-note">The source is inspectable. Run changes through the external agent interface; this viewer never executes pasted code.</p><button id="download-scene" class="button outline">Download scene graph</button></section>
+    <section id="panel-graph" role="tabpanel" hidden><div id="graph-tree" class="graph-tree"></div><details class="raw-graph"><summary>Raw scene graph</summary><pre id="graph-json"></pre></details></section>
+    <section id="panel-agent" role="tabpanel" hidden><h3>Bring your own agent</h3><p class="drawer-note">The local runtime exposes scene construction and inspection tools. Your coding agent can add bodies, attach orbits, create observers, and publish a new scene. Accepted changes appear here automatically.</p><pre id="agent-command"></pre><h3 class="tools-title">Available tools</h3><div id="agent-tools" class="agent-tools">Loading tool descriptions…</div><p class="drawer-note">The scientific model evaluates the composition. There is no embedded chatbot or model credential in this viewer.</p></section>
+    <p id="drawer-status" class="drawer-status" role="status"></p>
+  </aside>
+  <script type="module" src="/src/app.js"></script>
+</body>
 </html>

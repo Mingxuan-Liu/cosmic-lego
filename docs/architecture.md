@@ -1,76 +1,87 @@
 # AstroCompose: architecture decisions
 
-Decision date: 2026-11-01. Status: provisional prototype design. This note records the intended boundaries; the README and demo status record what has actually been implemented and checked.
+Revised 2026-11-02. Status: a bounded exoplanet authoring experiment. This note records the chosen design; implementation and verification status belong in [demo-status.md](demo-status.md).
 
-AstroCompose is a compositional astrophysics visualization toolkit for exploration and explanation. The first demonstration connects orbital geometry, transit flux, and stellar radial velocity. Its useful unit is a physical model with an explicit contract, not a decorative asset or an unconstrained generated program.
+## Correcting the first prototype
 
-## 1. Independent physics; replaceable presentation
+The first prototype chose the wrong abstraction. It packaged an entire star–planet pair as a unit and let users edit parameters or replace a JSON scene. That demonstrated synchronized views, but it did not demonstrate the user's intended ability to construct and revise physical scenes from reusable objects. This was an implementation decision by the assistant, not a limitation imposed by the user's idea.
 
-Use small JavaScript ES modules with pure numerical functions that can run in both Node and a browser. Keep physics independent of the DOM, canvas, UI, wall-clock time, and language model. A saved scene specifies systems, observers, views, parameters, and playback speed. Physical time is a separate runtime input shared by every view; the current playhead is not saved in scene JSON.
+The rebuild makes scene structure authorable: create bodies, attach orbits, place observers, define measurements, and arrange visual explanations and narration. The test is whether an external agent can construct an unanticipated case and make structural changes through the public interface without editing the engine. Changing one preset's sliders is not sufficient evidence.
+
+## Authoring vocabulary and boundaries
+
+| Concept | Responsibility |
+| --- | --- |
+| Scene / world | Owns objects and their relationships; evaluates them at a shared physical time. |
+| Body | Holds physical properties and identity; a planet is not a prepackaged experiment. |
+| Orbit | Connects a planet to the central star and specifies the supported Keplerian motion. |
+| Observer | Defines a physical viewing direction, independently of the illustrative camera. |
+| Measurement | Connects a target and observer to a supported calculation, such as combined transit flux. |
+| View | Presents existing state or measurement results; does not invent a second physical evolution. |
+| Narration | Carries explanatory text and presentation intent; does not modify physics or imply a speech-generation service. |
+
+Stable handles let an author retain a planet or orbit reference, add another planet, revise one orbit, change an observer, or attach another measurement. The public JavaScript `World` SDK is the primary programmatic authoring route. JSON is its serialization and transport format, not a vocabulary the user must manually speak. Exact signatures and tool operations are documented in [agent-interface.md](agent-interface.md).
+
+An operation batch is applied to a draft, validated, and committed atomically. A failed edit must leave the prior scene intact. References must resolve; deleting an object with dependents must reject the change or use a documented explicit cascade. The SDK and semantic tools must share validation rather than creating a more permissive authoring path.
 
 ```text
-Human or external agent
-        ↓
-Versioned scene JSON → validation → physical state at time t
-                                           ↓
-                                observer measurements
-                                           ↓
-                             browser views / later exports
+User's own agent / author script
+          ↓
+World SDK or semantic operations
+          ↓
+Validated objects and relationships
+          ↓
+Physical state at time t → observer measurement → presentation
 ```
 
-The current presentation direction is a browser interface served by a small local Node server, with no external package dependencies. This makes the demonstration easy to inspect and keeps the physical core reusable. The server and CLI are thin access paths to that core, not separate implementations of its equations.
+Validation checks the declared contract: supported fields, finite quantities, bounds, references, and known physical constraints. It does not establish arbitrary scientific truth. A prompt asking a model to obey physics is not a constraint mechanism. New physical behavior requires an implemented model, stated assumptions, and independent checks.
 
-### Why not start as a Manim extension?
+## Keep the physics separate from presentation
 
-Manim already provides valuable animation, camera, text, and equation machinery. It remains a plausible later presentation adapter for narrated sequences. However, the first experiment needs editable physical scenarios, direct parameter interaction, and several synchronized measurements. Making those semantics depend on Manim objects would unnecessarily couple the scientific library to one presentation system.
+Use small JavaScript ES modules and a numerical core independent of the DOM, canvas, model provider, and wall-clock time. The local Node server and CLI expose the same composition/evaluation capabilities. The browser is an interactive application whose main surface is an immersive scene, with the source and object inspector as secondary tools.
 
-This is a scope decision, not a claim that Manim cannot support interaction. Reconsider the adapter after the same scene can drive a useful interactive demonstration and a short deterministic export. Do not build two independent physics implementations to serve those outputs. See [references](references.md) for the relevant project documentation and architectural precedents.
+The illustrative camera and drawing scales are presentation choices. Observer orientation is a physical input. Magnified icons, colors, zoom, playback speed, and labels must not feed into measured flux. A single physical time drives every object and measurement; a curve may sample an interval but its current-time marker must refer to the same state as the scene. Editing orbital elements creates a new model configuration, not a conservation-respecting impulse during a real orbit.
 
-## 2. Contracts are executable boundaries
+Manim remains a plausible later presentation adapter because it offers useful animation, camera, text, and equation facilities. The initial implementation does not depend on it: the central experiment is semantic composition and browser interaction. Revisit video export after a useful authoring case works, without duplicating the physics. This is a provisional choice, not a claim that Manim cannot support interactive workflows.
 
-Scene JSON is data. Version 0.1 implies one fixed circular two-body model; there is no model-selection field yet. The application validates required values, finite numbers, parameter ranges, unique identifiers, and cross-references before evaluating it. Domain validation additionally checks geometric intersection and numerical range. Omitted effects are rejected as unsupported fields, while astrophysical realizability of every mass/radius pair is not checked. A JSON schema alone cannot establish physical validity.
+## The deliberately limited physical model
 
-The LLM may select components, set permitted parameters, connect supported views, and explain the resulting scene. It does not gain a new physical capability by describing it in a prompt. Unsupported effects require a separately implemented and checked model; instructions such as “obey conservation laws” are not an enforcement mechanism.
+The selected model is a fixed central star with multiple independently moving Keplerian test-particle planets. Each orbit has its own eccentricity, orientation, and phase: eccentricity, inclination, ascending node, argument of periapsis, and mean anomaly at an epoch. Orbit size and stellar mass determine the period. The exact conventions and numerical implementation belong in [physics.md](physics.md).
 
-Each model needs:
+Planet masses are metadata and are neglected in the dynamics. A summed planetary-to-stellar mass-ratio limit of 1% is an interface guard for this approximation; it is not an accuracy bound or a stability guarantee. Planet–planet forces, stellar reflex motion, resonances, transit-timing variations, and gravitational encounters are absent. **Radial velocity is removed from this approximation**, rather than displaying a stellar signal inconsistent with the fixed-star model.
 
-- Parameter units and coordinate/sign conventions.
-- Its equations, approximations, supported range, and omitted effects.
-- Defined state and observable outputs.
-- Reference cases, limiting cases, and failure behavior.
+A spherical, uniformly bright star and opaque, dark spherical planets supply the transit model. Project each foreground planet into the observer's sky plane, form the union of its blocked area with all other foreground planets, clip that union to the stellar disk, and calculate the normalized remaining flux. Overlapping planet silhouettes block the shared area only once. The same physical positions must drive the rendered silhouettes and measurement.
 
-Visual choices are separate parameters: magnified bodies, camera movement, colors, annotations, and playback speed must not change the physical values used to calculate observables. Exaggerated scales must be labeled in the relevant view.
+Projected overlap is not a physical collision. Planets separated along the line of sight can overlap in the image. Conversely, this noninteracting model can prescribe intersecting trajectories without modeling impacts or gravitational deflections. Star intersection must be checked using periapsis and physical radii; any displayed or flagged planet collision is a geometric condition, not collision dynamics.
 
-## 3. First physical domain: circular star–planet systems
+Limb darkening, spectra, emitted/reflected planetary light, atmosphere, finite exposures, instrumental noise, and light-travel delays remain outside scope. New body/orbit combinations are supported only within the stated model, not by a promise of universal composability.
 
-Start with a Newtonian circular two-body model, including stellar motion about the barycenter; a spherical star with uniform projected brightness; an opaque, dark spherical planet; and distant observers. Compute transit flux from foreground disk overlap, and radial velocity from the star's velocity projected onto the observer's line of sight. Document the convention for positive radial velocity in the implementation and UI.
+## Eccentricity edits must say what stays fixed
 
-Multiple systems, observers, and views can be composed in a scene. Multiple systems are independent comparisons; their coexistence does not imply gravitational coupling, shared illumination, or combined unresolved photometry. Several observers of one system should change the projected measurements without changing that system's intrinsic evolution.
+With fixed stellar mass, the chosen approximation has
 
-Use one simulation time for synchronized views. Changing playback speed changes presentation time, not the orbital period or velocities. A view may sample a curve over an interval, but its current-time marker must correspond to the same state shown elsewhere.
+\[
+P = 2\pi\sqrt{a^3/(GM_\star)}, \qquad q=a(1-e).
+\]
 
-The initial model omits eccentricity, planet–planet interactions, limb darkening, stellar activity, reflected/emitted planetary light, instrumental noise, exposure integration, and light-travel delays. It demonstrates geometry and idealized signals; it is not a fit to observational data or a complete detection pipeline. Independent stellar mass and radius controls describe a toy system, not an enforced stellar-evolution relation.
+Changing eccentricity at fixed semimajor axis changes the orbit's shape and speed distribution, but not its period. Changing eccentricity at fixed periapsis changes the semimajor axis to `a = q/(1-e)` and therefore changes the period. For example, starting at `e = 0`, an edit to `e = 0.6` at fixed periapsis multiplies the period by about 3.952847; at fixed semimajor axis the multiplier is 1.
 
-## 4. Local browser application before desktop packaging
+The authoring operation must express that choice explicitly. The UI should show the resulting orbit size and period so that the learner can inspect the dependency. The agent must not quietly choose a different quantity to preserve to make a requested conclusion appear true.
 
-A local web interface gives the user an interactive application while preserving ordinary files and an inspectable repository. It does not require a public website, account, hosted backend, or desktop wrapper. Keep the server local and avoid adding accounts, deployment, synchronization, or native packaging until there is a demonstrated need.
+## The user's agents stay outside the application
 
-An eventual shared teaching version should preserve exportable scenes and clear model limitations. Its accessibility, browser compatibility, hosting, and classroom workflow will need separate validation. A local demonstration does not establish those properties.
+Authors can use their own agents through the SDK, documented CLI, and local HTTP semantic operations. No embedded model or API key is needed for playback or evaluation. Author scripts run in the agent's own process. The web server accepts data and supported operations; it does not execute arbitrary submitted JavaScript. A serialized scene does not carry executable code or remote dependencies.
 
-## 5. Use the user's agents; do not embed a model
+MCP remains a possible adapter and is not implemented. Do not describe the HTTP service as an MCP server. Compatibility with a particular agent client must be tested before claiming it. Local browser delivery avoids requiring public hosting or desktop packaging for this experiment; those remain separate choices.
 
-The integration surface consists of CLI and local HTTP operations for discovering capabilities, reading the schema, reading/updating a scene, and evaluating supported physics. Exact commands and routes belong in the README so that this note does not duplicate their specification. All paths should use the same validation and evaluation functions.
+## Evidence required from this rebuild
 
-No API key or embedded LLM is required to run the demonstration. An agent capable of reading local files and invoking a CLI or local HTTP service can compose scene data using the exposed contract. That is an interface design, not a claim of compatibility testing with every agent client. Provider credentials remain with whichever external client the user chooses.
+Check both structural authoring and scientific behavior. A useful demonstration should add or remove bodies and measurements, revise an orbit's constraints, and preserve unaffected objects. Numerical checks should cover Keplerian limits, the two eccentricity-edit modes, foreground ordering, and union photometry under disjoint, contained, coincident, grazing, and partially overlapping silhouettes.
 
-An MCP adapter is a possible later convenience and is **not implemented in this prototype**. It should wrap the same operations rather than introduce a separate scene format or privileged physics path. Do not present ordinary local HTTP endpoints as an MCP server.
+Render and inspect the resulting scenes as well as checking data: camera framing, scale labels, occlusion, timing, graph markers, and explanatory text can mislead even when numerical values are correct. Passing tests, a plausible screenshot, schema acceptance, or an LLM review alone does not establish correctness or educational value. An independently authored case provides limited evidence of composability; it does not establish arbitrary-case reliability.
 
-## 6. What would count as progress?
+The older prototype remains in Git history while the active implementation is replaced. Keep this one-domain experiment small and use the independent authoring exercise to decide what abstraction is actually missing before adding more topics.
 
-The first useful checks are consistent phase across views, barycentric motion, geometric transit limits, inclination dependence, and clear handling of invalid scenes. Compare outputs with independently calculated reference values; a successful render, schema acceptance, or an LLM's approval does not establish scientific correctness.
+## Working name
 
-After this demonstration, test a few requested variations without modifying the physical core. Record whether the composition contract is expressive enough, how much expert correction is required, and whether the visual explanation remains intelligible. Add another topic only when it exposes a concrete reusable need. “Extensible” means new supported models can be added; it does not mean arbitrary combinations are already valid.
-
-## 7. Working name
-
-Choose **AstroCompose**: it describes constructing astrophysical explanations and leaves room beyond exoplanets. Exact-name web searches, including GitHub/PyPI/npm-targeted queries, returned no matches on 2026-11-01. That limited search does not establish trademark, domain, or package-name availability. AstroWeave had an existing repository; AstroLoom had an active software company and an astrology app. Astralgebra was less clear and could suggest a symbolic-algebra system. See the linked evidence in [references](references.md).
+AstroCompose describes assembling astrophysical explanations and extends beyond exoplanets. A limited exact-name web/GitHub/PyPI/npm search on 2026-11-01 found no matches. That is not trademark, domain, or package-name clearance. The preliminary collision evidence is recorded in [references.md](references.md).

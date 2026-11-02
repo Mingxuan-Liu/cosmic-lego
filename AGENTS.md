@@ -1,26 +1,34 @@
-# AstroCompose — contributor and agent instructions
+# AstroCompose: agent-built scientific worlds
 
-AstroCompose explores composing scientific models, observations, and explanations.
-The first domain is exoplanet detection. This is an experimental prototype, not a
-general astronomy simulator or a claim of universally valid composition.
+User clarification, 2026-11-02: the goal is an extensible construction environment.
+Agents must create bodies, attach physical relationships, create measurements,
+and arrange explanations. A fixed experiment with exposed parameters is insufficient.
 
-- Read README.md, docs/architecture.md and docs/physics.md before changing behavior.
-- Author scenes through scene.schema.json and the documented CLI/API. A scene is
-  declarative data; it must never contain executable code or remote dependencies.
-- Physics belongs in src/physics.js. Scene validation/composition belongs in
-  src/scene.js. Rendering and display exaggeration belong in src/app.js.
-- Do not silently broaden physical assumptions. Unsupported physics requires a
-  separate reviewed model, documentation, and independent reference tests.
-- Preserve a shared physical clock and consistent observer conventions. Labels,
-  colors, zoom and explanatory size exaggerations must not alter measurements.
-- Derive orbital separation from period and masses. Never independently animate
-  a light curve or radial velocity unrelated to the physical state.
-- Run `node --test` for model/API changes. Inspect relevant browser views after UI
-  changes; program execution alone is insufficient visual/scientific validation.
-- Runtime validation checks declared contracts, not all possible scientific truth.
-- Keep the demo local, dependency-light and provider-independent. Do not add API
-  keys, accounts, paid services, publishing, or an embedded LLM without a need.
-- Preserve source provenance and label schematic scale. Do not represent a
-  toy model as observed data or a numerically validated plasma/universe solver.
-- Record provisional architecture decisions and limits; prefer a small working
-  example over speculative infrastructure. Public release license is undecided.
+- Start with README.md, docs/physics.md and docs/agent-interface.md.
+- Author with the public `World` SDK in `src/sdk.js` or discover semantic tools
+  with `node scripts/agent.mjs tools`. JSON is persistence/transport, not the
+  intended limit of the authoring vocabulary. Do not hand-edit numerical kernels
+  to fulfill a request already expressible through handles and relationships.
+- The scene graph separates bodies, orbits, observers, measurements and annotations.
+  Stable handles support creation, attachment, modification and explicit removal.
+  Apply multi-operation edits atomically through the same validation as the SDK.
+- v0.2 uses a fixed primary and independent, star-dominated Kepler orbits. Each
+  planet has its own eccentricity, inclination, node, periapsis and epoch/phase.
+  Planet masses are metadata in this approximation; reject total mass >1% of
+  the host mass. This bound does not certify orbital stability. No stellar RV
+  should be inferred from this fixed-primary model.
+- Period derives from semimajor axis and host GM. Eccentricity edits must state
+  whether semimajor axis or periapsis distance is held fixed.
+- Transit photometry computes the union of foreground disks clipped to the star.
+  Never add independent transit depths when occultors overlap.
+- Keep camera/size exaggeration separate from physical observer geometry. The
+  immersive stage may enlarge icons; the sky-plane measurement uses real ratios.
+- Unknown physics still needs a new reviewed model and tests. LLM instructions
+  explain laws; equations, contracts and independent checks enforce known limits.
+- Run `node --test` for scientific/API changes. Inspect rendered states for UI
+  changes. Validate novel constructions by agents using only the public interface.
+- Work locally; no publishing, accounts, credentials or paid services are needed.
+  Scripts authored by an agent run in that agent's own process; never execute
+  arbitrary uploaded JavaScript inside the local API server or browser.
+- Preserve old work in Git history, not parallel obsolete implementations.
+  Public license and broad architecture remain open pending prototype feedback.

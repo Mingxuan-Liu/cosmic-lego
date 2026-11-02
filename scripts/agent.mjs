@@ -1,51 +1,30 @@
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs';
-import { capabilities, sceneSchema, validateScene, evaluateScene, sampleScene } from '../src/scene.js';
-
-const [command, ...args] = process.argv.slice(2);
-let flags = new Map(), scenePath;
-const option = (name, fallback) => flags.has(name) ? flags.get(name) : fallback;
-const print = value => console.log(JSON.stringify(value, null, 2));
-const sceneFromFile = () => JSON.parse(readFileSync(scenePath === '-' ? 0 : scenePath, 'utf8'));
-try {
-  const allowed = { capabilities: [], schema: [], validate: [], evaluate: ['--time-days'], sample: ['--samples'], inspect: ['--url'], apply: ['--url', '--base-revision'], help: [], '--help': [] };
-  const needsScene = ['validate', 'evaluate', 'sample', 'apply'].includes(command);
-  if (Object.hasOwn(allowed, command)) {
-    for (let i = 0; i < args.length; i++) {
-      const arg = args[i];
-      if (arg.startsWith('--')) {
-        if (!allowed[command].includes(arg)) throw new Error(`Unknown option ${arg} for ${command}.`);
-        if (flags.has(arg)) throw new Error(`Duplicate option ${arg}.`);
-        const value = args[++i];
-        if (value === undefined || value.startsWith('--')) throw new Error(`Missing value for ${arg}.`);
-        flags.set(arg, value);
-      } else if (needsScene && scenePath === undefined) scenePath = arg;
-      else throw new Error(`Unexpected argument: ${arg}.`);
-    }
-    if (needsScene && !scenePath) throw new Error('A scene JSON path (or - for stdin) is required.');
-    if (flags.has('--base-revision') && (!Number.isInteger(Number(flags.get('--base-revision'))) || Number(flags.get('--base-revision')) < 1)) throw new Error('--base-revision must be a positive integer.');
+import { pathToFileURL } from 'node:url';
+import path from 'node:path';
+import { tools,capabilities,validateScene } from '../src/scene.js';
+import { publish } from '../src/sdk.js';
+const [command,...args]=process.argv.slice(2), flags=new Map();let file;
+const print=value=>console.log(JSON.stringify(value,null,2));
+try{
+  const allowed={tools:[],inspect:['--url'],run:['--url','--base-revision','--dry-run'],transact:['--url','--base-revision'],evaluate:['--url','--time-days'],sample:['--url','--samples'],validate:[],help:[]};
+  if(!Object.hasOwn(allowed,command))throw new Error('Commands: tools, inspect, run recipe.mjs [--dry-run], transact operations.json, evaluate --time-days N, sample --samples N, validate world.json.');
+  for(let i=0;i<args.length;i++){const arg=args[i];if(arg.startsWith('--')){if(!allowed[command].includes(arg)||flags.has(arg))throw new Error(`Unknown or duplicate option ${arg}.`);if(arg==='--dry-run'){flags.set(arg,true);continue;}const value=args[++i];if(value===undefined||value.startsWith('--'))throw new Error(`Missing value for ${arg}.`);flags.set(arg,value);}else if(['run','transact','validate'].includes(command)&&!file)file=arg;else throw new Error(`Unexpected argument ${arg}.`);}
+  if(['run','transact','validate'].includes(command)&&!file)throw new Error('A local file is required.');
+  const url=new URL(flags.get('--url')??'http://127.0.0.1:4317');if(!['127.0.0.1','localhost','[::1]'].includes(url.hostname)||url.protocol!=='http:')throw new Error('Use a local HTTP loopback endpoint.');
+  let baseRevision;if(flags.has('--base-revision')){baseRevision=Number(flags.get('--base-revision'));if(!Number.isInteger(baseRevision)||baseRevision<1)throw new Error('Revision must be a positive integer.');}
+  const jsonFile=()=>JSON.parse(readFileSync(file==='-'?0:file,'utf8'));
+  const call=async(route,input)=>{const response=await fetch(new URL(route,url),input===undefined?{signal:AbortSignal.timeout(10000)}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input),signal:AbortSignal.timeout(10000)});const result=await response.json();print(result);if(!response.ok)process.exitCode=1;};
+  if(command==='tools')print({tools,capabilities});
+  if(command==='inspect')await call('/api/scene');
+  if(command==='validate'){const result=validateScene(jsonFile());print(result);if(!result.valid)process.exitCode=1;}
+  if(command==='run'){
+    const recipe=path.resolve(file),module=await import(pathToFileURL(recipe));const world=typeof module.default==='function'?await module.default():module.default;
+    if(!world||typeof world.build!=='function')throw new Error('Recipe must export a World or a function returning one.');
+    const scene=world.build();if(flags.has('--dry-run'))print({valid:true,scene});else print(await publish(scene,{url:url.href,baseRevision,source:readFileSync(recipe,'utf8')}));
   }
-  if (command === 'capabilities') print(capabilities);
-  else if (command === 'schema') print(sceneSchema);
-  else if (command === 'validate') {
-    const result = validateScene(sceneFromFile()); print(result); if (!result.valid) process.exitCode = 1;
-  } else if (command === 'evaluate') print(evaluateScene(sceneFromFile(), Number(option('--time-days', 0))));
-  else if (command === 'sample') print(sampleScene(sceneFromFile(), { samples: Number(option('--samples', 721)) }));
-  else if (command === 'inspect' || command === 'apply') {
-    const url = new URL(option('--url', 'http://127.0.0.1:4317'));
-    if (!['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname) || url.protocol !== 'http:') throw new Error('The demo agent endpoint must be an HTTP loopback URL.');
-    const endpoint = new URL('/api/scene', url);
-    let init;
-    if (command === 'apply') {
-      const scene = sceneFromFile(), validation = validateScene(scene);
-      if (!validation.valid) { print(validation); process.exit(1); }
-      const base = option('--base-revision', undefined);
-      init = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scene, ...(base === undefined ? {} : { baseRevision: Number(base) }) }) };
-    }
-    const response = await fetch(endpoint, { ...init, signal: AbortSignal.timeout(5000) });
-    print(await response.json()); if (!response.ok) process.exitCode = 1;
-  } else {
-    console.log('AstroCompose agent portal\n\nnode scripts/agent.mjs capabilities\nnode scripts/agent.mjs schema\nnode scripts/agent.mjs validate scene.json\nnode scripts/agent.mjs evaluate scene.json --time-days 0\nnode scripts/agent.mjs sample scene.json --samples 721\nnode scripts/agent.mjs inspect [--url http://127.0.0.1:4317]\nnode scripts/agent.mjs apply scene.json [--base-revision N] [--url http://127.0.0.1:4317]\n\nUse - as the scene path to read JSON from stdin.');
-    if (command && !['--help', 'help'].includes(command)) process.exitCode = 1;
-  }
-} catch (error) { print({ error: error.code ?? 'AGENT_ERROR', message: error.message, ...(error.validation ? { validation: error.validation } : {}) }); process.exitCode = 1; }
+  if(command==='transact')await call('/api/commands',{commands:jsonFile(),baseRevision});
+  if(command==='evaluate'){const timeDays=Number(flags.get('--time-days')??0);if(!Number.isFinite(timeDays))throw new Error('Invalid time.');await call('/api/evaluate',{timeDays});}
+  if(command==='sample'){const samples=Number(flags.get('--samples')??721);if(!Number.isInteger(samples)||samples<3||samples>4097)throw new Error('samples must be 3–4097.');await call('/api/sample',{samples});}
+  if(command==='help')print({workflow:['tools','run examples/cosmic-clockwork.mjs --dry-run','run examples/cosmic-clockwork.mjs','inspect','transact operations.json --base-revision N','evaluate --time-days 0']});
+}catch(error){print({error:'AGENT_ERROR',message:error.message,...(error.validation?{validation:error.validation}:{})});process.exitCode=1;}
