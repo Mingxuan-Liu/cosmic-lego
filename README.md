@@ -18,10 +18,10 @@ of delivered features.
 
 ```mermaid
 flowchart LR
-    Q["Ask an astronomy question<br/>What happens if…?"] --> A["Your agent assembles<br/>and revises the pieces"]
+    Q["Ask inside the visualization<br/>What happens if…?"] --> A["Your chosen agent assembles<br/>and revises the pieces"]
     B["Reusable blocks with checked physics<br/>stars · orbits · gas · light · observers"] --> A
     A --> P["Physical models calculate<br/>motion, light, and measured quantities"]
-    P --> V["Interactive 3D views<br/>with linked plots and measurements"]
+    P --> V["An immersive central scene<br/>with floating, foldable plots and measurements"]
     V --> E["Change the arrangement<br/>Observe · compare · ask again"]
     E --> A
     V --> R["Save and reuse<br/>in a lesson, visualization or animation"]
@@ -84,6 +84,33 @@ the library's authors did not anticipate.
 The project includes reusable code and a place to explore its results. Existing
 visualizations should open, play, and support their available interactions without
 programming or LLM access. Agents or code help learners build new arrangements.
+
+The common foundation must work across topics: constructing objects, connecting
+quantities, evolving models, drawing results, conversing with an agent, and saving
+or presenting a creation. Astronomy packages supply the particular physics and
+assets. A new topic should not need a new application or conversation interface.
+The foundation must also work without an astronomy package loaded; exoplanets
+are one application of it, not its underlying vocabulary.
+
+## A place to explore, like a planetarium
+
+The visualization should occupy the main stage. A learner can move around the
+scene, select something interesting, and ask their own agent to change or extend
+it from within the same app. Plots, equations, object details, and the conversation
+float above the scene and can be moved, folded, or hidden. A clear way to restore
+them makes it easy to move between watching and investigating.
+
+Imagine following gas through a region of space, opening a velocity distribution
+over the scene, then asking for a second population to compare. Or inspect an
+orbit, ask for another observer, and bring its measurement into view. The agent
+can construct new arrangements and views using the available blocks. Sliders
+and numerical inputs remain useful for precise adjustments, but do not define
+the limits of exploration.
+
+This is a planetarium-like workspace, not a requirement to make every concept
+three-dimensional. A spectrum or diagram can become the main view when it best
+serves the question. The user's chosen compatible agent supplies the conversation;
+the implemented models and checked operations govern changes to the visualization.
 
 ## Four commitments
 
@@ -159,3 +186,5 @@ to manuscripts; any future Cosmic Lego paper would be licensed separately.
 
 Practical instructions belong in the [authoring guide](docs/getting-started.md).
 Current capabilities and evidence belong in the [implementation record](docs/demo-status.md).
+The [shared architecture roadmap](docs/infrastructure-roadmap.md) translates this
+purpose into implementation tasks and agent prompts.

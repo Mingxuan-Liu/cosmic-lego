@@ -1,202 +1,209 @@
-# Cosmic Lego infrastructure roadmap
+# Cosmic Lego: reusable infrastructure and implementation prompts
 
-Plan dated 2026-11-02, based on the [project blueprint](../README.md) and the
-prototype at commit `75738e9`. These are implementation tasks, not delivered
-capabilities. Read the current checkout before starting a task: later work may
-already satisfy part of it.
+Plan dated **2026-11-03**. This replaces the earlier exoplanet-led roadmap.
+It describes intended implementation, not capabilities already delivered.
+The [README](../README.md) remains the blueprint; inspect the current checkout
+and actual handoffs before implementing a task.
 
-Build six small shared layers, then test them with an independent author. Use
-the existing exoplanet physics to prove the infrastructure before adding another
-substantial astronomy topic. Timeline/export work can follow for outreach
-production; a new agent protocol and a stateful runtime are conditional needs.
+The objective is a reusable authoring application that works with **no astronomy
+package installed**. It must assemble scientific components, arithmetic, geometry,
+materials, views, and authored sequences through shared interfaces. In-app
+conversation with the user's own agent is part of this foundation. The exoplanet
+demonstration becomes a later optional package and regression case; improving its
+transit curves is not the infrastructure readiness gate.
 
-The first complete result should be an agent-authored multi-planet visualization
-that compares correct combined transit flux with a deliberately naive
-calculation, displays the geometry and both curves in linked views, and saves a
-creation another person can reopen and explore without an LLM.
+## The intended working experience
 
-## Infrastructure we already have
+A learner opens an immersive stage, connects a supported agent, and requests a
+visualization. The agent discovers available components and uses public commands
+to add objects, connect scientific relationships, calculate comparisons, and
+arrange views. Authorized changes appear with diagnostics and Undo. Ordinary
+code recipes retain loops, functions, and reusable construction logic.
 
-| Keep and extend | Where it exists | What is still missing |
-| --- | --- | --- |
-| Ordinary code authoring and stable object handles | [SDK](../src/sdk.js), [recipes](../examples/cosmic-clockwork.mjs) | Registered calculations and view construction through the same public interface |
-| Atomic semantic edits and reference checks | [scene operations](../src/scene.js), [HTTP service](../src/server.js) | General model dispatch, richer diagnostics, transaction preview and discoverable schemas |
-| Physical evaluation and model-specific sampling | [physics](../src/physics.js), [sampling](../src/scene.js) | Common scientific result descriptions and explicit model/version requirements |
-| Camera/observer separation and interactive playback | [viewer](../src/app.js) | Author-arranged views and explicit presentation-time evaluation |
-| CLI, local HTTP access and tool discovery | [CLI](../scripts/agent.mjs), [agent guide](agent-interface.md) | Structured argument/output contracts; a protocol adapter only if useful |
-| Graph saving and generated reconstruction source | [server launcher](../scripts/serve.mjs), [SDK](../src/sdk.js) | Faithful project saving, original recipe retention and portable delivery |
-| Numerical and authoring checks | [tests](../test), [independent exercises](demo-status.md) | Shared extension-contract checks and a fresh end-to-end author challenge |
+The stage fills the viewport, with actual 3D navigation, depth, selection, and
+object inspection. Conversation, plots, equations, and inspectors occupy movable,
+foldable floating windows. Scene-only mode has an obvious way to restore them.
+Permanent dashboard columns must not determine the visual experience. A plot or
+other 2D representation can become the main view when the question benefits;
+immersive does not mean every concept needs 3D.
 
-The present graph and compiler hard-code stars, planets, Kepler orbits and transit
-measurements. The viewer expects one selected photometer. Tool arguments are
-described largely in prose. Saved scene JSON does not preserve the complete
-original authoring program or presentation composition. These are the concrete
-seams to improve; a replacement of the entire prototype is unnecessary.
+Disconnecting the agent must not close the creation. People continue playback,
+exploration, inspection, and saving without an LLM. Saved work should support
+both interactive delivery and authored animation.
 
-## Implementation order and prompts
+## One architecture, with replaceable implementations
 
-Each prompt below is self-contained and approximately 500–600 words. Copy the
-entire linked file into a new coding-agent conversation. It includes repository
-context, prerequisites, implementation scope, acceptance checks and a handoff
-requirement. The dependency column refers to integrated, tested results, not
-merely another agent having started that task.
-
-| Order | Task and copy-ready prompt | Required result | Depends on |
-| --- | --- | --- | --- |
-| 01 | [Scientific values and shared results](prompts/01-scientific-values.md) | Units, meanings, reference frames and time, normalization, revision-tagged results and sampling metadata | — |
-| 02 | [Registered physical models and coupling rules](prompts/02-model-packages.md) | Extract current physics into registered modules; shared graph no longer assumes every world contains one star | 01 |
-| 03 | [Authorable arithmetic and derived measurements](prompts/03-derived-calculations.md) | Saveable calculations and curves made through SDK handles, with explicit sample alignment | 01, 02 |
-| 04 | [Composable linked views and drawing primitives](prompts/04-composable-views.md) | Author-arranged spatial views, projections, plots and labels using common results | 01–03 |
-| 05 | [Agent discovery and reliable commands](prompts/05-agent-contracts.md) | Machine-readable capabilities, non-mutating preview, actionable errors and consistent revision checks | 02–04 |
-| 06 | [Complete project saving and reopening](prompts/06-portable-projects.md) | Preserve graph, calculations, views, requirements, provenance and original source across restart | 01–05 |
-| 07 | [Independent authoring readiness check](prompts/07-independent-author-gate.md) | A fresh author builds and reopens an unfamiliar composition using public interfaces only | 01–06 |
-| 08 | [Authored timelines](prompts/08-authored-timelines.md) | Seekable pauses, camera movements and explicit configuration comparisons | 07 |
-| 09 | [Interactive delivery and frame export](prompts/09-interactive-and-frame-export.md) | A portable local interactive creation and image sequences from the same presentation evaluator | 08 |
-| 10 | [Optional external-agent adapter](prompts/10-optional-agent-adapter.md) | One tested client connection translating the established public operations | 07; optional |
-| 11 | [Conditional stateful computation](prompts/11-conditional-stateful-runtime.md) | Bounded stepping, jobs, cancellation and checkpoints when a real workload needs them | 07; conditional |
+This diagram shows data and authoring flow, not permission for generic layers
+to import domain packages.
 
 ```mermaid
 flowchart TD
-    A["01 Scientific values and results"] --> B["02 Registered models"]
-    B --> C["03 Authorable calculations"]
-    C --> D["04 Composable views"]
-    D --> E["05 Agent discovery and commands"]
-    E --> F["06 Complete saved projects"]
-    F --> G["07 Independent authoring check"]
-    G --> H["Start one new astronomy domain"]
-    G --> I["08 Authored timelines"]
-    I --> J["09 Interactive delivery and frames"]
-    G -. "when a client needs it" .-> K["10 Agent protocol adapter"]
-    G -. "when a model needs it" .-> L["11 Stateful computation"]
+    A["Learner + own agent<br/>in-app conversation"] --> G["Shared commands<br/>inspect · construct · revise"]
+    G --> P["Generic project graph<br/>scientific ports · calculations"]
+    P --> R["Analytic and stateful runtime<br/>shared scientific snapshots"]
+    R --> V["Full-stage presentation<br/>geometry · materials · floating views"]
+    V -->|"selection, results and diagnostics"| A
+    P <--> S["Saved creation + authored timeline<br/>agent-free playback and frame export"]
+    X["Trusted extension registry<br/>models · operators · assets · views"] --> P
+    X --> R
+    X --> V
 ```
 
-Run 01–07 sequentially by default. They touch shared contracts and often the same
-small source files; giving them to simultaneous agents in the same checkout
-would create conflicting assumptions. After 07, tasks 08, 10 and planning for a
-new domain can proceed independently if their file ownership and interface
-versions are explicit. Task 09 follows 08. A new domain that needs step-based
-evolution should settle task 11's narrow interface before depending on it.
+Code dependencies run from scientific value contracts and the composition kernel
+toward registration, computation, scene rendering, and the application. Domain
+modules depend on these interfaces. A **composition root**, the startup module
+selecting installed components, injects their registered implementations. Kernel,
+runtime, renderer, shell, and agent-session code never import domain packages or
+dispatch on names such as planet or transit.
 
-If a task exposes a missing primitive in its prerequisites, fix that owning task
-and update its handoff. Do not copy a second validator, calculation engine or
-renderer into a downstream feature. Reassess the plan after 03 and again after
-07; these checkpoints can reduce or reshape later work.
+The graph owns identity, references, staged drafts, accepted transactions, and
+undo/redo. It does not assume an object is a physical body. Scientific ports
+describe units, shape, frame, normalization, time, and required meaning. Arithmetic
+builds reusable comparisons over outputs. Computation produces revision-tagged
+snapshots; visual bindings map values to geometry, positions, labels, and color
+scales. Geometry and materials are reusable assets, not hidden physical laws.
 
-## The concrete proving case
+Preserve prototype guarantees: stable handles, atomic edits, reference checks,
+shared-time evaluation, and separation of presentation from physical observation.
+Do not preserve its one-star graph shape as a universal contract. Extend the
+local JavaScript/Node environment incrementally. A functioning 3D renderer is
+required, but its adapter boundary leaves later choices open. Evaluate Manim
+against a concrete export need later.
 
-The existing [overlap exercise](../experiments/agent-a-overlap.mjs) already
-contains the scientific ingredients. Infrastructure should let another author
-express the following without changing the numerical core or adding a special
-viewer page:
+## Implementation sequence and copy-ready prompts
 
-1. Create several planets with independently chosen orbital properties and a
-   physical observer.
-2. Obtain the true combined flux from the union of their projected silhouettes,
-   plus individual-planet fluxes normalized to the same unobscured star.
-3. Construct `F_naive = 1 - sum(1 - F_i)` and `F_union - F_naive` using
-   reusable calculation handles. Clearly identify the naive sum as a deliberately
-   incorrect overlap approximation.
-4. Arrange orbital geometry, the observer projection, true/naive curves and the
-   difference. An author can rearrange or replace a view using public primitives.
-5. Scrub one physical time and inspect consistent measurements. Rotating the
-   presentation camera changes the picture; moving the observer changes the
-   applicable measurements.
-6. Add a planet, its orbit and individual photometer in an author transaction;
-   revise a connection or remove an object. A live measurement selection updates
-   its reduction; a fixed list retains explicit membership. Arithmetic must not
-   silently create measurements.
-7. Save, close and reopen the entire creation with its source, assumptions and
-   view bindings retained, without an agent connected.
+Copy an entire linked prompt into a coding-agent conversation. It includes scope,
+prerequisites, acceptance checks, and a handoff path. Dependencies mean integrated,
+tested interfaces, not merely another agent starting work.
 
-Individual photometers can have different adaptive sample times. Calculation
-composition must explicitly align or reevaluate them; equal array indices do
-not imply equal physical times. General derived values remain signed. In this
-particular model, however, `F_union - F_naive >= 0` within tolerance: it vanishes
-for disjoint silhouettes and is positive for a shared blocked area. Test that
-invariant as well as independent numerical values.
+| Task | Implementation prompt | Required result | Depends on |
+| --- | --- | --- | --- |
+| F01 | [Composition kernel](prompts/F01-composition-kernel.md) | Generic graph, drafts, atomic commands, identities, undo/redo | — |
+| F02 | [Scientific dataflow](prompts/F02-scientific-dataflow.md) | Values, ports, frames, normalization, arithmetic, aligned results | F01 |
+| F03 | [Extension registry](prompts/F03-extension-registry.md) | Model/operator/asset/view manifests and trusted registration | F01–F02 |
+| F04 | [Computation runtime](prompts/F04-computation-runtime.md) | Analytic and basic stateful lifecycles, cancellation, checkpoints | F02–F03 |
+| F05 | [Scene and assets](prompts/F05-scene-and-assets.md) | Visual handles, data bindings, actual 3D navigation/selection | F01–F04 |
+| F06 | [Planetarium shell](prompts/F06-planetarium-shell.md) | Full-stage application and movable, foldable floating windows | F05 |
+| F07 | [Command gateway](prompts/F07-command-gateway.md) | One discoverable, validated write route | F01–F05 |
+| F08 | [In-app agent sessions](prompts/F08-in-app-agent-sessions.md) | Conversation, streaming, tools, Stop, real connected adapter | F06–F07 |
+| F09 | [Portable projects](prompts/F09-portable-projects.md) | Faithful saving/reopening, assets, source, layout, provenance | F01–F08 |
+| F10 | [Timelines and export](prompts/F10-authored-timelines-export.md) | Shared evaluator, local player, scheduled frame sequences | F05–F06, F09 |
+| F11 | [Domain-independent readiness](prompts/F11-domain-independent-readiness.md) | Independent complete workflow with astronomy disabled | F01–F10 |
+| F12 | [Exoplanet package migration](prompts/F12-exoplanet-package-migration.md) | Existing science as an optional package with regressions | F11 |
 
-A deliberately tiny non-astronomical test module, such as a constant source,
-checks that model registration really works without a stellar host. It is a
-software fixture, not a second education topic or evidence that arbitrary
-physical models couple correctly.
+Run F01→F02→F03→F04→F05 in order. F06 and F07 can proceed in parallel with
+explicit ownership and agreed interfaces. Their integration enables F08, then
+F09→F10→F11. F12 follows the generic gate. Do not dispatch every prompt
+simultaneously into one checkout: shared contracts cannot safely acquire
+conflicting implementations.
 
-## Where scientific responsibility belongs
+## Readiness fixtures independent of astronomy
 
-| Shared infrastructure enforces | Each model or operator must supply |
+Use three small software fixtures throughout the foundation:
+
+1. **Analytic moving points:** `r(t) = r0 + v*t`. Author loops create collections,
+   bind positions to geometry, compare speeds, transform declared frames, and
+   rearrange plots. Equivalent unit choices preserve values. No star or orbit
+   is required.
+2. **Accumulator and seeded sequence:** a stepping component tests initialization,
+   bounded advancement, cancellation, checkpoint/replay, and reductions/histograms.
+   Random resume retains generator identity and state, not merely a seed. This
+   is not a validated particle model.
+3. **Static scalar/vector field:** known values at declared coordinates test
+   array/field ports, instancing, arrows or slices, color mappings, labels,
+   provenance, and missing-data diagnostics.
+
+An independent author must construct an unfamiliar arrangement through public
+interfaces and an in-app agent conversation, change its structure, save it,
+reopen without an agent, and deliver an interactive creation plus a short authored
+export. Mock tests cannot replace the real agent roundtrip or browser inspection.
+Import-boundary checks and an integration run with astronomy packages disabled
+provide evidence of reuse. These fixtures establish neither astronomical
+correctness nor educational effectiveness. F12 separately retains the existing
+Kepler/photometry reference cases and limits.
+
+## Scientific responsibility and runtime boundaries
+
+| Shared mechanisms enforce | Domain extensions provide |
 | --- | --- |
-| IDs, declared types, units, reference resolution, atomic edits and version compatibility | The equation or algorithm, assumptions, physical interpretation and applicability limits |
-| A consistent result/time/revision contract | Appropriate evaluation and sampling methods, tolerances and unresolved-accuracy signals |
-| Required connection metadata and explicit adapters | Why a connection is physically justified; matching dimensions alone is insufficient |
-| A way to run reference cases and display diagnostics | Meaningful reference cases, conserved quantities when applicable, failure limits and review evidence |
-| A route for trusted local extensions | The implemented new physics and honest experimental/review status |
+| IDs, references, atomic changes, version/capability checks | Physical entities, relationships, parameter choices, applicability rules |
+| Units, declared meaning, frames, normalization, explicit adapters | Why a coupling is physically justified; matching dimensions is insufficient |
+| Evaluation lifecycle, snapshots, budgets, cancellation | Equations, integration/sampling algorithms, tolerances, accuracy limits |
+| Dependency handling and aligned sample coordinates | Interpretation of measurements, transformations, reductions, approximations |
+| A reference-case harness and diagnostics | Relevant reference cases, conserved quantities when applicable, review evidence |
+| Geometry/material bindings and visible scale/color metadata | Scientific interpretation of appearance or a supported observation model |
 
-Do not make one stellar host, a planetary mass cutoff or Keplerian eccentricity
-constraints universal laws of the framework. Do not require the physical
-relationship graph to be acyclic: that restriction applies only to calculation
-dependencies that are evaluated as a directed acyclic graph. Genuine dynamical
-feedback belongs within an appropriate solver/model.
+Implement analytic **and basic stateful** capabilities in the foundation.
+Analytic models evaluate requested coordinates directly. Stateful models expose
+initialization, advancement, extraction, and checkpoint/restore. Models own
+numerical methods; the runtime schedules work and identifies results. A global
+adaptive solver, all-domain conservation checker, and advanced numerical methods
+are unnecessary.
 
-LLM-facing help explains these contracts; implemented rules enforce the checks
-we actually know how to perform. Passing schema validation, tests or an agent
-review does not establish arbitrary scientific truth.
+Physical time is independent of display frame rate. Presentation tracks can pause,
+seek, or change camera framing without changing physics. Stateful rewind follows
+a documented replay/checkpoint policy. Material emission, enlarged markers, and
+color scales cannot silently become physical radiation, radius, or temperature.
+Computational cycles require an appropriate coupled model/solver; ordinary
+object-relationship cycles must not be globally forbidden.
 
-## Authoring freedom and saved playback
+Results and mutations carry project identity, load generation, and revision.
+Loading another creation invalidates old jobs and agent turns even when numeric
+revisions match. Failed validation preserves accepted state; drafts may remain
+incomplete until their connections are supplied.
 
-Ordinary JavaScript recipes remain a way to use loops, functions and arbitrary
-construction logic in the author's own process. Handles should create objects,
-relationships, calculations, views and later timelines. The saved representation
-records the resulting construction and supported operations; it is not the
-limit of the author's imagination.
+## The user's agent inside the application
 
-New physical laws, operators and drawing adapters can enter as explicit trusted
-local code extensions, with their contracts and evidence. Loading someone else's
-project data must not execute its stored source or silently fetch/install a
-module. Saved source and the accepted graph have different roles: preserve the
-original recipe, associate it with the graph it produced, identify generated
-reconstructions, and expose later source/graph divergence. Results and mutation
-tokens need project identity as well as revision, since revision numbers can
-recur after restart or project replacement. Export uses one fixed snapshot.
+F08 is mandatory. The experience is Copilot-like conversation beside the evolving
+visualization, not a requirement to leave the application and manually run a CLI.
+A provider-neutral bridge normalizes streaming text, tool progress, completion,
+cancellation, authentication needs, and genuine permission requests. Test one
+adapter with a real runtime; do not claim universal compatibility.
 
-For now, extend the current local JavaScript/browser implementation. Its modular
-boundaries matter more than choosing a permanent language or renderer. Manim can
-later consume shared evaluated results or presentation intent if a concrete
-authoring/export test warrants it. There is no need to settle that choice before
-the first complete comparison works.
+[ACP](https://agentclientprotocol.com/get-started/architecture) defines
+application-to-agent communication; MCP concerns tool/context access. An MCP
+server alone does not supply conversational sessions. ACP v1 currently specifies
+[local subprocess stdio transport](https://agentclientprotocol.com/protocol/v1/transports).
+The local Node companion can host that process; the browser cannot directly
+launch it. [Zed's external-agent integration](https://zed.dev/docs/ai/external-agents)
+illustrates hosting conversation while an external agent retains its runtime
+and authentication. These are precedents, not tested Cosmic Lego integrations.
 
-MCP is an optional tool-connection protocol, not an astronomy engine or an
-embedded LLM. A thin adapter can expose the same capabilities to a compatible
-client; the existing CLI and SDK remain useful routes. Verify SDK/client
-compatibility when implementing it. [Official MCP architecture](https://modelcontextprotocol.io/docs/learn/architecture).
+[Codex app-server](https://learn.chatgpt.com/docs/app-server) is another candidate.
+Its help was available locally during planning; authentication and live connection
+were not tested. Recheck installed versions, current protocols, and capabilities
+in F08. Credentials belong in the supported runtime authentication mechanism,
+outside browser storage, project files, and transcripts. A reopened transcript
+is not automatically a resumed provider session.
 
-## What can wait
+Gateway validation cannot magically constrain an external agent's native filesystem
+or shell tools. Use a separate authoring workspace and verified runtime permission
+controls where available; report actual limits. Authorized reversible edits apply
+with a visible summary and Undo, without repetitive approval dialogs. Stop revokes
+further writes and cancels work; committed changes remain until separately undone.
 
-A second domain should supply evidence for the abstractions it needs. Defer a
-universal scientific ontology, arbitrary cross-domain coupling, a general solver,
-symbolic mathematics, full uncertainty propagation, GPU/distributed execution,
-cloud accounts, collaborative editing, a plug-in marketplace and support for
-every renderer or agent client.
+## Extension authors, artifacts, and handoffs
 
-Task 07 is enough to start one new topic. Tasks 08–09 test the original-content
-production goal. Task 11 becomes necessary when the chosen domain actually needs
-stateful evolution or when measurements show a responsiveness problem. A costly
-analytic model may need only background scheduling, not stepping/checkpoints.
-This conditional work is not a reason to delay an analytic demonstration.
+Learners and teachers compose installed blocks. Model authors add trusted local
+implementations, contracts, reference cases, and honest experimental/review status.
+An equation suggested in conversation becomes supported physics only after
+implementation and appropriate checks. Projects carry definitions and requirements,
+not permission to execute embedded source or install arbitrary modules.
 
-## Handoff and completion rules
+Preserve the original recipe and its produced graph; expose later divergence.
+Save scientific conventions, data identities, assets/licenses, layout, timelines,
+and required implementation identities. Derived caches remain separate from
+authoritative inputs. Interactive playback and export share one presentation
+evaluator with explicit frame times. Identical pixels across graphics devices
+are not a blanket reproducibility promise.
 
-Every implementation agent writes `docs/handoffs/NN.md` with actual interfaces,
-files, reproducible checks, limitations and downstream implications. Create these
-handoffs as work finishes; this plan does not pre-fill them with imagined results.
-Later agents inspect both those records and the real current code.
+Each task writes `docs/handoffs/Fxx.md` with actual interfaces, changed files,
+executed checks, assumptions, limits, and downstream implications. Read handoffs
+alongside current code. Preserve the approved logo, BSD-3-Clause notices, and
+existing scientific evidence. Do not pre-fill future completion claims.
 
-Preserve the [BSD-3-Clause license](../LICENSE), approved logo and existing model
-reference checks. There are 38 tests in the recorded prototype baseline; use the
-current applicable suite, not a permanently fixed test count. Every new physical
-model still needs its own scientific validation. Record visual inspection
-separately from numerical checks, and keep implementation status in
-[demo-status.md](demo-status.md), not in the purpose statement.
-
-Do not call the core ready because all six individual tasks are marked done.
-Task 07 must demonstrate the complete authoring-and-reopening path with an
-unfamiliar construction. Its result measures infrastructure feasibility and
-clarity; classroom learning impact needs a separate later evaluation.
+Defer cloud accounts, collaborative editing, GPU/distributed execution, a plug-in
+marketplace, universal scientific ontology, symbolic algebra, and support for
+every agent or renderer. F11 must demonstrate the generic workflow before F12
+migration or substantive new topic development. Real learner studies remain
+separate from infrastructure readiness.

@@ -1,12 +1,33 @@
 # Cosmic Lego: architecture decisions
 
-Revised 2026-11-02. Status: a bounded exoplanet authoring experiment. This note records the chosen design; implementation and verification status belong in [demo-status.md](demo-status.md).
+Revised 2026-11-03. The implemented prototype remains a bounded exoplanet
+authoring experiment. Its design is recorded below; implementation and
+verification status belong in [demo-status.md](demo-status.md).
+
+## The next architecture is shared across domains
+
+The [shared architecture roadmap](infrastructure-roadmap.md) supersedes the
+earlier plan to establish infrastructure through an exoplanet-only authoring
+exercise. The new core must construct objects, connect scientific quantities,
+run analytic and stateful models, present results, host conversation and save
+work without importing any astronomy package. Domain models are registered
+extensions; the current star/planet vocabulary below is specific to this prototype.
+
+The intended application has a central navigable stage with floating, movable,
+foldable plots, inspectors and conversation. Permanent dashboard columns do not
+satisfy that presentation goal. In-app conversation with a compatible external
+agent is required foundation work. The existing sidebar viewer and external
+CLI/HTTP authoring routes do not yet deliver that experience.
+
+These are planned boundaries, not claims of implemented capabilities. Follow
+F01–F11 for the generic foundation and its independent readiness exercise;
+F12 migrates this prototype into an optional domain package afterward.
 
 ## Correcting the first prototype
 
 The first prototype chose the wrong abstraction. It packaged an entire star–planet pair as a unit and let users edit parameters or replace a JSON scene. That demonstrated synchronized views, but it did not demonstrate the user's intended ability to construct and revise physical scenes from reusable objects. This was an implementation decision by the assistant, not a limitation imposed by the user's idea.
 
-The rebuild makes scene structure authorable: create bodies, attach orbits, place observers, define measurements, and arrange visual explanations and narration. The test is whether an external agent can construct an unanticipated case and make structural changes through the public interface without editing the engine. Changing one preset's sliders is not sufficient evidence.
+The rebuild makes scene structure authorable: create bodies, attach orbits, place observers, define measurements, and arrange interactive visualizations and narration. The test is whether an external agent can construct an unanticipated case and make structural changes through the public interface without editing the engine. Changing one preset's sliders is not sufficient evidence.
 
 ## Authoring vocabulary and boundaries
 
@@ -68,11 +89,22 @@ Changing eccentricity at fixed semimajor axis changes the orbit's shape and spee
 
 The authoring operation must express that choice explicitly. The UI should show the resulting orbit size and period so that the learner can inspect the dependency. The agent must not quietly choose a different quantity to preserve to make a requested conclusion appear true.
 
-## The user's agents stay outside the application
+## Current external authoring and planned in-app conversation
 
 Authors can use their own agents through the SDK, documented CLI, and local HTTP semantic operations. No embedded model or API key is needed for playback or evaluation. Author scripts run in the agent's own process. The web server accepts data and supported operations; it does not execute arbitrary submitted JavaScript. A serialized scene does not carry executable code or remote dependencies.
 
-MCP remains a possible adapter and is not implemented. Do not describe the HTTP service as an MCP server. Compatibility with a particular agent client must be tested before claiming it. Local browser delivery avoids requiring public hosting or desktop packaging for this experiment; those remain separate choices.
+MCP is not implemented. Do not describe the HTTP service as an MCP server.
+The next design adds a provider-neutral session bridge so the user can converse
+with a compatible agent inside Cosmic Lego. The agent process may remain external
+while the app hosts its messages, progress and supported actions. Conversation
+and construction tools are separate interfaces; see the roadmap's researched
+ACP/MCP options and F08. Compatibility must be tested before claiming it.
+
+Start with a browser and a local companion that connects the configured agent;
+public hosting and desktop packaging remain separate choices. Routine commands
+use checked transactions, while adding new executable model code follows a
+distinct development workflow. Independent agent filesystem access is not
+constrained merely because the application offers validated tools.
 
 ## Evidence required from this rebuild
 
@@ -80,7 +112,10 @@ Check both structural authoring and scientific behavior. A useful demonstration 
 
 Render and inspect the resulting scenes as well as checking data: camera framing, scale labels, occlusion, timing, graph markers, and explanatory text can mislead even when numerical values are correct. Passing tests, a plausible screenshot, schema acceptance, or an LLM review alone does not establish correctness or educational value. An independently authored case provides limited evidence of composability; it does not establish arbitrary-case reliability.
 
-The older prototype remains in Git history while the active implementation is replaced. Keep this one-domain experiment small and use the independent authoring exercise to decide what abstraction is actually missing before adding more topics.
+The older prototype remains in Git history. Preserve the current model's checks
+through migration, but use the domain-independent F11 exercise to assess shared
+architecture readiness. Exoplanet behavior becomes a separate F12 regression
+exercise rather than the definition of the reusable core.
 
 ## Working name
 
