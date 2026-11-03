@@ -101,7 +101,7 @@ test('scene publication stores source as text and rejects malformed graphs witho
   const { request } = await start(t);
   const world = emptyWorld('Published by an external author');
   world.planet({ id: 'authored' }).orbit(world.get('host'), { semiMajorAxisAU: 0.08, eccentricity: 0.3 });
-  const marker = '__astrocompose_source_should_never_execute__';
+  const marker = '__cosmic_lego_source_should_never_execute__';
   delete globalThis[marker];
   t.after(() => { delete globalThis[marker]; });
   const source = `globalThis.${marker} = true; throw new Error('Submitted source ran');`;

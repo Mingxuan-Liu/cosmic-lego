@@ -1,8 +1,8 @@
 {
-  "name": "astrocompose",
+  "name": "cosmic-lego",
   "version": "0.2.0",
   "private": true,
-  "description": "Composable astrophysics visualizations for exploration and explanation",
+  "description": "Reusable building blocks for interactive astronomical visualizations",
   "type": "module",
   "engines": { "node": ">=20" },
   "scripts": {

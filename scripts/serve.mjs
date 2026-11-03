@@ -19,7 +19,7 @@ async function loadExample(id){if(!examples.some(e=>e.id===id))throw new Error('
 const saved=path.join(root,'.local/world-v2.json');
 const initial=flags.has('--resume')&&existsSync(saved)?{scene:JSON.parse(readFileSync(saved,'utf8'))}:await loadExample(flags.get('--example')??'cosmic-clockwork');
 const server=createApp({root,initialScene:initial.scene,initialSource:initial.source??toScript(initial.scene),examples,loadExample,onScene:scene=>{mkdirSync(path.dirname(saved),{recursive:true});writeFileSync(saved,JSON.stringify(scene,null,2)+'\n');}});
-server.listen(port,'127.0.0.1',()=>console.log(`AstroCompose v0.2: http://127.0.0.1:${server.address().port}\nAgent construction tools: GET /api/tools · POST /api/commands\nCtrl+C to stop.`));
+server.listen(port,'127.0.0.1',()=>console.log(`Cosmic Lego v0.2: http://127.0.0.1:${server.address().port}\nAgent construction tools: GET /api/tools · POST /api/commands\nCtrl+C to stop.`));
 server.on('error',e=>{console.error(e.message);process.exitCode=1;});
 for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>{
   server.close(()=>process.exit(0));

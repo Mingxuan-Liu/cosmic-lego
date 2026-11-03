@@ -13,8 +13,8 @@ node scripts/serve.mjs
 ```
 
 Open **http://127.0.0.1:4317**. On macOS, double-click
-**Start AstroCompose.command** instead. The launcher can use the bundled Codex
-Node runtime when Node is not on PATH; `ASTROCOMPOSE_NODE` selects an explicit
+**Start Cosmic Lego.command** instead. The launcher can use the bundled Codex
+Node runtime when Node is not on PATH; `COSMIC_LEGO_NODE` selects an explicit
 executable. In commands below, `bash scripts/node.sh` can replace `node`.
 
 The plain server starts the `cosmic-clockwork` world. The macOS launcher resumes

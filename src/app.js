@@ -300,7 +300,7 @@ $('open-source').addEventListener('click',()=>drawer(true));$('close-source').ad
 window.addEventListener('keydown',(event)=>{if(event.key==='Escape'&&!$('source-drawer').hidden)drawer(false);});
 for(const name of ['source','graph','agent'])$('tab-'+name).addEventListener('click',()=>{for(const target of ['source','graph','agent']){$('tab-'+target).setAttribute('aria-selected',String(name===target));$('panel-'+target).hidden=name!==target;}});
 $('copy-source').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('source-code').textContent);$('drawer-status').textContent='Source copied.';}catch{$('drawer-status').textContent='Select the source text and copy it with your keyboard.';}});
-$('download-scene').addEventListener('click',()=>{if(!scene)return;const url=URL.createObjectURL(new Blob([JSON.stringify(scene,null,2)+'\n'],{type:'application/json'}));const link=el('a');link.href=url;link.download='astrocompose-world.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+$('download-scene').addEventListener('click',()=>{if(!scene)return;const url=URL.createObjectURL(new Blob([JSON.stringify(scene,null,2)+'\n'],{type:'application/json'}));const link=el('a');link.href=url;link.download='cosmic-lego-world.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
 async function loadCatalog() {
   try{const result=await request('/api/examples');examples=Array.isArray(result)?result:result.examples||[];setOptions($('example-select'),[{id:'',title:'Explore authored worlds…'},...examples],'');}
   catch{$('example-select').replaceChildren(el('option','','Current authored world'));}

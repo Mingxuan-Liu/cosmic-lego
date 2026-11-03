@@ -4,7 +4,7 @@ import path from 'node:path';
 import { capabilities, tools, validateScene, applyOperations, evaluateScene, sampleMeasurements } from './scene.js';
 import { toScript } from './sdk.js';
 
-const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8'};
+const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png'};
 function json(res,status,value){res.writeHead(status,{'Content-Type':mime['.json'],'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(value));}
 async function body(req){let n=0,chunks=[];for await(const chunk of req){n+=chunk.length;if(n>256*1024){const e=new Error('Body exceeds 256 KiB.');e.status=413;throw e;}chunks.push(chunk);}try{return JSON.parse(Buffer.concat(chunks).toString());}catch{const e=new Error('Expected JSON transport data.');e.status=400;throw e;}}
 
@@ -49,7 +49,7 @@ export function createApp({root,initialScene,initialSource='',examples=[],loadEx
     if(route.startsWith('/api/'))return json(res,404,{error:'NOT_FOUND'});
     if(!['GET','HEAD'].includes(req.method))return json(res,405,{error:'METHOD_NOT_ALLOWED'});
     const relative=decodeURIComponent(route==='/'?'/index.html':route).slice(1);
-    if(!/^(index\.html|styles\.css|src\/[A-Za-z0-9_-]+\.js|examples\/[A-Za-z0-9_-]+\.mjs)$/.test(relative))return json(res,404,{error:'NOT_FOUND'});
+    if(!/^(index\.html|styles\.css|src\/[A-Za-z0-9_-]+\.js|examples\/[A-Za-z0-9_-]+\.mjs|assets\/branding\/cosmic-lego-mark\.png)$/.test(relative))return json(res,404,{error:'NOT_FOUND'});
     const data=await readFile(path.join(root,relative));res.writeHead(200,{'Content-Type':mime[path.extname(relative)]??'text/plain','Cache-Control':'no-cache','X-Content-Type-Options':'nosniff'});res.end(req.method==='HEAD'?undefined:data);
   }catch(error){json(res,error.status??(error.validation?422:400),{error:error.code??(error.validation?'INVALID_SCENE':'REQUEST_ERROR'),message:error.message,...(error.validation?{validation:error.validation}:{})});}});
 }

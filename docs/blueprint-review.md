@@ -3,7 +3,32 @@
 2026-11-02. This records a qualitative review of the project charter in
 [README.md](../README.md); it is not part of the charter itself.
 
-## Method
+**Review scope:** the audit below concerned the earlier charter with eight
+diagrams. The owner subsequently requested the name Cosmic Lego, a focus on
+interactive visualizations, more concrete astronomy examples, less interface
+design jargon, and one central schematic. The current README follows that newer
+editorial direction. This report is retained as historical review evidence; it
+is not a claim that the later revision received the same blind reading.
+
+## Cosmic Lego revision follow-up
+
+Later on 2026-11-02, one new reader received only the revised README in a fresh
+context. It recovered the intended division of responsibility: the learner and
+agent assemble objects, relationships, measurements, and views; implemented
+models calculate physical behavior. It understood structural freedom, playback
+without an agent, and interactive 3D complemented by plots and spectra.
+
+The reader found the astronomy motivation and four application examples
+appropriately qualified. It identified one useful clarification: faster bulk
+motion is not itself higher gas temperature. The gas example now explicitly
+compares random motion relative to the mean flow. This is a qualitative clarity
+check, not an independent scientific or educational validation.
+
+The revised document contains one central Mermaid schematic. A local browser
+preview rendered it successfully with the new logo; both were visually inspected.
+The earlier eight-diagram audit below remains a record of the previous draft.
+
+## Earlier six-reader method
 
 Six agent readers received fresh conversation contexts in two groups of three.
 Each was instructed to read only the README, without repository implementation,

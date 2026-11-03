@@ -1,4 +1,4 @@
-# AstroCompose: architecture decisions
+# Cosmic Lego: architecture decisions
 
 Revised 2026-11-02. Status: a bounded exoplanet authoring experiment. This note records the chosen design; implementation and verification status belong in [demo-status.md](demo-status.md).
 
@@ -84,4 +84,7 @@ The older prototype remains in Git history while the active implementation is re
 
 ## Working name
 
-AstroCompose describes assembling astrophysical explanations and extends beyond exoplanets. A limited exact-name web/GitHub/PyPI/npm search on 2026-11-01 found no matches. That is not trademark, domain, or package-name clearance. The preliminary collision evidence is recorded in [references.md](references.md).
+**Cosmic Lego**, with repository slug **`cosmic-lego`**, emphasizes assembling
+interactive astronomical visualizations from reusable physical building blocks.
+This is the project owner's chosen working name. The name does not establish
+trademark clearance, package availability, or ownership of a public domain.

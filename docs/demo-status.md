@@ -151,3 +151,21 @@ The repository remains local and unpublished. Public license/contribution policy
 hosting, packaging, broader accessibility, name clearance, and long-term
 maintenance are unresolved. The source examples and contracts are inspectable,
 but current work should still be treated as a prototype for review and revision.
+
+## Naming and charter revision — 2026-11-02
+
+The repository directory, package, launcher, runtime messages, saved-file name,
+agent capability name, and current documentation now use **Cosmic Lego** or
+`cosmic-lego`. The original pixel-art mark appears in the viewer and README;
+its design and generation record are in [the branding notes](../assets/branding/README.md).
+The README now centers astronomy applications and one schematic, with its
+follow-up comprehension check recorded in [blueprint-review.md](blueprint-review.md).
+
+All 38 existing tests passed after the rename. The logo was served successfully
+as a PNG, the executable launcher was retained, and a browser inspection showed
+the new name and logo without warning/error logs. The existing local demo was
+restarted under the renamed directory; its physical scene and original authoring
+source were retained. Session revision numbers and history restart with the
+server. Review screenshots are saved locally as `.local/cosmic-lego-demo.jpg`
+and `.local/cosmic-lego-readme.jpg` (ignored by Git). These checks concern the
+rename and presentation; they add no new scientific validation or capabilities.

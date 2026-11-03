@@ -1,8 +1,16 @@
-# AstroCompose: agent-built scientific worlds
+# Cosmic Lego: interactive astronomical visualizations
 
 User clarification, 2026-11-02: the goal is an extensible construction environment.
 Agents must create bodies, attach physical relationships, create measurements,
-and arrange explanations. A fixed experiment with exposed parameters is insufficient.
+and arrange interactive visualizations. A fixed experiment with exposed parameters
+is insufficient.
+
+- Use the project name Cosmic Lego and repository slug cosmic-lego.
+- Describe the goal as interactive astronomical visualizations. In the README,
+  lead with concrete astronomy questions and the difficulty of accessing cosmic
+  objects and scales; avoid generic interface-design jargon. Keep one central
+  schematic as the visual summary. Reuse should spare beginners unnecessary
+  simulation coding and prompt-engineering work.
 
 - Read README.md first: it defines the enduring purpose and design commitments.
   It is a blueprint, not a promise that every described capability exists.

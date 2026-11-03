@@ -18,7 +18,7 @@ export const tools = [
 ];
 
 export const capabilities = {
-  name: 'AstroCompose', version: '0.2.0', model: 'independent-keplerian-uniform-union',
+  name: 'Cosmic Lego', version: '0.2.0', model: 'independent-keplerian-uniform-union',
   authoring: 'Construct and revise a graph of body, orbit, observer, measurement and annotation handles with the public JavaScript World SDK or semantic tool transactions.',
   supported: ['multiple planets around one primary', 'independent orbital eccentricity, inclination, node, periapsis, phase and epoch', 'composite transits including mutual projected overlap', 'multiple physical observers and selective photometers', 'atomic structural edits and removals', 'scripted annotations and camera framing'],
   assumptions: ['Fixed primary; planets follow independent Kepler orbits using host GM only.', 'Planet masses are metadata; total planet/host mass <= 0.01 is required but does not certify stability.', 'No mutual forces, scattering, precession, TTV, stellar reflex RV, limb darkening, planetary light, atmosphere, exposure integration or instrumental noise.', 'Changing parameters constructs a new model, not a conserving in-flight intervention.'],
