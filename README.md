@@ -1,6 +1,6 @@
 # Cosmic Lego
 
-<img src="assets/branding/cosmic-lego-mark.png" alt="Cosmic Lego pixel-brick orbital mark" width="180">
+<img src="assets/branding/cosmic-lego-galaxy.png" alt="Cosmic Lego spiral galaxy assembled from colorful interlocking bricks" width="180">
 
 **Reusable scientific building blocks for interactive astronomy visualizations.**
 
@@ -141,6 +141,19 @@ establish Cosmic Lego's educational effectiveness.
 
 **The goal is to spend less effort rebuilding visualizations and more time
 exploring astronomy.**
+
+## License
+
+Cosmic Lego is released under the [BSD 3-Clause License](LICENSE), a permissive
+software license also used by [Astropy](https://docs.astropy.org/en/stable/license.html).
+It permits use, modification, and redistribution, including commercial reuse,
+with the required notices retained and no implied endorsement by the authors.
+
+Unless otherwise noted, this license covers the project's code, examples,
+documentation, and original assets to the extent the contributors hold the
+relevant rights. Third-party materials and trademarks retain their own rights.
+[arXiv's article licenses](https://info.arxiv.org/help/license/index.html) apply
+to manuscripts; any future Cosmic Lego paper would be licensed separately.
 
 ---
 

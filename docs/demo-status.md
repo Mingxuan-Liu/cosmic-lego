@@ -147,8 +147,8 @@ ambition before adding another large physical topic.
 
 ## Release and maintenance state
 
-The repository remains local and unpublished. Public license/contribution policy,
-hosting, packaging, broader accessibility, name clearance, and long-term
+The repository remains local and unpublished, under the [BSD 3-Clause License](../LICENSE).
+Contribution policy, hosting, packaging, broader accessibility, name clearance, and long-term
 maintenance are unresolved. The source examples and contracts are inspectable,
 but current work should still be treated as a prototype for review and revision.
 
@@ -156,8 +156,8 @@ but current work should still be treated as a prototype for review and revision.
 
 The repository directory, package, launcher, runtime messages, saved-file name,
 agent capability name, and current documentation now use **Cosmic Lego** or
-`cosmic-lego`. The original pixel-art mark appears in the viewer and README;
-its design and generation record are in [the branding notes](../assets/branding/README.md).
+`cosmic-lego`. The mark installed during this revision has since been replaced
+by the approved brick-built galaxy; see [the branding notes](../assets/branding/README.md).
 The README now centers astronomy applications and one schematic, with its
 follow-up comprehension check recorded in [blueprint-review.md](blueprint-review.md).
 
@@ -169,3 +169,19 @@ source were retained. Session revision numbers and history restart with the
 server. Review screenshots are saved locally as `.local/cosmic-lego-demo.jpg`
 and `.local/cosmic-lego-readme.jpg` (ignored by Git). These checks concern the
 rename and presentation; they add no new scientific validation or capabilities.
+
+## Approved galaxy logo and license — 2026-11-02
+
+The owner selected `assets/branding/cosmic-lego-galaxy.png` as the project logo.
+The README, branding guide, viewer header, favicon, and server asset route now
+use that exact PNG. The superseded image is retained only in Git history.
+BSD-3-Clause is recorded in LICENSE, the README, and package metadata; references
+document the astronomy-software precedent and the distinction from arXiv's
+article licenses.
+
+All 38 existing tests passed. Browser inspection confirmed the selected logo in
+the viewer and README, the rendered license section, and no warning/error logs.
+The image route returned HTTP 200 with `image/png`. The running demo was restarted
+with its physical scene and authoring source preserved. Current review images
+are `.local/galaxy-adoption-demo.jpg` and `.local/galaxy-adoption-readme.jpg`
+(ignored by Git); earlier screenshots above document earlier branding.

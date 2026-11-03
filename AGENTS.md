@@ -6,6 +6,10 @@ and arrange interactive visualizations. A fixed experiment with exposed paramete
 is insufficient.
 
 - Use the project name Cosmic Lego and repository slug cosmic-lego.
+- Use the approved `assets/branding/cosmic-lego-galaxy.png` wherever a project
+  logo appears; preserve its image bytes and transparency. See the branding notes.
+- The project uses BSD-3-Clause; retain LICENSE and its notices in distributions.
+  Preserve separate notices for any third-party materials.
 - Describe the goal as interactive astronomical visualizations. In the README,
   lead with concrete astronomy questions and the difficulty of accessing cosmic
   objects and scales; avoid generic interface-design jargon. Keep one central
@@ -46,4 +50,4 @@ is insufficient.
   Scripts authored by an agent run in that agent's own process; never execute
   arbitrary uploaded JavaScript inside the local API server or browser.
 - Preserve old work in Git history, not parallel obsolete implementations.
-  Public license and broad architecture remain open pending prototype feedback.
+  Broad architecture remains open pending prototype feedback.

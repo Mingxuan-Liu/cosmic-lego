@@ -1,6 +1,7 @@
 {
   "name": "cosmic-lego",
   "version": "0.2.0",
+  "license": "BSD-3-Clause",
   "private": true,
   "description": "Reusable building blocks for interactive astronomical visualizations",
   "type": "module",

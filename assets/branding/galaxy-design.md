@@ -1,6 +1,6 @@
-# Cosmic Lego — brick-built galaxy concept
+# Cosmic Lego — approved brick-built galaxy logo
 
-Created 2026-11-02 as a new logo candidate following the owner's request for the
+Created and selected by the owner on 2026-11-02 following the request for the
 tactile brick-relief style of the supplied LEGO Milky Way wall-art reference.
 
 Asset: [cosmic-lego-galaxy.png](cosmic-lego-galaxy.png).
@@ -30,8 +30,8 @@ galaxy is an artistic branding metaphor, not an observation or numerical model.
   treatment at very small favicon sizes.
 - Source output: `exec-57ba9242-de5a-400d-943e-901e726d7b67.png`, copied unchanged
   into this repository. Model identifier, seed, and cost were not exposed.
-- The candidate is saved separately for design review; it has not been installed
-  as the viewer's active mark.
+- The selected image is the active project mark in the documentation, viewer
+  header, and favicon. The original PNG is unchanged.
 
 ## Generation prompt
 

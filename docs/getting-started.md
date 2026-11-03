@@ -187,6 +187,6 @@ were replaced. The old prototype is preserved at Git tag **`prototype-v0.1`**;
 its scenes are not the active v0.2 contract. The new persistence path keeps the
 old saved state separate.
 
-This repository is local and unpublished. A public license, contribution policy,
-and release/distribution plan remain undecided. See [AGENTS.md](../AGENTS.md) before
-changing behavior.
+This repository is local and unpublished, under the [BSD 3-Clause License](../LICENSE).
+A contribution policy and release/distribution plan remain undecided.
+See [AGENTS.md](../AGENTS.md) before changing behavior.

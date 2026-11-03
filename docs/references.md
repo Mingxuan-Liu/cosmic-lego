@@ -46,5 +46,17 @@ package-name reservation is claimed.
 The [LEGO Group's published Fair Play policy](https://www.lego.com/en-us/legal/notices-and-policies/fair-play),
 checked 2026-11-02, restricts use of its trademarks and corporate logo. It does
 not establish permission for this project's branding. The chosen name remains
-a working name pending a public-branding decision; the original pixel-art mark
+a working name pending a public-branding decision; the approved brick-built galaxy mark
 does not imply affiliation or resolve name clearance.
+
+## Licensing choice — 2026-11-02
+
+Cosmic Lego adopts [BSD-3-Clause](../LICENSE) for the repository's own code,
+documentation, and assets, subject to the scope stated in the README.
+[Astropy's license](https://docs.astropy.org/en/stable/license.html) provides an
+astronomy-software precedent, and the [Open Source Initiative's standard text](https://opensource.org/license/bsd-3-clause)
+defines the reuse conditions. [arXiv's license guidance](https://info.arxiv.org/help/license/index.html)
+offers several licenses for deposited manuscripts; its own non-exclusive license
+primarily grants arXiv distribution rights. These sources do not establish a
+single most-used license across astronomy submissions. The choice here follows
+a software precedent rather than an unsupported popularity ranking.
