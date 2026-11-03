@@ -1,5 +1,48 @@
 # Agent construction interface v0.2
 
+For new infrastructure, use [the F01 composition-kernel guide](composition-kernel.md),
+the [F02 scientific-dataflow guide](scientific-dataflow.md), `src/core/index.js`
+and `src/dataflow/index.js`. F03 adds the [extension-registry interface](extension-registry.md)
+in `src/registry/index.js`: discover installed schemas/requirements, then instantiate
+through an immutable registry binding. Use `binding.validators` for registry-backed
+projects; saved pins do not install code. Mutations require a complete project/load/revision
+token, and its draft authoring API supports generic components, relationships,
+calculation definitions and presentation definitions. F02 adds scientific port
+checks and bounded synchronous evaluation through the same graph. Supply
+`flow.validators` when constructing/reopening a scientific project. The shared command gateway
+and in-app agent session remain later F07/F08 tasks.
+
+F04 adds [worker computation](computation-runtime.md) through `src/runtime/index.js`.
+The trusted host selects `registryModule`; jobs submit accepted projects, output
+IDs, physical time and numerical settings. Check `valid`, diagnostics and the full
+identity triple before consuming results. Stop/supersession discards worker work;
+it does not undo accepted graph changes. A checkpoint is continuation data, never
+authorization to edit or execute project source.
+
+F05 adds [scene and asset authoring](scene-and-assets.md) through
+`src/scene/index.js`. The trusted composition root registers the scene extensions;
+create `layer = createSceneLayer(binding)` and use `layer.validators` for a project
+containing scene nodes. `layer.author(draft)` creates ordinary F01 handles for
+visual instances, reusable assets, and scientific bindings. It supports grouping,
+duplication, reparenting and removal without editing a renderer object directly.
+See the [public scene recipe](../examples/scene-and-assets.mjs) and
+[F05 handoff](handoffs/F05.md).
+
+Evaluate each `layer.sources(project)` output through F04 at the chosen physical
+time, then pass the results to `await layer.compile(project, {results, time})`.
+The compiler consumes supplied snapshots, preserving units, frames, mappings and
+source metadata. It rejects missing, stale or mismatched results. Camera and
+material changes remain presentation edits. The browser adapter consumes the
+compiled data; scientific workers still run in the local Node host.
+
+F01–F05 are implemented. F06 is next for the application shell. The F05 fixture
+server exposes state, evaluation and a few checked demonstration edits; it does
+not replace the planned F07 gateway or provide F08 agent conversation.
+
+The interface below describes the existing exoplanet prototype, which has not
+yet migrated to the generic kernel. Its optional numeric revision checks are
+not the identity contract for new infrastructure.
+
 Start with semantic handles and operations. JSON is used to serialize a world or
 tool request; it does not define the ceiling of the authoring workflow.
 

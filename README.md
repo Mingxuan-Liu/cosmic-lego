@@ -185,6 +185,14 @@ to manuscripts; any future Cosmic Lego paper would be licensed separately.
 ---
 
 Practical instructions belong in the [authoring guide](docs/getting-started.md).
+The implemented generic F01 API has its own [composition guide](docs/composition-kernel.md).
+Scientific values, ports and calculations are covered in the [F02 dataflow guide](docs/scientific-dataflow.md).
+Trusted model, operator, asset and view registration is covered in the [F03 extension guide](docs/extension-registry.md).
+Analytic and stateful worker execution is covered in the [F04 runtime guide](docs/computation-runtime.md).
+Authorable 3D scenes, scientific bindings, and reusable assets are covered in the
+[F05 scene guide](docs/scene-and-assets.md), with a [runnable example](examples/scene-and-assets.mjs)
+and [implementation handoff](docs/handoffs/F05.md).
+F01–F05 are implemented; F06 will build the application shell around these interfaces.
 Current capabilities and evidence belong in the [implementation record](docs/demo-status.md).
 The [shared architecture roadmap](docs/infrastructure-roadmap.md) translates this
 purpose into implementation tasks and agent prompts.

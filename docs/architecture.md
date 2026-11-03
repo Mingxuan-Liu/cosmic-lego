@@ -1,8 +1,62 @@
 # Cosmic Lego: architecture decisions
 
-Revised 2026-11-03. The implemented prototype remains a bounded exoplanet
-authoring experiment. Its design is recorded below; implementation and
-verification status belong in [demo-status.md](demo-status.md).
+Revised 2026-11-03. F01–F05 provide generic composition, scientific dataflow,
+trusted registration, worker computation, and a scene/asset layer alongside the
+existing bounded exoplanet authoring experiment. Implementation and verification status
+belong in [demo-status.md](demo-status.md).
+
+## Implemented generic foundation
+
+F01 lives in `src/core/`; see [the public guide](composition-kernel.md) and
+[the handoff](handoffs/F01.md). It has no model, renderer, provider, or fixture
+imports. The composition root supplies trusted validation functions. Generic
+graph data, explicit references and computational dependencies are separate from
+the exoplanet scene contract. F02 evaluates calculation definitions in the separate
+`src/dataflow/` layer; F05 supplies rendering in `src/scene/` without coupling it
+to the kernel or scientific evaluator.
+
+F02 supplies scientific value/port contracts, coordinate-aware arithmetic,
+fixed/live selection, field selection, mapping/reduction and a bounded synchronous
+evaluator. The composition root injects trusted model and adapter functions; neither
+shared layer imports the software fixtures or a domain package. Model ports and
+actual outputs both receive validation. A shared result envelope retains full
+project/load/revision identity, implementation identity, time, coordinates and
+diagnostics. See [the dataflow guide](scientific-dataflow.md) and
+[F02 handoff](handoffs/F02.md). F03 now supplies manifests, discovery, exact
+version/build pins, parameter schemas and contract tests through `src/registry/`.
+Registry bindings capture installed trusted implementations without introducing
+imports from shared layers into domain code. Assets/views return validated data
+artifacts. Review declarations and executed reference-case evidence remain distinct;
+see [the registry guide](extension-registry.md) and [F03 handoff](handoffs/F03.md).
+F04 adds analytic/stateful scheduling in `src/runtime/` using the same registry,
+scientific Values and graph. A trusted composition-root file constructs the
+registry inside each worker; project data cannot select that file. Model-owned
+steps, extraction and checkpoint callbacks run with bounded work and disposable
+worker isolation. Cancellation and deadlines terminate worker JavaScript, while
+identity checks prevent late results from replacing current data. Backward seeks
+restore compatible checkpoints or reset/replay forward. See [the runtime guide](computation-runtime.md)
+and [F04 handoff](handoffs/F04.md).
+
+F05 uses the same accepted graph for scene handles, asset references, and explicit
+scientific-output bindings. `src/scene/` compiles supplied F04 snapshots at a
+common physical time, checking identity, port, implementation and sampling context.
+It preserves unit/frame transformations, display exaggeration, color ranges,
+source provenance and diagnostics. Missing results fail rather than triggering
+scientific evaluation during rendering. Local assets retain content hashes and
+dependency identities; the Three.js adapter shares and disposes renderer resources.
+Three.js 0.187.0 is pinned for this implementation, with its MIT notice retained;
+the data/adapter boundary keeps that choice replaceable.
+
+The browser stage supports navigation, projection changes and stable picking.
+Its loopback host runs the F04 Node workers; there is no browser scientific-worker
+backend. Camera navigation and material appearance remain presentation state.
+The [scene guide](scene-and-assets.md), [public recipe](../examples/scene-and-assets.mjs)
+and [F05 handoff](handoffs/F05.md) describe the contracts and evidence. F06 is next
+for the full application shell. The demonstration host's narrow edits are not
+the F07 command gateway.
+
+The exoplanet architecture recorded below is retained until F12. It is not the
+schema or readiness gate for the shared core.
 
 ## The next architecture is shared across domains
 
@@ -19,8 +73,8 @@ satisfy that presentation goal. In-app conversation with a compatible external
 agent is required foundation work. The existing sidebar viewer and external
 CLI/HTTP authoring routes do not yet deliver that experience.
 
-These are planned boundaries, not claims of implemented capabilities. Follow
-F01–F11 for the generic foundation and its independent readiness exercise;
+Beyond the F01–F05 interfaces above, these are planned capabilities. Continue with
+F06–F11 for the application and its independent readiness exercise;
 F12 migrates this prototype into an optional domain package afterward.
 
 ## Correcting the first prototype

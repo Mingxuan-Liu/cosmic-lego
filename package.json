@@ -5,10 +5,15 @@
   "private": true,
   "description": "Reusable building blocks for interactive astronomical visualizations",
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node scripts/serve.mjs",
     "test": "node --test",
     "tools": "node scripts/agent.mjs tools"
+  },
+  "dependencies": {
+    "three": "0.187.0"
   }
 }

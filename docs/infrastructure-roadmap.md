@@ -5,6 +5,19 @@ It describes intended implementation, not capabilities already delivered.
 The [README](../README.md) remains the blueprint; inspect the current checkout
 and actual handoffs before implementing a task.
 
+Implementation update, **2026-11-03**: F01–F05 are implemented and tested; read
+the [F01 handoff](handoffs/F01.md), [F02 handoff](handoffs/F02.md),
+[composition guide](composition-kernel.md) and [dataflow guide](scientific-dataflow.md).
+The [F03 handoff](handoffs/F03.md) and [registry guide](extension-registry.md) describe
+trusted registration and extension contracts. The [F04 handoff](handoffs/F04.md)
+and [runtime guide](computation-runtime.md) cover analytic/stateful execution,
+cancellation and checkpoints. The [F05 handoff](handoffs/F05.md),
+[scene guide](scene-and-assets.md) and [public example](../examples/scene-and-assets.mjs)
+cover generic 3D authoring, scientific bindings and reusable assets. The fixture
+browser consumes snapshots from the local Node worker host. F06 is next for the
+application shell; F06–F12 remain planned. The existing exoplanet demo has not
+migrated to the new kernel.
+
 The objective is a reusable authoring application that works with **no astronomy
 package installed**. It must assemble scientific components, arithmetic, geometry,
 materials, views, and authored sequences through shared interfaces. In-app
@@ -91,7 +104,7 @@ tested interfaces, not merely another agent starting work.
 | F11 | [Domain-independent readiness](prompts/F11-domain-independent-readiness.md) | Independent complete workflow with astronomy disabled | F01–F10 |
 | F12 | [Exoplanet package migration](prompts/F12-exoplanet-package-migration.md) | Existing science as an optional package with regressions | F11 |
 
-Run F01→F02→F03→F04→F05 in order. F06 and F07 can proceed in parallel with
+F01→F02→F03→F04→F05 are integrated. Start F06 next; F06 and F07 can proceed in parallel with
 explicit ownership and agreed interfaces. Their integration enables F08, then
 F09→F10→F11. F12 follows the generic gate. Do not dispatch every prompt
 simultaneously into one checkout: shared contracts cannot safely acquire

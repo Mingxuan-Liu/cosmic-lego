@@ -1,10 +1,105 @@
 # Authoring guide
 
-This guide describes the current prototype. The enduring purpose and design
-commitments are defined in [the project charter](../README.md). Run commands
+This guide describes the implemented F01–F05 foundation and the existing astronomy
+prototype. The enduring purpose and design commitments are defined in
+[the project charter](../README.md). Run commands
 from the repository root.
 
-## Open the demo
+## Compose without an astronomy package
+
+F01 supplies a separate domain-independent authoring API in `src/core/index.js`.
+It accepts empty projects, points and labels, staged connections, atomic edits,
+non-mutating previews, and undo/redo. Run its public example in your own authoring
+process:
+
+```sh
+bash scripts/node.sh examples/composition-kernel.mjs
+bash scripts/node.sh --test test/composition.test.js
+```
+
+Read [the composition-kernel guide](composition-kernel.md) for the graph schema,
+handle/command APIs, identity tokens, injected validators, and deletion rules.
+The example prints checked graph/history results; it does not render a scene.
+The astronomy browser and its HTTP/CLI below still use the earlier exoplanet `World` API.
+Their migration belongs to F12, after the generic infrastructure is ready.
+
+F02 adds scientific values, explicit input/output ports, arithmetic, field
+selection, per-object mapping/reduction, fixed/live membership, and synchronous
+evaluation tagged with project identity. Run its checked example:
+
+```sh
+bash scripts/node.sh examples/scientific-dataflow.mjs
+bash scripts/node.sh --test test/dataflow.test.js test/values.test.js
+```
+
+The [scientific-dataflow guide](scientific-dataflow.md) documents units, frames,
+normalization, physical time, coordinate alignment, calculation handles, trusted
+fixture injection and result diagnostics. F04 supplies worker scheduling and
+F05 maps these scientific results into a generic 3D scene.
+
+F03 adds trusted extension registration, data-only discovery, exact version/build
+requirements, declared parameter/port contracts, and a reference-case harness:
+
+```sh
+bash scripts/node.sh examples/extension-registry.mjs
+bash scripts/node.sh --test test/registry-contracts.test.js test/registry.test.js
+```
+
+The [extension-registry guide](extension-registry.md) separates the developer
+registration workflow from ordinary authoring with installed definitions. The
+example runs four real extensions and produces checked geometry/view data.
+The F05 example below uses registered scene formats and a browser renderer.
+
+F04 runs analytic and stateful scientific jobs in disposable Node workers, with
+progress, cancellation, deadlines, checked checkpoint/resume and reset/replay for
+backward seeks:
+
+```sh
+bash scripts/node.sh examples/computation-runtime.mjs
+bash scripts/node.sh --test test/runtime.test.js test/runtime-registry.test.js test/runtime-edge.test.js
+```
+
+The [runtime guide](computation-runtime.md) documents trusted worker setup,
+lifecycle callbacks, numerical settings, requested/achieved physical times,
+checkpoint identity and resource limits. The example compares analytic and
+stepped accumulators and resumes a seeded generator from its full state.
+These are software fixtures, not physical models. The F05 scene host uses this
+runtime; the existing astronomy demo remains on its earlier evaluation path.
+
+## Open the generic scene laboratory
+
+F05 supplies authorable groups, cameras, geometry, materials, local textures,
+instanced points, polylines, arrows, labels, and explicit scientific bindings.
+Its [public recipe](../examples/scene-and-assets.mjs) assembles moving-point
+collections and static scalar/vector fields without an astronomy package.
+
+Use **Node.js 20 or later**, pnpm, and a **WebGL2-capable browser**. Install the
+pinned Three.js dependency, run the checked recipe, then start the local stage:
+
+```sh
+pnpm install --frozen-lockfile --ignore-scripts
+node examples/scene-and-assets.mjs
+node scripts/scene-server.mjs --port 4325
+```
+
+Open **http://127.0.0.1:4325**. Left drag orbits the presentation camera, right drag
+pans, and the wheel zooms. Click an object to select its stable scene/source ID.
+The fixture stage supports perspective/orthographic views, physical-time sampling,
+and checked instance/appearance edits. Stop the server with Ctrl+C. On the original
+workstation, `bash scripts/node.sh` can replace `node` and find the bundled runtime;
+`COSMIC_LEGO_NODE` selects an explicit executable.
+
+Scientific evaluation runs in the Node host's F04 workers. The browser consumes
+checked snapshots; its render loop and camera motion do not advance physics.
+Dependencies are served locally after installation. See the [scene guide](scene-and-assets.md)
+for authoring, units/frame/color mappings, asset provenance and renderer APIs, and
+the [F05 handoff](handoffs/F05.md) for checks and limitations.
+
+This is the F05 fixture host. F06 is next for the full application shell and
+movable, foldable windows; F07/F08 will add the shared command gateway and in-app
+agent sessions. The scene host's limited edit endpoints do not supply those APIs.
+
+## Open the existing astronomy demo
 
 Requires **Node.js 20 or later** and a modern browser:
 
@@ -164,20 +259,26 @@ bash scripts/node.sh --test
 ```
 
 The numerical, composition, SDK, and transport checks are separate from visual and
-pedagogical review. The current viewer is intentionally limited: custom derived
-plots/equation overlays, saved authoring snapshots, richer explanation timelines,
+pedagogical review. F01–F05 are implemented; F06 is the next application task.
+Movable plots/equation overlays, portable project archives, authored timelines,
 and deterministic video export remain open work. New model packs need their own
 physical contracts and verification; more presets alone do not supply that
 capability.
 
 ```text
-src/sdk.js          public World and semantic handles
-src/contract.js     discoverable tools and structural rules
-src/scene.js        composition, operations and shared evaluation
-src/physics.js      Kepler motion and composite shadow geometry
-src/app.js          interactive presentation
-src/server.js       local HTTP transport
-examples/          authored SDK worlds
+src/core/          domain-independent graph, drafts, transactions and undo/redo
+src/dataflow/      scientific values, ports, calculations and synchronous evaluation
+src/registry/      manifests, trusted registration, pinned requirements and contract tests
+src/runtime/       analytic/stateful workers, cancellation, checkpoints and budgets
+src/scene/         generic scene/asset graph, scientific bindings and Three adapter
+demo/scene/        generic fixture stage served by scripts/scene-server.mjs
+src/sdk.js         existing astronomy World and semantic handles
+src/contract.js    existing astronomy tools and structural rules
+src/scene.js       existing astronomy composition and shared evaluation
+src/physics.js     Kepler motion and composite shadow geometry
+src/app.js         existing astronomy presentation
+src/server.js      existing astronomy HTTP transport
+examples/          generic foundation examples and authored astronomy worlds
 experiments/       independent author recipes and reports
 docs/              contracts, decisions and verification record
 ```
