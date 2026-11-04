@@ -4,9 +4,9 @@
 
 **Reusable scientific building blocks for interactive astronomy visualizations.**
 
-When two planets cross the face of a star, how much light do they block? At astronomical distances we often have a light curve and cannot see either shadow. In Cosmic Lego you can move an observer, follow each planet, and compare the shadows on the stellar disk with the signal that observer would measure.
+Cosmic Lego aims to let students, teachers, and creators work with their own LLM agents to assemble stars, planets, gas, light, and observers into interactive visualizations. They should be able to add objects, change physical relationships, choose what to measure, and build views that make the consequences visible.
 
-Cosmic Lego aims to let students, teachers, and creators assemble stars, planets, gas, light, and observers with their own agents. The first installed astronomy package supplies independent Kepler orbits and transit photometry. The other astronomy questions below guide future model development. A saved study can be explored and replayed locally without connecting an agent.
+We supply reusable physics and visualization tools; an agent helps a person put them together. The result should remain explorable, inspectable, and editable. This document describes our purpose and intended capabilities, not a catalogue of delivered features.
 
 ![The astronomy learning map in its default 3D cluster view.](assets/roadmap-3d.png)
 
