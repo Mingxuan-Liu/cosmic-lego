@@ -2,17 +2,19 @@
 
 ## What makes a topic foundational?
 
-A large star marks an idea that helps a student understand many other topics on this map. For example, the size and period of an orbit help us weigh the stars in a binary system. Each learning link names two phenomena and explains how the first helps answer the question posed by the second. The links are editorial choices that can be reviewed individually. The ranking is calculated from those choices. [Learning links and scoring code](../packages/atlas/foundations.mjs) · [Measuring stellar masses, OpenStax Astronomy 2e](https://openstax.org/books/astronomy-2e/pages/18-2-measuring-stellar-masses)
+A large star marks an idea that helps a student understand many other topics on this map. For example, the size and period of an orbit help us weigh the stars in a binary system. Each learning link names two topics and explains how the first helps answer the question posed by the second. The links are editorial choices that can be reviewed individually. The ranking is calculated from those choices. [Learning links and scoring code](../packages/atlas/foundations.mjs) · [Measuring stellar masses, OpenStax Astronomy 2e](https://openstax.org/books/astronomy-2e/pages/18-2-measuring-stellar-masses)
 
 For each topic, count every other topic reachable from it once. A topic one step away contributes one point, a topic two steps away contributes half a point, and a topic three steps away contributes a third. In general, the contribution is the reciprocal of the shortest directed path length. This is outgoing harmonic centrality. A topic at the end of a learning path can make a good destination for a lesson even when its score is zero.
 
-The 104 phenomena are ranked among themselves. To compare the 29 domains, consider paths from a phenomenon in one domain to a phenomenon in another. Each distinct destination domain contributes once, using its shortest actual phenomenon path. Simply sharing a domain with another phenomenon does not create a learning step. The current 129 learning links give *Light & color* paths into 19 other domains, nine of them direct. *Orbital free fall* reaches 34 other phenomena, seven of them directly.
+The 104 phenomena and 17 techniques are ranked together. Their 35 topic groups form a separate ranking. To compare two groups, follow a learning path between individual topics in those groups. Each destination group counts once, at the shortest such distance. Among the current 164 links, *Light & color* reaches 24 other groups, twelve directly. *Orbital free fall* reaches 36 individual topics, eight directly.
+
+A technique earns a learning link when it helps answer a particular question. For example, measuring how much starlight disappears during a transit connects *Photometry* to *Planetary transits*. The link goes from technique to application for scoring. Students can follow it in either direction in the map. [Technique questions, sources and applications](../packages/atlas/techniques.mjs)
 
 **Why this star is this size** shows the score, its rank among peers and examples of the teaching links. The roadmap's scientific references, shared diagrams and study availability are independent of the calculation. The [regression tests](../test/atlas-foundations.test.js) independently recompute the shortest paths and domain scores.
 
 ## Background reading and coverage
 
-The scientific crosswalk maps these learner questions to the printed sections of Carroll and Ostlie’s *An Introduction to Modern Astrophysics*, second edition. A section's pages are divided equally among the phenomena mapped to it. Contributions total 1,274 pages across the full roadmap. This separate ledger records the breadth of the reference material. [Roadmap and crosswalk](../packages/atlas/roadmap.mjs) · [Cambridge contents](https://assets.cambridge.org/97811084/22161/toc/9781108422161_toc.pdf)
+The scientific crosswalk maps the original 104 phenomena to the printed sections of Carroll and Ostlie’s *An Introduction to Modern Astrophysics*, second edition. A section's pages are divided equally among the phenomena mapped to it. Contributions total 1,274 pages across the full roadmap. Observing and simulation techniques have their own sources, linked from each technique. They receive no allocation from this book. This separate ledger records the breadth of the reference material. [Roadmap and crosswalk](../packages/atlas/roadmap.mjs) · [Cambridge contents](https://assets.cambridge.org/97811084/22161/toc/9781108422161_toc.pdf)
 
 ## Reference ledger audit
 
@@ -62,7 +64,7 @@ Expected output is 119 pairs with SHA-256 `a48a10dc78b5a3be78efa0e57f88cf4d663a7
 
 ## The two map views
 
-Domains and phenomena both use rank within their own level. Equal scores share the same percentile and radial distance. Rescale the observed percentile range to a fraction `q` between 0 and 1. At a common viewing distance, the disk radius is proportional to `2 × 9^q`, so the largest star spans nine times the diameter of the smallest. For the center of mass, each star carries its foundation score plus one. This gives topics with zero outgoing reach some mass as well.
+Groups have their own ranking. Individual phenomena and techniques are ranked together. Equal scores share the same percentile and radial distance. Rescale the observed percentile range to a fraction `q` between 0 and 1. At a common viewing distance, the disk radius is proportional to `2 × 9^q`, so the largest star spans nine times the diameter of the smallest. For the center of mass, each star carries its foundation score plus one. This gives topics with zero outgoing reach some mass as well.
 
 Pan and zoom over the plane in 2D, or orbit the cluster in 3D. Each camera keeps its own pose. A text search highlights matching stars and dims the other stars in the current field, domain and study-status filters. The table lists matching rows. All views preserve the full-map scores and positions.
 
@@ -70,4 +72,4 @@ Pan and zoom over the plane in 2D, or orbit the cluster in 3D. Each camera keeps
 
 A dashed line means the same diagram can help a student think through either topic. For example, an orbital path can help explain both the time a planet takes to circle its star and the moments when a transit occurs. Select the line for a question to ask about that diagram and a route into either topic. The overview limits the number of lines drawn per star. Searching and selecting can reveal additional connections.
 
-To maintain the map, editors record specific uses of visual templates and their evidence. A domain inherits the uses documented for its phenomena. Each study that is available to students also has a working player destination. [Visual catalog](../packages/atlas/reuse.mjs) · [Topic connections and diagram prompts](../packages/atlas/roadmap-assets.mjs)
+To maintain the map, editors record specific uses of visual templates and their evidence. A group inherits the uses documented for its phenomena or techniques. A technique’s applications are a separate set of links. Each one explains how an observation or model helps answer a specific question. These applications can be followed in either direction in the topic panel. Each study that is available to students also has a working player destination. [Visual catalog](../packages/atlas/reuse.mjs) · [Topic connections and diagram prompts](../packages/atlas/roadmap-assets.mjs)

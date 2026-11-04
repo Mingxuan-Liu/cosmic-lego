@@ -199,6 +199,15 @@ const catalog = [
       proposed('5.3', 'Compare energy levels in a hydrogenic model.'),
       proposed('8.1', 'Identify the stellar absorption-line transition before adding population and atmosphere calculations.'),
     ]),
+  // These templates are assigned through externally sourced roadmap topics.
+  design('two-beam-interference', 'Relative phase and interference',
+    'Show two equal-frequency electric-field traces, their relative phase, and the change in the time-averaged combined intensity or correlation as the phase varies.',
+    'Coherent narrowband components of common polarization, relative phase in radians, amplitudes, coherence, delay and the named readout. Label the source of each wave.',
+    'A single pair samples one projected baseline in a telescope array. In a laser detector, the arm delay changes the local laser phase. Inferring an image or calibrated gravitational-wave strain requires the instrument response.', []),
+  design('solar-recoil-angle', 'Solar recoil direction distribution',
+    'Bin selected events in the cosine of the angle between the reconstructed recoil electron and the direction from the Sun to the detector. Compare counts with a background expectation.',
+    'Event times, reconstructed unit directions, solar direction in the same frame, energy selection, bin edges, event counts and background with its normalization.',
+    'An electron direction carries scattering spread and detector uncertainty. The forward excess identifies a solar contribution statistically across events.', []),
 ];
 
 function freeze(data) {

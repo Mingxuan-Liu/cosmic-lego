@@ -68,3 +68,20 @@ test('domains never borrow a learning path from an unrelated sibling', () => {
   assert.throws(() => buildFoundations(phenomena,domains,[...links,edge('B1','A1')]),/Circular/);
   assert.throws(() => buildFoundations(phenomena,domains,[...links,links[0]]),/Duplicate/);
 });
+
+test('techniques enter the same foundation ranking through sourced steps to and from the ideas they teach', () => {
+  const links = new Map(learningLinks.map(link => [link.from + '/' + link.to,link]));
+  for (const n of roadmap.phenomena.filter(n => n.kind === 'technique')) {
+    const score = foundationFor(n.id);
+    assert.ok(score.score >= n.applications.length);
+    assert.equal(score.peerCount, roadmap.phenomena.length);
+    for (const {id,reason} of n.applications) {
+      assert.deepEqual(links.get(n.id+'/'+id), {from:n.id,to:id,reason,source:n.source.url});
+      assert.ok(foundationFor(id).prerequisiteIds.includes(n.id));
+    }
+    for (const {id,reason} of n.prerequisites) {
+      assert.deepEqual(links.get(id+'/'+n.id), {from:id,to:n.id,reason,source:n.source.url});
+      assert.ok(score.prerequisiteIds.includes(id));
+    }
+  }
+});

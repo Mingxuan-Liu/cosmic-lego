@@ -142,6 +142,10 @@ export const learningLinks = [
   ['dark-matter', 'galaxy-clusters', 'Dark matter contributes much of the gravitational field that binds a galaxy cluster.'],
   ['dark-matter', 'cosmic-filaments', 'Dark matter can amplify initial density differences gravitationally, helping build filaments and voids.'],
   ['cosmic-filaments', 'galaxy-assembly', 'Filaments guide material into the dense regions where galaxies grow.'],
+  ...roadmap.phenomena.filter(n => n.kind === 'technique').flatMap(n => [
+    ...n.prerequisites.map(({ id, reason }) => [id, n.id, reason, n.source.url]),
+    ...n.applications.map(({ id, reason }) => [n.id, id, reason, n.source.url]),
+  ]),
 ].map(([from, to, reason, source]) => Object.freeze({ from, to, reason, ...(source && { source }) }));
 Object.freeze(learningLinks);
 

@@ -16,7 +16,7 @@ const { chromium } = await import(process.env.COSMIC_LEGO_PLAYWRIGHT ?? 'playwri
 const output = fileURLToPath(new URL('../.local/atlas-qa/', import.meta.url));
 await mkdir(output, { recursive: true });
 const projectDirectory = await mkdtemp(join(tmpdir(), 'cosmic-atlas-check-'));
-const report = { checks: [], errors: [], screenshots: [] };
+const report = { checks: [], errors: [], screenshots: [], openingViews: [] };
 let app, browser;
 async function check(label, run) {
   await run();
@@ -68,6 +68,8 @@ async function checkOpeningCluster(page, minLabels) {
     'Star centers should span at least 65% of each canvas dimension.');
   const names = new Set(roadmap.domains.map(n=>n.label));
   const shown = labels.filter(r=>names.has(r.name));
+  report.openingViews.push({ viewport: page.viewportSize(), stars: stars.length, labeled: shown.length,
+    widthShare: span('x')/width, heightShare: span('y')/height });
   assert.ok(shown.length >= minLabels,'Only '+shown.length+' topic names were drawn.');
   for (const [i,r] of shown.entries()) {
     assert.ok(r.left >= 0 && r.top >= 0 && r.right <= width && r.bottom <= height,r.name+' was clipped.');
@@ -322,6 +324,55 @@ try {
     assert.notEqual(await rows.first().locator('button').innerText(),first);
     await page.locator('#availability').selectOption('available');
     assert.ok(await page.locator('[data-topic-id="planetary-transits"]').isVisible());
+    await resetSearch(page);
+  });
+  await check('Students can find observing and simulation techniques by name and abbreviation in the directory.', async () => {
+    await page.locator('#level').selectOption('phenomenon');
+    for (const [field,query,id] of [
+      ['observation','interferometry','interferometry'],
+      ['observation','gravitational waves','gravitational-wave-detection'],
+      ['observation','neutrino','neutrino-detection'],
+      ['simulation','MHD','mhd-simulations'],
+      ['simulation','N-body','n-body-simulations']
+    ]) {
+      await page.locator('#category').selectOption(field);
+      await page.locator('#query').fill(query);
+      assert.ok(await page.locator('[data-topic-id="'+id+'"]').isVisible(),query+' should find '+id);
+    }
+    await resetSearch(page);
+  });
+  await check('A student can move from each method family to a phenomenon it studies and back to the technique.', async () => {
+    for (const [view,techniqueId,phenomenonId] of [
+      ['graph-mode','neutrino-detection','solar-neutrinos'],
+      ['plan-mode','mhd-simulations','accretion-disks']
+    ]) {
+      const technique = roadmap.phenomena.find(n=>n.id===techniqueId);
+      const domain = roadmap.domains.find(n=>n.id===technique.parentId);
+      const phenomenon = roadmap.phenomena.find(n=>n.id===phenomenonId);
+      await page.locator('#level').selectOption('domain');
+      await page.locator('#category').selectOption(technique.partId);
+      await page.locator('#query').fill(technique.label);
+      assert.match(await count(),/^1 of /);
+      await page.locator('#'+view).click();
+      await canvas.focus(); await page.keyboard.press('Enter');
+      assert.equal(await page.locator('#detail-title').innerText(),domain.label);
+      await page.locator('[data-phenomenon-id="'+techniqueId+'"]').click();
+      assert.equal(await page.locator('#detail-title').innerText(),technique.label);
+      assert.match(await page.locator('#detail-type').innerText(),/technique/i);
+      assert.ok(await page.locator('#detail .status-badge',{hasText:/planned/i}).isVisible());
+      assert.equal(await page.locator('.study-launch').count(),0);
+      assert.equal(await page.locator('[data-technique-source]').getAttribute('href'),technique.source.url);
+      const reason = technique.applications.find(link=>link.id===phenomenonId).reason;
+      assert.ok((await page.locator('#detail-links').innerText()).includes(reason));
+      await page.locator('[data-application-id="'+phenomenonId+'"]').click();
+      assert.equal(await page.locator('#detail-title').innerText(),phenomenon.label);
+      assert.ok((await page.locator('#detail-links').innerText()).includes(reason));
+      await page.locator('[data-technique-id="'+techniqueId+'"]').click();
+      assert.equal(await page.locator('#detail-title').innerText(),technique.label);
+      await page.locator('#table-mode').click();
+      assert.ok(await page.locator('[data-topic-id="'+techniqueId+'"]').isVisible());
+      await page.locator('#detail-close').click();
+    }
     await resetSearch(page);
   });
   await check('Search spotlights matching stars while keeping the surrounding stars visible at their original positions in 2D and 3D.', async () => {

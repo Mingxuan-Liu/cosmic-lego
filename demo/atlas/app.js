@@ -18,7 +18,7 @@ function button(label, click) {
   el.addEventListener('click', click)
   return el
 }
-const palette = ['#F0CA86','#93CCDB','#B7A3DE','#8DC9AD']
+const palette = ['#F0CA86','#93CCDB','#B7A3DE','#8DC9AD','#F3A18D','#9CADEB']
 const fields = new Map(roadmap.families.map((field,i) => [field.id,{ ...field, color: palette[i] }]))
 const templates = new Map(assetTemplates.map(a => [a.id,a]))
 const levels = {}
@@ -28,7 +28,14 @@ for (const [level,topics] of [['domain',roadmap.domains],['phenomenon',roadmap.p
 }
 const byId = new Map(Object.values(levels).flatMap(l => l.nodes.map(n => [n.id,n])))
 const childrenOf = id => roadmap.phenomena.filter(n => n.parentId === id)
-const fold = value => value.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[–—−-]/g,' ').replace(/&/g,' and ').replace(/\s+/g,' ').trim()
+const techniquesByTarget = new Map()
+for (const technique of roadmap.phenomena) {
+  for (const {id,reason} of technique.applications ?? []) {
+    if (!techniquesByTarget.has(id)) techniquesByTarget.set(id,[])
+    techniquesByTarget.get(id).push({id:technique.id,reason})
+  }
+}
+const fold = value => value.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[‐‑‒–—−-]/g,' ').replace(/&/g,' and ').replace(/\s+/g,' ').trim()
 const searchIndex = new Map()
 for (const n of byId.values()) {
   const assets = visualsFor(n.id).flatMap(a => [diagramFor(a.assetId).label,templates.get(a.assetId).label])
@@ -54,7 +61,7 @@ $('graph-panel').append(live)
 let mode = document.documentElement.dataset.projection, level = 'domain', scope = null
 let selected = null, selectedEdge = null, visible = [], links = [], degree = new Map()
 let sortKey = 'rank', descending = false
-const plural = { domain:'domains', phenomenon:'phenomena' }
+const plural = { domain:'domains', phenomenon:'topics' }
 const cluster = createCluster($('atlas-canvas'),{
   onNode: showTopic, onEdge: showEdge,
   onZoom: z => { $('zoom-level').textContent = Math.round(z*100)+'%' },
@@ -70,7 +77,7 @@ function setView(next) {
   if (mode === 'table') drawTable()
   else {
     document.documentElement.dataset.projection = mode
-    $('atlas-canvas').setAttribute('aria-label',mode === '2d' ? '2D phenomenon roadmap' : '3D phenomenon cluster')
+    $('atlas-canvas').setAttribute('aria-label',mode === '2d' ? '2D astronomy roadmap' : '3D astronomy cluster')
     cluster.setProjection(mode)
     cluster.redraw()
   }
@@ -113,8 +120,10 @@ function refresh() {
   }
   $('scope-chip').hidden = !scope
   if (scope) $('scope-label').textContent = byId.get(scope).label
-  const denominator = terms.length ? inScope.length : data.nodes.length
-  const count = visible.length+' of '+denominator+' '+plural[level]
+  const techniquesOnly = level === 'phenomenon' && inScope.length > 0 && inScope.every(n => n.kind === 'technique')
+  const peers = techniquesOnly ? data.nodes.filter(n => n.kind === 'technique') : data.nodes
+  const denominator = terms.length ? inScope.length : peers.length
+  const count = visible.length+' of '+denominator+' '+(techniquesOnly ? 'techniques' : plural[level])
   $('result-count').textContent = terms.length ? count+' · search results' :
     count+' · '+links.length+' diagram '+(links.length===1?'connection':'connections')
   cluster.setData(inScope,overview,links,terms.length ? ids : null)
@@ -124,7 +133,7 @@ function refresh() {
   if (mode === 'table') drawTable()
 }
 function badge(n) {
-  const status = element('span',n.availability === 'available' ? (n.level === 'domain' ? 'Study available' : 'Available now') : 'Planned')
+  const status = element('span',n.availability === 'available' ? (n.level === 'domain' ? 'Study available' : 'Available now') : 'Study planned')
   status.className = 'status-badge'
   status.dataset.status = n.availability
   return status
@@ -223,7 +232,8 @@ function scoreNote(n) {
   note.className = 'asset-note score-note'
   note.append(element('summary','Why this star is this size'))
   const direct = n.directIds.length, total = n.reachableIds.length
-  const description = total ? 'On this map, '+n.label+' helps explain '+direct+' other '+(direct===1?n.level:plural[n.level])+' directly'+
+  const unit = n.level === 'domain' ? 'domain' : 'topic'
+  const description = total ? 'On this map, '+n.label+' helps explain '+direct+' other '+(direct===1?unit:plural[n.level])+' directly'+
     (direct < total ? ' and '+(total-direct)+' more through those ideas.' : '.') :
     'This is a destination on the learning paths mapped so far.'
   note.append(element('p',description),element('p','Each topic reached counts once. A direct step adds 1 point, two steps add ½, and three steps add ⅓. '+
@@ -231,7 +241,7 @@ function scoreNote(n) {
   for (const example of n.examples.slice(0,2)) {
     const explanation = element('p',byId.get(example.from).label+' → '+byId.get(example.to).label+'. '+example.reason)
     if (example.source) {
-      const reading = element('a','Read more in OpenStax Astronomy')
+      const reading = element('a','Read the source')
       reading.href = example.source
       explanation.append(' ',reading)
     }
@@ -245,14 +255,19 @@ function relatedButton(id) {
   return link
 }
 function learningPath(target,n) {
-  const next = n.directIds.length ? n.directIds : n.prerequisiteIds
+  const featured = new Set([...(n.applications ?? []),...(techniquesByTarget.get(n.id) ?? [])].map(link => link.id))
+  const forward = n.directIds.filter(id => !featured.has(id))
+  const next = forward.length ? forward : n.prerequisiteIds.filter(id => !featured.has(id))
   if (!next.length) return
-  target.append(element('h3',n.directIds.length ? 'Build on this idea' : 'Ideas to start with'))
+  target.append(element('h3',forward.length ? 'Build on this idea' : 'Ideas to start with'))
   for (const id of next.slice(0,3)) target.append(relatedButton(id))
 }
 function renderTopic(n) {
   const domain = n.level === 'domain', children = domain ? childrenOf(n.id) : []
-  header(domain ? fields.get(n.partId).label+' · Domain' : byId.get(n.parentId).label+' · Phenomenon',n.label,n.question)
+  const technique = n.kind === 'technique'
+  const group = domain ? fields.get(n.partId) : byId.get(n.parentId)
+  const type = domain ? (technique ? 'Technique group' : 'Domain') : (technique ? 'Technique' : 'Phenomenon')
+  header(group.label+' · '+type,n.label,n.question)
   const meta = $('detail-meta'), target = $('detail-links')
   if (n.insight) {
     const insight = element('p',n.insight)
@@ -261,10 +276,10 @@ function renderTopic(n) {
   }
   meta.append(badge(n))
   if (domain) {
-    const explore = button('Explore '+children.length+' phenomena →',() => enterDomain(n))
+    const explore = button('Explore '+children.length+(technique?' techniques':' phenomena')+' →',() => enterDomain(n))
     explore.id = 'explore-domain'
     explore.className = 'roadmap-action'
-    target.append(explore,element('h3','Choose a phenomenon'))
+    target.append(explore,element('h3',technique?'Choose a technique':'Choose a phenomenon'))
     for (const child of children) {
       const pick = button(child.label,()=>enterDomain(n,child))
       pick.dataset.phenomenonId = child.id
@@ -277,6 +292,22 @@ function renderTopic(n) {
     launch.className = 'roadmap-action study-launch'
     launch.href = n.launch.href
     target.append(launch)
+  }
+  const applications = n.applications ?? []
+  const methods = techniquesByTarget.get(n.id) ?? []
+  if (applications.length || methods.length) {
+    target.append(element('h3',technique?'What can you study with it?':'How can we study this?'))
+    for (const {id,reason} of [...applications,...methods]) {
+      const link = relatedButton(id)
+      link.dataset[technique?'applicationId':'techniqueId'] = id
+      target.append(link,element('p',reason))
+    }
+  }
+  if (n.source) {
+    const reading = element('a',n.source.label+' ↗')
+    reading.href = n.source.url
+    reading.dataset.techniqueSource = ''
+    target.append(element('h3','Go deeper'),reading)
   }
   learningPath(target,n)
   target.append(scoreNote(n))

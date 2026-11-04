@@ -6,7 +6,7 @@
 
 When two planets cross the face of a star, how much light do they block? At astronomical distances we often have a light curve and cannot see either shadow. In Cosmic Lego you can move an observer, follow each planet, and compare the shadows on the stellar disk with the signal that observer would measure.
 
-The **astronomy learning map** opens as a 3D star cluster. Pick *Light & color* to see what starlight can tell you, or search for *Moon phases* to explore why the Moon changes shape. Larger stars mark ideas that help explain more topics. Follow a dashed line to see how the same diagram helps explain two topics. You can rotate the 3D cluster, pan across the 2D map, or browse the same topics in a table. Choose **Planetary transits** to try the playable study. [Launch the map](docs/getting-started.md) · [How the stars are sized](docs/atlas-sources.md)
+The **astronomy learning map** opens as a 3D star cluster. Explore an object or a phenomenon, or choose **Observation** or **Simulations** in the Field menu to find a way to study it. For example, start with *Solar neutrinos* to see how a detector can tell us about the Sun’s core. Larger stars mark ideas that help explain more topics. Follow a dashed line to see how the same diagram helps explain two topics. You can rotate the 3D cluster, pan across the 2D map, or browse the same topics in a table. Choose **Planetary transits** to try the playable study. [Launch the map](docs/getting-started.md) · [How the stars are sized](docs/atlas-sources.md)
 
 ![The astronomy learning map in 3D cluster view. Light & color sits near the center, and dashed lines connect topics you can explore with the same diagram.](docs/evidence/roadmap-3d.png)
 

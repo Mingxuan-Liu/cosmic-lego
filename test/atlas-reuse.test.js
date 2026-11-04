@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import { observingDiagramUses } from '../packages/atlas/techniques.mjs';
 import { coverage } from '../packages/atlas/coverage.mjs';
 import { assetTemplates, assetsForTopic, buildReuseGraph, topicAssetUses } from '../packages/atlas/reuse.mjs';
 import { buildExample as makeSkyStudy } from '../packages/exoplanet/recipe.mjs';
@@ -18,7 +19,10 @@ test('cited recipes and template specifications resolve to local evidence', asyn
   for (const asset of assetTemplates) {
     assert.ok(asset.inputContract && asset.limits && asset.summary);
     const uses = topicAssetUses.filter(use => use.assetId === asset.id);
-    assert.ok(uses.length >= 2);
+    // A specification can be reused by book topics or by sourced methods.
+    const directUses = observingDiagramUses.filter(use => use.assetId === asset.id);
+    assert.ok(uses.length + directUses.length >= 2, asset.id);
+    for (const use of directUses) assert.ok(use.rationale && new URL(use.source.url).protocol === 'https:');
     assert.equal(new Set(uses.map(use => use.topicId)).size, uses.length);
     for (const use of uses) {
       assert.ok(sections.has(use.topicId) && use.rationale);

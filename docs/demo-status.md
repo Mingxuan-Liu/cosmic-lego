@@ -5,7 +5,7 @@ educational application.
 
 ## Phenomenon roadmap — 2026-11-04
 
-The home page opens on a rotatable 3D cluster, with a flat overview and a table available for the same 29 domains and 104 phenomena. Star sizes are calculated from 129 directed learning links. Search highlights matching stars in both maps and filters the table. Dashed lines connect topics that share a useful diagram. The installed transit study has a dedicated read-only player. The remaining study designs have planned status. [Roadmap and controls](getting-started.md) · [Sources and scores](atlas-sources.md)
+The home page opens on a rotatable 3D cluster, with a flat overview and a table available for the same 35 topic groups. Four science fields cover 104 phenomena. Two more fields, Observation and Simulations, introduce 17 techniques with source readings and links to their applications. Star sizes are calculated from 164 directed learning links. Search highlights matching stars in both maps and filters the table. Dashed lines connect topics that share a useful diagram. The installed transit study has a dedicated read-only player. The remaining study designs have planned status. [Roadmap and controls](getting-started.md) · [Sources and scores](atlas-sources.md)
 
 ## Playback performance and black planetarium HUD — 2026-11-04
 

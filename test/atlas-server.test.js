@@ -18,7 +18,7 @@ test('astronomy host serves the atlas home, its module allowlist, and the separa
     assert.match(home, /<html\b[^>]*data-projection="3d"/, 'Serve the 3D view before JavaScript initializes.');
     assert.equal(await atlas.text(), home);
     assert.match(await (await fetch(host.url + '/workspace/')).text(), /id="overlays"/);
-    for (const file of ['app.js', 'cluster.js', 'layout.js', 'orbit.js', 'coverage.mjs', 'reuse.mjs', 'roadmap.mjs', 'roadmap-assets.mjs', 'foundations.mjs', 'style.css']) {
+    for (const file of ['app.js', 'cluster.js', 'layout.js', 'orbit.js', 'coverage.mjs', 'reuse.mjs', 'roadmap.mjs', 'roadmap-assets.mjs', 'foundations.mjs', 'techniques.mjs', 'style.css']) {
       const asset = await fetch(host.url + '/atlas/' + file);
       assert.equal(asset.status, 200, file);
       assert.match(asset.headers.get('content-type'), file.endsWith('.css') ? /^text\/css/ : /^text\/javascript/);
@@ -36,7 +36,7 @@ test('generic workspace keeps its original home and serves no astronomy atlas as
   const host = await startSceneServer({ workspace: true, port: 0, projectDirectory: directory });
   try {
     assert.match(await (await fetch(host.url + '/')).text(), /id="overlays"/);
-    for (const url of ['/atlas/', '/atlas/reuse.mjs', '/atlas/layout.js', '/atlas/orbit.js', '/atlas/roadmap.mjs', '/atlas/foundations.mjs', '/studies/planetary-transits/']) assert.equal((await fetch(host.url + url)).status, 404);
+    for (const url of ['/atlas/', '/atlas/reuse.mjs', '/atlas/layout.js', '/atlas/orbit.js', '/atlas/roadmap.mjs', '/atlas/foundations.mjs', '/atlas/techniques.mjs', '/studies/planetary-transits/']) assert.equal((await fetch(host.url + url)).status, 404);
   } finally {
     await host.close(); await rm(directory, { recursive: true, force: true });
   }

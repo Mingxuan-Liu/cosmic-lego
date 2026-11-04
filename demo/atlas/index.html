@@ -27,18 +27,19 @@
       <div>
         <div class="eyebrow guide-kicker"><i aria-hidden="true"></i> Learning map</div>
         <h1>Explore astronomy</h1>
-        <p>Pick a star to explore a question, from why the Moon has phases to how stars shine.</p>
+        <p>Pick a star to explore a phenomenon, the observations that reveal it, or a simulation that helps explain it.</p>
       </div>
       <details id="method" class="method">
         <summary><span class="info-mark" aria-hidden="true">i</span> How to read the map</summary>
         <div class="method-copy">
           <h2>What can I explore?</h2>
-          <p>Each star is a topic or a phenomenon. Select one to see a question, read a short explanation, and open an interactive study where one is available.</p>
+          <p>Start with a phenomenon to find ways to study it. Or choose Observation or Simulations in the Field menu, pick a technique, and follow it to an astronomy question. Some topics also have an interactive study.</p>
           <h3>What makes a star large?</h3>
           <p id="method-rank">Ideas that help explain more of the map have larger stars closer to the center. An idea gets more credit for topics that build directly on it than for topics several steps away.</p>
           <h3>Where does a line lead?</h3>
           <p id="method-edges">Follow a dashed line to see how the same diagram can help explain two topics. Select the line to compare them.</p>
           <h3>Further reading</h3>
+          <p>Technique pages link to the observatories and researchers who explain how the methods work. For background on the astronomy topics, see the textbook below.</p>
           <a id="method-source" href="https://assets.cambridge.org/97811084/22161/toc/9781108422161_toc.pdf">Carroll &amp; Ostlie, <cite>An Introduction to Modern Astrophysics</cite> <span aria-hidden="true">↗</span></a>
         </div>
       </details>
@@ -52,13 +53,13 @@
       </div>
       <label class="query-field">
         <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8" cy="8" r="5.3"></circle><path d="m12 12 4.5 4.5"></path></svg>
-        <span class="sr-only">Search topics, questions, and diagrams</span>
+        <span class="sr-only">Search topics, techniques, questions, and diagrams</span>
         <input id="query" type="search" autocomplete="off" placeholder="Find a topic…" aria-describedby="search-hint">
       </label>
       <span class="sr-only" id="search-hint">Matching stars stay bright. Other stars fade so you can still see where they are.</span>
       <div class="map-filters">
         <label class="select-field"><span>Show</span>
-          <select id="level"><option value="domain">Topic groups</option><option value="phenomenon">Phenomena</option></select>
+          <select id="level"><option value="domain">Topic groups</option><option value="phenomenon">Topics &amp; techniques</option></select>
         </label>
         <label class="select-field field-filter"><span>Field</span>
           <select id="category"><option value="">All fields</option></select>
@@ -73,7 +74,7 @@
     <div class="atlas-body" id="atlas-body">
       <section class="chart-panel" id="graph-panel" aria-label="Interactive astronomy roadmap">
         <div class="canvas-frame">
-          <canvas id="atlas-canvas" tabindex="0" aria-label="3D phenomenon cluster" aria-describedby="chart-gestures chart-keys">Browse the same topics using Table.</canvas>
+          <canvas id="atlas-canvas" tabindex="0" aria-label="3D astronomy cluster" aria-describedby="chart-gestures chart-keys">Browse the same topics using Table.</canvas>
           <div class="chart-register" aria-hidden="true"><span class="for-flat">2D overview</span><span class="for-cluster">3D cluster</span></div>
           <span class="register-cross" aria-hidden="true"></span>
           <div id="graph-empty" class="empty-state" hidden>
@@ -108,7 +109,7 @@
 
       <section id="table-panel" class="table-panel" aria-label="Roadmap table" hidden>
         <div class="table-scroll" tabindex="0" aria-label="Scrollable topic table">
-          <table id="atlas-table" role="table"><caption class="sr-only">Astronomy domains and phenomena</caption><thead id="table-head"></thead><tbody id="table-body"></tbody></table>
+          <table id="atlas-table" role="table"><caption class="sr-only">Astronomy domains, phenomena and techniques</caption><thead id="table-head"></thead><tbody id="table-body"></tbody></table>
         </div>
         <div id="table-empty" class="empty-state" hidden><h2>No matching topics</h2><p>Try another word or reset your filters.</p><button type="button" data-clear-filters>Clear filters</button></div>
       </section>

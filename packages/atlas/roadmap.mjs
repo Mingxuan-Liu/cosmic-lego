@@ -1,12 +1,15 @@
 // The learner-facing taxonomy is editorial. Section numbers are crosswalk keys into
 // the separately maintained print ledger. Each key can support several phenomena.
 import { coverage } from './coverage.mjs';
+import { observingDiagramUses, techniqueDomains } from './techniques.mjs';
 
 const families = [
   { id: 'part-1', label: 'Sky & light' },
   { id: 'part-2', label: 'Stars & remnants' },
   { id: 'part-3', label: 'Planetary systems' },
   { id: 'part-4', label: 'Galaxies & universe' },
+  { id: 'observation', label: 'Observation' },
+  { id: 'simulation', label: 'Simulations' },
 ];
 
 function topic(id, label, question, insight, refs, assets = '', aliases = '') {
@@ -333,11 +336,12 @@ function buildRoadmap() {
     unitsPerPage *= count / gcd(unitsPerPage, count);
   }
   const domains = [], phenomena = [];
-  for (const group of catalog) {
+  for (const group of [...catalog, ...techniqueDomains]) {
+    const technique = techniqueDomains.includes(group);
     const children = [];
     const domainUnits = new Map();
     for (const child of group.children) {
-      const allocations = child.refs.map(ref => {
+      const allocations = (child.refs ?? []).map(ref => {
         const section = sections.get(ref);
         const share = counts.get(ref);
         const units = section.pages * (unitsPerPage / share);
@@ -346,10 +350,19 @@ function buildRoadmap() {
       });
       const units = allocations.reduce((n, a) => n + a.units, 0);
       const launch = child.id === 'planetary-transits' ? transitStudy : null;
+      const sourcedVisuals = observingDiagramUses.filter(use => use.topicId === child.id);
+      if (technique) {
+        for (const assetId of child.assetIds) {
+          sourcedVisuals.push({ topicId: child.id, assetId, source: child.source, rationale: child.assetNotes?.[assetId] ?? child.insight });
+        }
+      }
       const node = { id: child.id, parentId: group.id, partId: group.partId, level: 'phenomenon',
         order: phenomena.length, label: child.label, question: child.question, insight: child.insight,
+        ...(technique && { kind: 'technique', source: child.source, applications: child.applications,
+          prerequisites: child.prerequisites }),
         keywords: child.keywords, sectionIds: allocations.map(a => a.sectionId), allocations,
-        pages: units / unitsPerPage, assetIds: child.assetIds,
+        pages: units / unitsPerPage, sourcedVisuals,
+        assetIds: [...new Set([...child.assetIds, ...sourcedVisuals.map(use => use.assetId)])],
         demonstratedAssetIds: demonstratedByPhenomenon[child.id] ?? [], availability: launch ? 'available' : 'planned', launch };
       children.push(node);
       phenomena.push(node);
@@ -359,13 +372,15 @@ function buildRoadmap() {
     const allocations = [...domainUnits].map(([sectionId, units]) => ({ sectionId, units, pages: units / unitsPerPage }));
     const units = [...domainUnits.values()].reduce((sum, v) => sum + v, 0);
     domains.push({ id: group.id, parentId: group.partId, partId: group.partId, level: 'domain',
-      order: domains.length, label: group.label, question: group.question, keywords: [],
+      ...(technique && { kind: 'technique' }), order: domains.length, label: group.label, question: group.question, keywords: [],
       sectionIds: [...domainUnits.keys()], allocations, pages: units / unitsPerPage,
       assetIds: collect('assetIds'), demonstratedAssetIds: collect('demonstratedAssetIds'),
       availability: launch ? 'available' : 'planned', launch });
   }
-  rank(domains);
-  rank(phenomena);
+  // The print ledger ranks only its mapped topics. Externally sourced techniques
+  // join every topic in the separate learning-path ranking (foundations.mjs).
+  rank(domains.filter(n => n.sectionIds.length));
+  rank(phenomena.filter(n => n.sectionIds.length));
   return { families, domains, phenomena, totals: { families: families.length, domains: domains.length,
     phenomena: phenomena.length, sections: coverage.sections.length, pages: coverage.totals.pages },
     method: { unit: 'allocated reference pages', unitsPerPage,

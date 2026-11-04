@@ -6,7 +6,7 @@ import { runPlayer } from '../scripts/timeline-server.mjs';
 import { playerComposition } from '../packages/exoplanet/player.mjs';
 import * as composition from '../packages/exoplanet/recipe.mjs';
 
-// Only this product includes the textbook atlas. Each browser module is explicitly served.
+// Only this product includes the astronomy roadmap. Each browser module is explicitly served.
 const staticAliases = {
   '/': 'demo/atlas/index.html', '/atlas/': 'demo/atlas/index.html',
   '/atlas/app.js': 'demo/atlas/app.js', '/atlas/cluster.js': 'demo/atlas/cluster.js',
@@ -14,6 +14,7 @@ const staticAliases = {
   '/atlas/style.css': 'demo/atlas/style.css', '/atlas/coverage.mjs': 'packages/atlas/coverage.mjs',
   '/atlas/reuse.mjs': 'packages/atlas/reuse.mjs', '/atlas/roadmap.mjs': 'packages/atlas/roadmap.mjs',
   '/atlas/roadmap-assets.mjs': 'packages/atlas/roadmap-assets.mjs',
+  '/atlas/techniques.mjs': 'packages/atlas/techniques.mjs',
   '/atlas/foundations.mjs': 'packages/atlas/foundations.mjs',
 };
 

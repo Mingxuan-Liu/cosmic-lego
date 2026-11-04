@@ -3,23 +3,27 @@ import { roadmap } from './roadmap.mjs';
 import { assetsForTopic, createReuseGraphBuilder } from './reuse.mjs';
 
 const mappings = new Map();
-function record(id, assetId, use) {
-  if (!mappings.has(id)) mappings.set(id, new Map());
-  const group = mappings.get(id);
-  if (!group.has(assetId)) group.set(assetId, { assetId, status: 'proposed', uses: [] });
-  const item = group.get(assetId);
-  item.uses.push(use);
-  if (use.status === 'demonstrated') item.status = 'demonstrated';
+function record(topic, assetId, use) {
+  for (const id of [topic.id, topic.parentId]) {
+    if (!mappings.has(id)) mappings.set(id, new Map());
+    const group = mappings.get(id);
+    if (!group.has(assetId)) group.set(assetId, { assetId, status: 'proposed', uses: [] });
+    const item = group.get(assetId);
+    item.uses.push(use);
+    if (use.status === 'demonstrated') item.status = 'demonstrated';
+  }
 }
 for (const topic of roadmap.phenomena) {
+  for (const { assetId, rationale, source } of topic.sourcedVisuals) {
+    record(topic, assetId, { topicId: topic.id, assetId, status: 'proposed', rationale, evidence: [source] });
+  }
   for (const sectionId of topic.sectionIds) {
     for (const entry of assetsForTopic(sectionId)) {
       if (!topic.assetIds.includes(entry.assetId)) continue;
       for (const source of entry.uses) {
         const status = topic.demonstratedAssetIds.includes(entry.assetId) ? source.status : 'proposed';
         const use = { ...source, topicId: topic.id, sectionId, status };
-        record(topic.id, entry.assetId, use);
-        record(topic.parentId, entry.assetId, use);
+        record(topic, entry.assetId, use);
       }
     }
   }
@@ -30,6 +34,8 @@ export const roadmapGraph = createReuseGraphBuilder([...roadmap.domains, ...road
 
 // The same diagram can pose a useful question in two different lessons.
 const guides = {
+  'two-beam-interference': ['Two waves meeting', 'Slide one light wave past the other. When do the peaks add, and when does a peak meet a trough? Telescope pairs compare light from the sky. In a gravitational-wave detector, the light comes from a laser on Earth.'],
+  'solar-recoil-angle': ['Which way did the electrons go?', 'Compare the direction of each recoiling electron with the path from the Sun to the detector. Do more events line up with that direction than the background would predict?'],
   'kepler-state': ['Orbital paths', 'Follow a body around its orbit. Where does it travel fastest, and how does a wider orbit change the time for one trip?'],
   'sky-silhouettes': ['Shadows on the sky', 'Look along the observer’s line of sight. Where do the two disks overlap, and which object passes in front?'],
   'relative-light-curve': ['Brightness over time', 'Trace a dip or a peak in brightness. Its depth tells you how much the light changed, and its width tells you how long the change lasted.'],

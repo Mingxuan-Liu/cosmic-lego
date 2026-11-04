@@ -5,12 +5,17 @@ import { roadmap } from '../packages/atlas/roadmap.mjs';
 import { assetTemplates, topicAssetUses } from '../packages/atlas/reuse.mjs';
 
 const { families, domains, phenomena, totals } = roadmap;
+const bookDomains = domains.filter(n => n.kind !== 'technique');
+const bookPhenomena = phenomena.filter(n => n.kind !== 'technique');
+const techniques = phenomena.filter(n => n.kind === 'technique');
 const byReference = new Map(coverage.sections.map(section => [section.id, section]));
 const byId = new Map([...families, ...domains, ...phenomena].map(node => [node.id, node]));
 const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, 'Expected ' + a + ' to equal ' + b);
 
 test('the roadmap has original short labels, study questions and original explanations within a phenomenon hierarchy', () => {
-  assert.deepEqual(totals, { families: 4, domains: 29, phenomena: 104, sections: 119, pages: 1274 });
+  assert.deepEqual(totals, { families: 6, domains: domains.length, phenomena: phenomena.length, sections: 119, pages: 1274 });
+  assert.equal(bookDomains.length, 29);
+  assert.equal(bookPhenomena.length, 104);
   assert.equal(byId.size, families.length + domains.length + phenomena.length);
   for (const peers of [domains, phenomena]) {
     assert.equal(new Set(peers.map(p => p.order)).size, peers.length);
@@ -20,7 +25,8 @@ test('the roadmap has original short labels, study questions and original explan
       assert.ok(n.label.length <= 24, n.label);
       assert.ok(n.label.split(' ').length <= 4, n.label);
       assert.match(n.question, /\?$/);
-      assert.ok(n.sectionIds.length && new Set(n.sectionIds).size === n.sectionIds.length);
+      assert.equal(n.sectionIds.length > 0, n.kind !== 'technique');
+      assert.equal(new Set(n.sectionIds).size, n.sectionIds.length);
       assert.ok(families.some(f => f.id === n.partId));
       assert.ok(n.sectionIds.every(id => byReference.has(id)));
       assert.ok(Object.isFrozen(n));
@@ -51,13 +57,13 @@ test('every printed section is divided equally among its mapped phenomena and co
     const directSum = domains.reduce((sum, d) => sum + (d.allocations.find(a => a.sectionId === s.id)?.pages ?? 0), 0);
     near(directSum, s.pages);
   }
-  for (const n of phenomena) near(n.pages, allocated.get(n.id));
-  for (const d of domains) {
+  for (const n of bookPhenomena) near(n.pages, allocated.get(n.id));
+  for (const d of bookDomains) {
     const children = phenomena.filter(n => n.parentId === d.id);
     near(d.pages, children.reduce((sum, n) => sum + allocated.get(n.id), 0));
     assert.deepEqual(new Set(d.sectionIds), new Set(children.flatMap(n => n.sectionIds)));
   }
-  for (const peers of [domains, phenomena]) {
+  for (const peers of [bookDomains, bookPhenomena]) {
     near(peers.reduce((sum, n) => sum + n.pages, 0), coverage.totals.pages);
     for (const n of peers) {
       const shorter = peers.filter(p => p.pages < n.pages).length;
@@ -74,7 +80,9 @@ test('only relevant, evidenced visuals are nominated and study availability is i
   for (const n of phenomena) {
     for (const id of n.assetIds) {
       assert.ok(ids.has(id));
-      assert.ok(topicAssetUses.some(use => use.assetId === id && n.sectionIds.includes(use.topicId)), n.id + ': ' + id);
+      const bookUse = topicAssetUses.some(use => use.assetId === id && n.sectionIds.includes(use.topicId));
+      const sourcedUse = n.sourcedVisuals.some(use => use.assetId === id && use.source.url && use.rationale);
+      assert.ok(bookUse || sourcedUse, n.id + ': ' + id);
     }
     for (const id of n.demonstratedAssetIds) {
       assert.ok(n.assetIds.includes(id));
@@ -92,5 +100,28 @@ test('only relevant, evidenced visuals are nominated and study availability is i
     assert.equal(d.availability === 'available', children.some(n => n.launch));
     assert.deepEqual(new Set(d.assetIds), new Set(children.flatMap(n => n.assetIds)));
     assert.deepEqual(new Set(d.demonstratedAssetIds), new Set(children.flatMap(n => n.demonstratedAssetIds)));
+  }
+});
+
+test('observation and simulation techniques have sources, scientific applications and no invented book allocations', () => {
+  for (const id of ['interferometry', 'gravitational-wave-detection', 'neutrino-detection', 'n-body-simulations', 'mhd-simulations']) {
+    assert.equal(byId.get(id)?.kind, 'technique', id);
+  }
+  assert.deepEqual(new Set(techniques.map(n => n.partId)), new Set(['observation','simulation']));
+  for (const n of techniques) {
+    assert.equal(byId.get(n.parentId).kind, 'technique');
+    assert.ok(n.source.label && new URL(n.source.url).protocol === 'https:');
+    assert.ok(n.applications.length > 0);
+    for (const {id,reason} of n.applications) {
+      assert.ok(bookPhenomena.some(p => p.id === id), n.id + ' should study a physical phenomenon: ' + id);
+      assert.ok(reason.length > 20);
+    }
+    assert.deepEqual(n.demonstratedAssetIds, []);
+    assert.equal(n.availability, 'planned');
+  }
+  for (const n of [...domains,...techniques].filter(n => n.kind === 'technique')) {
+    assert.deepEqual(n.allocations, []);
+    assert.equal(n.pages, 0);
+    assert.equal(n.rank, undefined);
   }
 });

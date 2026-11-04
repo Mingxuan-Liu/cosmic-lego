@@ -16,8 +16,8 @@ prompts for new architecture work; earlier numbered prompts are superseded.
   translucent, fixed-position HUD. Instruments and plots occupy the left rail.
   Inspection, provenance and conversation occupy the right. Keep the canvas
   full-size, allow fold/hide/restore, and show one drawer at a time on phones.
-- The opening astronomy roadmap belongs to the product. Give its domains and
-  phenomena short beginner-facing names, questions, and study status. Use
+- The opening astronomy roadmap belongs to the product. Give its astronomy topics, observing techniques and
+  simulation methods short beginner-facing names, questions, and study status. Use
   reference books for background. Size stars by how many other topics they
   help explain, weighted by learning distance. Use dashed lines for shared
   diagrams and dim nonmatching stars when students search. Open in the rotatable
