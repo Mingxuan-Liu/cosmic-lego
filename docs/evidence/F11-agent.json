@@ -1,0 +1,381 @@
+{
+  "exercise": "F11 native in-app construction journey",
+  "status": "passed",
+  "started": "2026-11-04T01:59:32.110Z",
+  "completed": "2026-11-04T02:00:29.149Z",
+  "versions": {
+    "node": "v24.22.1",
+    "codex": "codex-cli 0.166.0-alpha.5.1",
+    "browser": "156.0.8078.80"
+  },
+  "launch": {
+    "app": "Isolated 80-file readiness stage. The staged independent recipe, scene server, adapter, worker registry and UI ran from that tree.",
+    "model": "gpt-6-astra",
+    "permissionPolicy": "deny",
+    "graphics": "WebGL2 / SwiftShader",
+    "auth": "Existing authenticated local Codex runtime; no account, grant or billing setup.",
+    "evidence": "Semantic calls were observed at the real staged adapter callback and passed unchanged to the live bridge. The post-Stop check is a separate host probe. Native thread IDs, user identity, private file paths and free-form transcript are omitted."
+  },
+  "firstAttempt": {
+    "classification": "acceptance harness selector",
+    "outcome": "The first attempt reached the numeric baseline, then targeted the folded inspector. It ended before Connect or a native turn. The retained attempt report is attempt-01-folded-inspector.json in the local evidence directory. The completed run clicked the authored lane plot mark."
+  },
+  "input": {
+    "projectId": "gate-bench",
+    "sha256": "sha256:158f3d66bfb5c24cc0d92f60efc2a0e95a974f8e4f5d914b5cda85db68a78610",
+    "nodeCount": 46,
+    "timelineVersion": 1,
+    "portableGraphHash": "sha256:5c70f450612c5c68fab757c10c66013ce956cf4ac88da1a6725e152e025d15d4"
+  },
+  "selection": {
+    "selection": {
+      "nodeId": "pucks-stage",
+      "objectId": "puck-mid",
+      "instanceIndex": 1
+    },
+    "time": 2
+  },
+  "prompts": [
+    {
+      "turn": "structural edit",
+      "text": "At the selected puck and current physical time, make exactly one reversible structural edit. Add a fixture.moving-point named late-puck with r0=[-3,0,0] m and v=[0.5,0,0] m/s. The existing live collection should pick it up. Commit using the installed cosmic_command tool. Leave the scene bindings, plots, other components and panel layouts as authored. Briefly state what changed."
+    },
+    {
+      "turn": "invalid connection",
+      "text": "Run a deliberate negative connection test through the actual cosmic_command transaction.preview tool. The single operation is create:fixture.accumulator with args {id:\"bad-rate-integrator\",inputs:{source:{node:\"puck-mid\",port:\"position\"}}}. Use the current token. We need the real validator diagnostic and a concrete compatible-input repair; please do not correct or commit the preview and do not perform any other edit."
+    },
+    {
+      "turn": "stop",
+      "text": "Prepare and add one new fixture.moving-point called stopped-puck. First inspect the current graph as a standalone read and check whether the name exists. Then use a separate tool call to make the edit if it is available. I may stop this turn before the change."
+    }
+  ],
+  "tools": [
+    {
+      "turn": "structural edit",
+      "command": "discover",
+      "args": {},
+      "idempotent": false,
+      "ok": true,
+      "revision": 0
+    },
+    {
+      "turn": "structural edit",
+      "command": "discover",
+      "args": {
+        "names": [
+          "inspect",
+          "create:fixture.moving-point",
+          "transaction.commit",
+          "evaluate"
+        ]
+      },
+      "idempotent": false,
+      "ok": true,
+      "revision": 0
+    },
+    {
+      "turn": "structural edit",
+      "command": "inspect",
+      "args": {},
+      "idempotent": false,
+      "ok": true,
+      "revision": 0
+    },
+    {
+      "turn": "structural edit",
+      "command": "transaction.commit",
+      "args": {
+        "operations": [
+          {
+            "command": "create:fixture.moving-point",
+            "args": {
+              "id": "late-puck",
+              "parameters": {
+                "r0": [
+                  -3,
+                  0,
+                  0
+                ],
+                "v": [
+                  0.5,
+                  0,
+                  0
+                ],
+                "unit": "m",
+                "frame": "lab"
+              }
+            }
+          }
+        ]
+      },
+      "expectedRevision": 0,
+      "idempotent": true,
+      "ok": true,
+      "revision": 1
+    },
+    {
+      "turn": "structural edit",
+      "command": "evaluate",
+      "args": {
+        "id": "scan-pucks",
+        "port": "value",
+        "time": {
+          "value": 2,
+          "unit": {}
+        }
+      },
+      "expectedRevision": 1,
+      "idempotent": false,
+      "ok": true,
+      "revision": 1
+    },
+    {
+      "turn": "invalid connection",
+      "command": "discover",
+      "args": {},
+      "idempotent": false,
+      "ok": true,
+      "revision": 1
+    },
+    {
+      "turn": "invalid connection",
+      "command": "discover",
+      "args": {
+        "names": [
+          "inspect",
+          "transaction.preview",
+          "create:fixture.accumulator",
+          "dataflow.constant"
+        ]
+      },
+      "idempotent": false,
+      "ok": true,
+      "revision": 1
+    },
+    {
+      "turn": "invalid connection",
+      "command": "inspect",
+      "args": {},
+      "idempotent": false,
+      "ok": true,
+      "revision": 1
+    },
+    {
+      "turn": "invalid connection",
+      "command": "transaction.preview",
+      "args": {
+        "operations": [
+          {
+            "command": "create:fixture.accumulator",
+            "args": {
+              "id": "bad-rate-integrator",
+              "inputs": {
+                "source": {
+                  "node": "puck-mid",
+                  "port": "position"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expectedRevision": 1,
+      "idempotent": false,
+      "ok": false,
+      "revision": 1,
+      "error": {
+        "code": "KIND_MISMATCH",
+        "category": "incompatible-connection",
+        "message": "bad-rate-integrator.source: Input/output kinds differ.",
+        "diagnostics": [
+          {
+            "code": "KIND_MISMATCH",
+            "path": "$",
+            "message": "bad-rate-integrator.source: Input/output kinds differ."
+          }
+        ],
+        "repairs": [
+          {
+            "description": "Inspect the declared arguments and limits."
+          },
+          {
+            "description": "Repair the reported arguments or connections and preview the revised batch."
+          }
+        ]
+      }
+    }
+  ],
+  "measurements": {
+    "before": {
+      "revision": 0,
+      "physicalSeconds": 2,
+      "positionsByObject": {
+        "puck-low": [
+          0,
+          -1,
+          0
+        ],
+        "puck-mid": [
+          0,
+          0,
+          0
+        ],
+        "puck-high": [
+          0,
+          1,
+          0
+        ]
+      },
+      "meanMetres": 0.6666666666666666,
+      "plottedMeanMetres": 0.6666666666666666,
+      "plotSource": "mean-gate-radius"
+    },
+    "accepted": {
+      "revision": 1,
+      "physicalSeconds": 2,
+      "positionsByObject": {
+        "puck-low": [
+          0,
+          -1,
+          0
+        ],
+        "puck-mid": [
+          0,
+          0,
+          0
+        ],
+        "puck-high": [
+          0,
+          1,
+          0
+        ],
+        "late-puck": [
+          -2,
+          0,
+          0
+        ]
+      },
+      "meanMetres": 1,
+      "plottedMeanMetres": 1,
+      "plotSource": "mean-gate-radius"
+    },
+    "undo": {
+      "revision": 2,
+      "physicalSeconds": 2,
+      "positionsByObject": {
+        "puck-low": [
+          0,
+          -1,
+          0
+        ],
+        "puck-mid": [
+          0,
+          0,
+          0
+        ],
+        "puck-high": [
+          0,
+          1,
+          0
+        ]
+      },
+      "meanMetres": 0.6666666666666666,
+      "plottedMeanMetres": 0.6666666666666666,
+      "plotSource": "mean-gate-radius"
+    },
+    "redo": {
+      "revision": 3,
+      "physicalSeconds": 2,
+      "positionsByObject": {
+        "puck-low": [
+          0,
+          -1,
+          0
+        ],
+        "puck-mid": [
+          0,
+          0,
+          0
+        ],
+        "puck-high": [
+          0,
+          1,
+          0
+        ],
+        "late-puck": [
+          -2,
+          0,
+          0
+        ]
+      },
+      "meanMetres": 1,
+      "plottedMeanMetres": 1,
+      "plotSource": "mean-gate-radius"
+    }
+  },
+  "comparisonTolerance": {
+    "absolute": 1e-10,
+    "relative": 1e-12,
+    "unit": "m"
+  },
+  "graphDelta": {
+    "added": [
+      "late-puck"
+    ],
+    "removed": [],
+    "updated": []
+  },
+  "staleRevision": {
+    "status": "passed",
+    "source": "separate local HTTP client",
+    "code": "STALE_TOKEN",
+    "attemptedNode": "stale-puck",
+    "unchangedGraph": true
+  },
+  "invalidConnection": {
+    "status": "passed",
+    "code": "KIND_MISMATCH",
+    "source": "puck-mid.position",
+    "destination": "bad-rate-integrator.source",
+    "checkedRepair": "Use a timeless scalar accumulation-rate in 1/s.",
+    "unchangedGraph": true
+  },
+  "stop": {
+    "status": "passed",
+    "nativeStartAcknowledged": true,
+    "requestedWrite": "stopped-puck",
+    "activeTurnCleared": true,
+    "revision": 2
+  },
+  "revokedAuthority": {
+    "status": "passed",
+    "source": "host explicitly replayed a checked write through the genuine retired adapter callback",
+    "code": "TURN_REVOKED",
+    "attemptedNode": "stopped-puck",
+    "revisionUnchanged": true
+  },
+  "redo": {
+    "status": "passed",
+    "sameAcceptedAgentGraph": true,
+    "revision": 3
+  },
+  "privateSave": {
+    "status": "passed",
+    "slot": "readiness-saved",
+    "sha256": "sha256:0385e7b726338a6947f3364a869362a36311a1cf4ca9a6abc0b7e7aef748752a",
+    "originalRecipe": "experiments/f11-author.mjs",
+    "savedRevision": 3,
+    "graphHash": "sha256:488aedafbe215ac8aa9f7ac6aa17916a8b71aa93efa6cbbfc43b0b21f1541bfa",
+    "sourceStatus": "diverged",
+    "transcriptIncluded": false,
+    "portableGraphHash": "sha256:c5c3014c496f643b72280511d26d635674da5f984d8f65a1dbbe0d60a2720584"
+  },
+  "browserErrors": [],
+  "expectedReadCancellations": [],
+  "counts": {
+    "passed": 11,
+    "failed": 0,
+    "unexecuted": 0,
+    "nativeToolCalls": 9
+  }
+}

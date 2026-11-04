@@ -351,7 +351,7 @@ export function createThreeSceneResources({ limits: options, createCanvas } = {}
 }
 
 /** A WebGL2 browser renderer. Coordinates passed to pick are canvas-local CSS pixels. */
-export function createThreeAdapter({ canvas, onSelect = () => {}, onCameraChange = () => {}, onDiagnostic = () => {}, limits: options } = {}) {
+export function createThreeAdapter({ canvas, onSelect = () => {}, onCameraChange = () => {}, onDiagnostic = () => {}, limits: options, reducedMotion = false } = {}) {
   const limits = checkedLimits(options);
   ensure(canvas?.addEventListener && canvas?.getBoundingClientRect, 'A browser canvas is required.');
   let renderer;
@@ -392,7 +392,7 @@ export function createThreeAdapter({ canvas, onSelect = () => {}, onCameraChange
     activeCamera.scale.set(1, 1, 1);
     activeCamera.lookAt(new THREE.Vector3(...authored.userData.target));
     cameraId = id; projection(activeCamera);
-    controls = new OrbitControls(activeCamera, canvas); controls.enableDamping = true;
+    controls = new OrbitControls(activeCamera, canvas); controls.enableDamping = !reducedMotion;
     controls.target.fromArray(authored.userData.target); controls.addEventListener('change', emitCamera); controls.update(); emitCamera();
     return true;
   }
@@ -487,6 +487,7 @@ export function createThreeAdapter({ canvas, onSelect = () => {}, onCameraChange
       if (activeCamera) projection(activeCamera);
     },
     setCamera,
+    setReducedMotion(enabled) { reducedMotion = !!enabled; if (controls) { controls.enableDamping = !reducedMotion; controls.update(); } },
     frameAll() {
       if (!activeCamera || !resources.current) return false;
       const bounds = new THREE.Box3().setFromObject(resources.current.root);

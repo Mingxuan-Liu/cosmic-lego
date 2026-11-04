@@ -16,7 +16,15 @@ const valueFields = [...requiredDescriptor, 'data', 'coordinates', 'objectIds', 
 const record = v => v !== null && typeof v === 'object' && !Array.isArray(v);
 const text = v => typeof v === 'string' && !!v.trim();
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
-const close = (a, b) => a === b || Math.abs(a - b) <= 16 * Number.EPSILON * Math.max(1, Math.abs(a), Math.abs(b));
+// Coordinates have physical scale. A one-second absolute tolerance floor
+// would merge distinct small instants near zero.
+const close = (a, b, floor = 0) => Number.isFinite(a) && Number.isFinite(b) &&
+  (a === b || Math.abs(a - b) <= 16 * Number.EPSILON * Math.max(floor, Math.abs(a), Math.abs(b)));
+function canonicalCoordinate(x, scale) {
+  if (!Number.isFinite(x)) return NaN;
+  const transformed = x * scale;
+  return transformed === 0 && x !== 0 ? NaN : transformed;
+}
 const diagnostic = (code, path, message) => ({ code, path, message });
 const fail = (code, message, path = '$') => { throw new KernelError(code, message, { validation: { valid: false, errors: [diagnostic(code, path, message)] } }); };
 const requireFields = (obj, allowed, label) => {
@@ -69,11 +77,11 @@ function normalization(input) {
   return { reference: input.reference, definition: input.definition };
 }
 
-function instant(input) {
+export function instant(input) {
   if (input === null) return null;
   requireFields(input, ['value', 'unit'], 'time');
   const u = unit(input.unit);
-  if (!Number.isFinite(input.value) || !sameDimensions(u, 's')) fail('INVALID_TIME', 'Physical time needs a finite value and time unit.');
+  if (!Number.isFinite(canonicalCoordinate(input.value, u.scale)) || !sameDimensions(u, 's')) fail('INVALID_TIME', 'Physical time must be representable in seconds and use time units.');
   return { value: input.value, unit: u };
 }
 
@@ -84,8 +92,9 @@ function coordinates(input) {
   if (!Array.isArray(input.values)) fail('INVALID_COORDINATES', 'Sample coordinates require an array.');
   if (input.kind === 'time') {
     if (Object.hasOwn(input, 'frame')) fail('INVALID_COORDINATES', 'Time samples do not use a spatial frame.');
-    if (!sameDimensions(u, 's') || input.values.some((x, i) => !Number.isFinite(x) || (i > 0 && x <= input.values[i - 1]))) {
-      fail('INVALID_COORDINATES', 'Time coordinates must be finite, strictly increasing, and use time units.');
+    const seconds = input.values.map(x => canonicalCoordinate(x, u.scale));
+    if (!sameDimensions(u, 's') || seconds.some((x, i) => !Number.isFinite(x) || (i > 0 && x <= seconds[i - 1]))) {
+      fail('INVALID_COORDINATES', 'Time coordinates must remain representable and strictly increasing after conversion to physical seconds.');
     }
     return { kind: 'time', unit: u, values: [...input.values] };
   }
@@ -198,12 +207,18 @@ function descriptor(input, label) {
 function coordinateEqual(a, b) {
   if (a === null || b === null) return a === b;
   if (a.kind !== b.kind || !sameDimensions(a.unit, b.unit) || !equal(a.frame ?? null, b.frame ?? null) || a.values.length !== b.values.length) return false;
+  // Converting via the scale ratio can overflow even if both physical
+  // coordinates are small finite numbers, e.g. 1e-200 × 1e200 seconds.
+  if (a.kind === 'time') return a.values.every((x, i) =>
+    close(canonicalCoordinate(x, a.unit.scale), canonicalCoordinate(b.values[i], b.unit.scale)));
+  // Keep the existing spatial tolerance in the target length units.
   const ratio = a.unit.scale / b.unit.scale;
-  return a.values.every((row, i) => Array.isArray(row)
-    ? row.every((x, j) => close(x * ratio, b.values[i][j])) : close(row * ratio, b.values[i]));
+  const inTargetUnits = Number.isFinite(ratio) && ratio > 0 ? x => x * ratio
+    : x => canonicalCoordinate(x, a.unit.scale) / b.unit.scale;
+  return a.values.every((row, i) => row.every((x, j) => close(inTargetUnits(x), b.values[i][j], 1)));
 }
 
-function timeEqual(a, b) { return a === null || b === null ? a === b : close(a.value * a.unit.scale, b.value * b.unit.scale); }
+export function timeEqual(a, b) { return a === null || b === null ? a === b : close(a.value * a.unit.scale, b.value * b.unit.scale); }
 
 export function checkPort(source, requirement) {
   const errors = [];
@@ -216,10 +231,11 @@ export function checkPort(source, requirement) {
   }
   if (errors.length) return errors;
   const reject = (code, key, message) => errors.push(diagnostic(code, key, message));
-  if (actual.kind !== needed.kind) reject('KIND_MISMATCH', 'kind', 'Input/output kinds differ.');
+  const quantity = port => `${port.time === null ? 'timeless ' : ''}${port.kind} ${JSON.stringify(port.meaning)} in ${port.unit.symbol}`;
+  if (actual.kind !== needed.kind) reject('KIND_MISMATCH', 'kind', `The output supplies a ${quantity(actual)}. The input requires a ${quantity(needed)}.`);
   if (actual.shape.length !== needed.shape.length || actual.shape.some((n, i) => needed.shape[i] !== null && n !== needed.shape[i])) reject('SHAPE_MISMATCH', 'shape', 'Input shape does not meet the declared dimensions.');
-  if (!sameDimensions(actual.unit, needed.unit)) reject('UNIT_MISMATCH', 'unit', 'Dimensions differ; a unit conversion cannot make this connection.');
-  else if (actual.unit.scale !== needed.unit.scale) reject('UNIT_CONVERSION_REQUIRED', 'unit', 'Use an explicit unit-conversion adapter before this input.');
+  if (!sameDimensions(actual.unit, needed.unit)) reject('UNIT_MISMATCH', 'unit', `Output unit ${actual.unit.symbol} and required input unit ${needed.unit.symbol} have different physical dimensions.`);
+  else if (actual.unit.scale !== needed.unit.scale) reject('UNIT_CONVERSION_REQUIRED', 'unit', `The output uses ${actual.unit.symbol} (SI scale ${actual.unit.scale}). Convert to ${needed.unit.symbol} (SI scale ${needed.unit.scale}) before connecting this input.`);
   for (const [key, code] of [['meaning', 'MEANING_MISMATCH'], ['reference', 'REFERENCE_MISMATCH'], ['frame', 'FRAME_MISMATCH'], ['normalization', 'NORMALIZATION_MISMATCH']]) {
     if (!equal(actual[key], needed[key])) reject(code, key, `Input ${key} differs; an explicit justified adapter or comparison is required.`);
   }
@@ -275,17 +291,22 @@ function aligned(left, right, alignment, meta) {
   if (coordinateEqual(left.coordinates, right.coordinates)) return right;
   if (left.kind !== 'series' || alignment?.policy !== 'linear' || alignment?.target !== 'left') fail('SAMPLE_ALIGNMENT', 'Sample coordinates differ. Supply an explicit supported alignment policy.');
   requireFields(alignment, ['policy', 'target'], 'alignment');
-  const xs = right.coordinates.values.map(x => x * right.coordinates.unit.scale / left.coordinates.unit.scale);
+  const xs = right.coordinates.values.map(t => t * right.coordinates.unit.scale);
   let upper = 0;
-  const data = left.coordinates.values.map(x => {
+  const data = left.coordinates.values.map(t => {
+    const x = t * left.coordinates.unit.scale;
     while (upper < xs.length && xs[upper] < x && !close(xs[upper], x)) upper++;
     if (upper < xs.length && close(xs[upper], x)) return right.data[upper];
     const hi = upper;
     if (hi <= 0 || hi >= xs.length) fail('SAMPLE_ALIGNMENT', 'Linear alignment does not extrapolate beyond available samples.');
     const lo = hi - 1;
     if (missing(right.data[lo]) || missing(right.data[hi])) fail('MISSING_DATA', 'Interpolation cannot bridge missing samples.');
-    const fraction = (x - xs[lo]) / (xs[hi] - xs[lo]);
-    return zipNumbers(right.data[lo], right.data[hi], (a, b) => a + fraction * (b - a));
+    const span = xs[hi] - xs[lo];
+    const fraction = Number.isFinite(span) ? (x - xs[lo]) / span
+      : (x / 2 - xs[lo] / 2) / (xs[hi] / 2 - xs[lo] / 2);
+    // Keep finite opposite-signed endpoints from overflowing in (b - a).
+    return zipNumbers(right.data[lo], right.data[hi], (a, b) =>
+      (a < 0) === (b < 0) ? a + fraction * (b - a) : (1 - fraction) * a + fraction * b);
   });
   warn(meta, 'INTERPOLATED', 'Right-hand series was linearly interpolated onto left-hand coordinates; no extrapolation.');
   return { ...right, coordinates: copyData(left.coordinates), shape: [...left.shape], data };

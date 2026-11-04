@@ -1,0 +1,2322 @@
+{
+  "entries": [
+    "demo/scene/app.js",
+    "demo/timeline/app.js",
+    "demo/workspace/app.js",
+    "examples/fixtures/registry-extensions.js",
+    "examples/fixtures/runtime-extensions.js",
+    "examples/fixtures/scene-registry.js",
+    "examples/fixtures/workspace-registry.js",
+    "examples/scene-and-assets.mjs",
+    "examples/workspace.mjs",
+    "experiments/f11-author.mjs",
+    "scripts/gateway.mjs",
+    "scripts/scene-server.mjs",
+    "scripts/timeline-delivery.mjs",
+    "scripts/timeline-http.mjs",
+    "scripts/timeline-server.mjs",
+    "src/agent-session/codex.js",
+    "src/agent-session/config.js",
+    "src/agent-session/context.js",
+    "src/agent-session/index.js",
+    "src/agent-session/rpc.js",
+    "src/core/data.js",
+    "src/core/graph.js",
+    "src/core/index.js",
+    "src/core/project.js",
+    "src/dataflow/author.js",
+    "src/dataflow/contracts.js",
+    "src/dataflow/evaluate.js",
+    "src/dataflow/graph.js",
+    "src/dataflow/index.js",
+    "src/dataflow/values.js",
+    "src/gateway/commands.js",
+    "src/gateway/index.js",
+    "src/gateway/sdk.js",
+    "src/portable/format.js",
+    "src/portable/store.js",
+    "src/portable/workspace.js",
+    "src/registry/binding.js",
+    "src/registry/contracts.js",
+    "src/registry/harness.js",
+    "src/registry/index.js",
+    "src/registry/manifest.js",
+    "src/registry/requirements.js",
+    "src/registry/results.js",
+    "src/registry/schema.js",
+    "src/runtime/contracts.js",
+    "src/runtime/engine.js",
+    "src/runtime/index.js",
+    "src/runtime/worker.js",
+    "src/scene/assets.js",
+    "src/scene/author.js",
+    "src/scene/bindings.js",
+    "src/scene/contracts.js",
+    "src/scene/definitions.js",
+    "src/scene/index.js",
+    "src/scene/three-adapter.js",
+    "src/timeline/configurations.js",
+    "src/timeline/definition.js",
+    "src/timeline/evaluator.js",
+    "src/timeline/export.js",
+    "src/workspace/browser.js",
+    "src/workspace/definitions.js",
+    "src/workspace/index.js",
+    "src/workspace/plot-samples.js",
+    "src/workspace/project-files.js",
+    "src/workspace/session.js"
+  ],
+  "modules": [
+    "demo/scene/app.js",
+    "demo/timeline/app.js",
+    "demo/workspace/app.js",
+    "examples/fixtures/registry-extensions.js",
+    "examples/fixtures/runtime-extensions.js",
+    "examples/fixtures/scene-registry.js",
+    "examples/fixtures/workspace-registry.js",
+    "examples/scene-and-assets.mjs",
+    "examples/workspace.mjs",
+    "experiments/f11-author.mjs",
+    "node_modules/three/build/three.core.js",
+    "node_modules/three/build/three.module.js",
+    "node_modules/three/examples/jsm/controls/OrbitControls.js",
+    "scripts/gateway.mjs",
+    "scripts/scene-server.mjs",
+    "scripts/timeline-delivery.mjs",
+    "scripts/timeline-http.mjs",
+    "scripts/timeline-server.mjs",
+    "src/agent-session/codex.js",
+    "src/agent-session/config.js",
+    "src/agent-session/context.js",
+    "src/agent-session/index.js",
+    "src/agent-session/rpc.js",
+    "src/core/data.js",
+    "src/core/graph.js",
+    "src/core/index.js",
+    "src/core/project.js",
+    "src/dataflow/author.js",
+    "src/dataflow/contracts.js",
+    "src/dataflow/evaluate.js",
+    "src/dataflow/graph.js",
+    "src/dataflow/index.js",
+    "src/dataflow/values.js",
+    "src/gateway/commands.js",
+    "src/gateway/index.js",
+    "src/gateway/sdk.js",
+    "src/portable/format.js",
+    "src/portable/store.js",
+    "src/portable/workspace.js",
+    "src/registry/binding.js",
+    "src/registry/contracts.js",
+    "src/registry/harness.js",
+    "src/registry/index.js",
+    "src/registry/manifest.js",
+    "src/registry/requirements.js",
+    "src/registry/results.js",
+    "src/registry/schema.js",
+    "src/runtime/contracts.js",
+    "src/runtime/engine.js",
+    "src/runtime/index.js",
+    "src/runtime/worker.js",
+    "src/scene/assets.js",
+    "src/scene/author.js",
+    "src/scene/bindings.js",
+    "src/scene/contracts.js",
+    "src/scene/definitions.js",
+    "src/scene/index.js",
+    "src/scene/three-adapter.js",
+    "src/timeline/configurations.js",
+    "src/timeline/definition.js",
+    "src/timeline/evaluator.js",
+    "src/timeline/export.js",
+    "src/workspace/browser.js",
+    "src/workspace/definitions.js",
+    "src/workspace/index.js",
+    "src/workspace/plot-samples.js",
+    "src/workspace/project-files.js",
+    "src/workspace/session.js"
+  ],
+  "edges": [
+    {
+      "from": "demo/scene/app.js",
+      "kind": "static",
+      "specifier": "/src/scene/three-adapter.js",
+      "to": "src/scene/three-adapter.js"
+    },
+    {
+      "from": "src/scene/three-adapter.js",
+      "kind": "static",
+      "specifier": "three",
+      "to": "node_modules/three/build/three.module.js"
+    },
+    {
+      "from": "node_modules/three/build/three.module.js",
+      "kind": "static",
+      "specifier": "./three.core.js",
+      "to": "node_modules/three/build/three.core.js"
+    },
+    {
+      "from": "src/scene/three-adapter.js",
+      "kind": "static",
+      "specifier": "three/addons/controls/OrbitControls.js",
+      "to": "node_modules/three/examples/jsm/controls/OrbitControls.js"
+    },
+    {
+      "from": "node_modules/three/examples/jsm/controls/OrbitControls.js",
+      "kind": "static",
+      "specifier": "three",
+      "to": "node_modules/three/build/three.module.js"
+    },
+    {
+      "from": "demo/timeline/app.js",
+      "kind": "static",
+      "specifier": "/src/scene/three-adapter.js",
+      "to": "src/scene/three-adapter.js"
+    },
+    {
+      "from": "demo/timeline/app.js",
+      "kind": "static",
+      "specifier": "/src/workspace/plot-samples.js",
+      "to": "src/workspace/plot-samples.js"
+    },
+    {
+      "from": "demo/workspace/app.js",
+      "kind": "static",
+      "specifier": "/src/workspace/plot-samples.js",
+      "to": "src/workspace/plot-samples.js"
+    },
+    {
+      "from": "demo/workspace/app.js",
+      "kind": "static",
+      "specifier": "/src/scene/three-adapter.js",
+      "to": "src/scene/three-adapter.js"
+    },
+    {
+      "from": "demo/workspace/app.js",
+      "kind": "static",
+      "specifier": "/src/workspace/browser.js",
+      "to": "src/workspace/browser.js"
+    },
+    {
+      "from": "demo/workspace/app.js",
+      "kind": "static",
+      "specifier": "/src/workspace/session.js",
+      "to": "src/workspace/session.js"
+    },
+    {
+      "from": "demo/workspace/app.js",
+      "kind": "static",
+      "specifier": "/src/workspace/project-files.js",
+      "to": "src/workspace/project-files.js"
+    },
+    {
+      "from": "examples/fixtures/registry-extensions.js",
+      "kind": "static",
+      "specifier": "../../src/dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/dataflow/index.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/core/index.js",
+      "kind": "static",
+      "specifier": "./data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/core/index.js",
+      "kind": "static",
+      "specifier": "./graph.js",
+      "to": "src/core/graph.js"
+    },
+    {
+      "from": "src/core/graph.js",
+      "kind": "static",
+      "specifier": "./data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/core/index.js",
+      "kind": "static",
+      "specifier": "./project.js",
+      "to": "src/core/project.js"
+    },
+    {
+      "from": "src/core/project.js",
+      "kind": "static",
+      "specifier": "./data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/core/project.js",
+      "kind": "static",
+      "specifier": "./graph.js",
+      "to": "src/core/graph.js"
+    },
+    {
+      "from": "src/dataflow/index.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/dataflow/index.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/dataflow/contracts.js"
+    },
+    {
+      "from": "src/dataflow/contracts.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/dataflow/contracts.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/dataflow/index.js",
+      "kind": "static",
+      "specifier": "./graph.js",
+      "to": "src/dataflow/graph.js"
+    },
+    {
+      "from": "src/dataflow/graph.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/dataflow/graph.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/dataflow/graph.js",
+      "kind": "static",
+      "specifier": "./values.js",
+      "to": "src/dataflow/values.js"
+    },
+    {
+      "from": "src/dataflow/values.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/dataflow/values.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/dataflow/graph.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/dataflow/contracts.js"
+    },
+    {
+      "from": "src/dataflow/index.js",
+      "kind": "static",
+      "specifier": "./author.js",
+      "to": "src/dataflow/author.js"
+    },
+    {
+      "from": "src/dataflow/author.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/dataflow/author.js",
+      "kind": "static",
+      "specifier": "./values.js",
+      "to": "src/dataflow/values.js"
+    },
+    {
+      "from": "src/dataflow/author.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/dataflow/contracts.js"
+    },
+    {
+      "from": "src/dataflow/author.js",
+      "kind": "static",
+      "specifier": "./graph.js",
+      "to": "src/dataflow/graph.js"
+    },
+    {
+      "from": "src/dataflow/index.js",
+      "kind": "static",
+      "specifier": "./evaluate.js",
+      "to": "src/dataflow/evaluate.js"
+    },
+    {
+      "from": "src/dataflow/evaluate.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/dataflow/evaluate.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/dataflow/evaluate.js",
+      "kind": "static",
+      "specifier": "./values.js",
+      "to": "src/dataflow/values.js"
+    },
+    {
+      "from": "src/dataflow/evaluate.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/dataflow/contracts.js"
+    },
+    {
+      "from": "src/dataflow/evaluate.js",
+      "kind": "static",
+      "specifier": "./graph.js",
+      "to": "src/dataflow/graph.js"
+    },
+    {
+      "from": "src/dataflow/index.js",
+      "kind": "static",
+      "specifier": "./values.js",
+      "to": "src/dataflow/values.js"
+    },
+    {
+      "from": "examples/fixtures/runtime-extensions.js",
+      "kind": "static",
+      "specifier": "../../src/registry/index.js",
+      "to": "src/registry/index.js"
+    },
+    {
+      "from": "src/registry/index.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/registry/index.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/registry/index.js",
+      "kind": "static",
+      "specifier": "./manifest.js",
+      "to": "src/registry/manifest.js"
+    },
+    {
+      "from": "src/registry/manifest.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/registry/manifest.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/registry/manifest.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/registry/manifest.js",
+      "kind": "static",
+      "specifier": "./schema.js",
+      "to": "src/registry/schema.js"
+    },
+    {
+      "from": "src/registry/schema.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/registry/schema.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/registry/index.js",
+      "kind": "static",
+      "specifier": "./schema.js",
+      "to": "src/registry/schema.js"
+    },
+    {
+      "from": "src/registry/index.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/registry/contracts.js"
+    },
+    {
+      "from": "src/registry/contracts.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/registry/contracts.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/registry/index.js",
+      "kind": "static",
+      "specifier": "./requirements.js",
+      "to": "src/registry/requirements.js"
+    },
+    {
+      "from": "src/registry/requirements.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/registry/requirements.js",
+      "kind": "static",
+      "specifier": "../dataflow/contracts.js",
+      "to": "src/dataflow/contracts.js"
+    },
+    {
+      "from": "src/registry/requirements.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/registry/contracts.js"
+    },
+    {
+      "from": "src/registry/index.js",
+      "kind": "static",
+      "specifier": "./binding.js",
+      "to": "src/registry/binding.js"
+    },
+    {
+      "from": "src/registry/binding.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/registry/binding.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/registry/binding.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/registry/binding.js",
+      "kind": "static",
+      "specifier": "./schema.js",
+      "to": "src/registry/schema.js"
+    },
+    {
+      "from": "src/registry/binding.js",
+      "kind": "static",
+      "specifier": "./manifest.js",
+      "to": "src/registry/manifest.js"
+    },
+    {
+      "from": "src/registry/binding.js",
+      "kind": "static",
+      "specifier": "./requirements.js",
+      "to": "src/registry/requirements.js"
+    },
+    {
+      "from": "src/registry/binding.js",
+      "kind": "static",
+      "specifier": "./results.js",
+      "to": "src/registry/results.js"
+    },
+    {
+      "from": "src/registry/results.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/registry/results.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/registry/results.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/registry/contracts.js"
+    },
+    {
+      "from": "src/registry/binding.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/registry/contracts.js"
+    },
+    {
+      "from": "src/registry/index.js",
+      "kind": "static",
+      "specifier": "./harness.js",
+      "to": "src/registry/harness.js"
+    },
+    {
+      "from": "src/registry/harness.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/registry/harness.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/registry/harness.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/registry/harness.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/registry/contracts.js"
+    },
+    {
+      "from": "src/registry/index.js",
+      "kind": "static",
+      "specifier": "./results.js",
+      "to": "src/registry/results.js"
+    },
+    {
+      "from": "examples/fixtures/runtime-extensions.js",
+      "kind": "static",
+      "specifier": "../../src/dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "examples/fixtures/runtime-extensions.js",
+      "kind": "static",
+      "specifier": "./registry-extensions.js",
+      "to": "examples/fixtures/registry-extensions.js"
+    },
+    {
+      "from": "examples/fixtures/scene-registry.js",
+      "kind": "static",
+      "specifier": "../../src/registry/index.js",
+      "to": "src/registry/index.js"
+    },
+    {
+      "from": "examples/fixtures/scene-registry.js",
+      "kind": "static",
+      "specifier": "../../src/scene/index.js",
+      "to": "src/scene/index.js"
+    },
+    {
+      "from": "src/scene/index.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/scene/index.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/scene/index.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/scene/index.js",
+      "kind": "static",
+      "specifier": "./definitions.js",
+      "to": "src/scene/definitions.js"
+    },
+    {
+      "from": "src/scene/definitions.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/scene/definitions.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/scene/index.js",
+      "kind": "static",
+      "specifier": "./author.js",
+      "to": "src/scene/author.js"
+    },
+    {
+      "from": "src/scene/author.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/scene/author.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/scene/index.js",
+      "kind": "static",
+      "specifier": "./bindings.js",
+      "to": "src/scene/bindings.js"
+    },
+    {
+      "from": "src/scene/bindings.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/scene/bindings.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/scene/bindings.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/scene/contracts.js"
+    },
+    {
+      "from": "src/scene/contracts.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/scene/contracts.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/scene/index.js",
+      "kind": "static",
+      "specifier": "./assets.js",
+      "to": "src/scene/assets.js"
+    },
+    {
+      "from": "src/scene/assets.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/scene/assets.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/scene/assets.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/scene/contracts.js"
+    },
+    {
+      "from": "src/scene/index.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/scene/contracts.js"
+    },
+    {
+      "from": "examples/fixtures/scene-registry.js",
+      "kind": "static",
+      "specifier": "./registry-extensions.js",
+      "to": "examples/fixtures/registry-extensions.js"
+    },
+    {
+      "from": "examples/fixtures/scene-registry.js",
+      "kind": "static",
+      "specifier": "./runtime-extensions.js",
+      "to": "examples/fixtures/runtime-extensions.js"
+    },
+    {
+      "from": "examples/fixtures/workspace-registry.js",
+      "kind": "static",
+      "specifier": "../../src/registry/index.js",
+      "to": "src/registry/index.js"
+    },
+    {
+      "from": "examples/fixtures/workspace-registry.js",
+      "kind": "static",
+      "specifier": "../../src/scene/index.js",
+      "to": "src/scene/index.js"
+    },
+    {
+      "from": "examples/fixtures/workspace-registry.js",
+      "kind": "static",
+      "specifier": "../../src/workspace/index.js",
+      "to": "src/workspace/index.js"
+    },
+    {
+      "from": "src/workspace/index.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/workspace/index.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/workspace/index.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/workspace/index.js",
+      "kind": "static",
+      "specifier": "../registry/index.js",
+      "to": "src/registry/index.js"
+    },
+    {
+      "from": "src/workspace/index.js",
+      "kind": "static",
+      "specifier": "../scene/index.js",
+      "to": "src/scene/index.js"
+    },
+    {
+      "from": "src/workspace/index.js",
+      "kind": "static",
+      "specifier": "./definitions.js",
+      "to": "src/workspace/definitions.js"
+    },
+    {
+      "from": "src/workspace/definitions.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "examples/fixtures/workspace-registry.js",
+      "kind": "static",
+      "specifier": "./registry-extensions.js",
+      "to": "examples/fixtures/registry-extensions.js"
+    },
+    {
+      "from": "examples/fixtures/workspace-registry.js",
+      "kind": "static",
+      "specifier": "./runtime-extensions.js",
+      "to": "examples/fixtures/runtime-extensions.js"
+    },
+    {
+      "from": "examples/scene-and-assets.mjs",
+      "kind": "static",
+      "specifier": "node:assert/strict",
+      "to": "node:assert/strict"
+    },
+    {
+      "from": "examples/scene-and-assets.mjs",
+      "kind": "static",
+      "specifier": "node:url",
+      "to": "node:url"
+    },
+    {
+      "from": "examples/scene-and-assets.mjs",
+      "kind": "static",
+      "specifier": "../src/core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "examples/scene-and-assets.mjs",
+      "kind": "static",
+      "specifier": "../src/scene/index.js",
+      "to": "src/scene/index.js"
+    },
+    {
+      "from": "examples/scene-and-assets.mjs",
+      "kind": "static",
+      "specifier": "../src/runtime/index.js",
+      "to": "src/runtime/index.js"
+    },
+    {
+      "from": "src/runtime/index.js",
+      "kind": "static",
+      "specifier": "node:worker_threads",
+      "to": "node:worker_threads"
+    },
+    {
+      "from": "src/runtime/index.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/runtime/index.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/runtime/index.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/runtime/index.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/runtime/contracts.js"
+    },
+    {
+      "from": "src/runtime/contracts.js",
+      "kind": "static",
+      "specifier": "node:crypto",
+      "to": "node:crypto"
+    },
+    {
+      "from": "src/runtime/contracts.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/runtime/contracts.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/runtime/contracts.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/runtime/index.js",
+      "kind": "local-module-url",
+      "specifier": "./worker.js",
+      "to": "src/runtime/worker.js"
+    },
+    {
+      "from": "src/runtime/worker.js",
+      "kind": "static",
+      "specifier": "node:worker_threads",
+      "to": "node:worker_threads"
+    },
+    {
+      "from": "src/runtime/worker.js",
+      "kind": "static",
+      "specifier": "../registry/index.js",
+      "to": "src/registry/index.js"
+    },
+    {
+      "from": "src/runtime/worker.js",
+      "kind": "static",
+      "specifier": "./engine.js",
+      "to": "src/runtime/engine.js"
+    },
+    {
+      "from": "src/runtime/engine.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/runtime/engine.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/runtime/engine.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/runtime/engine.js",
+      "kind": "static",
+      "specifier": "../registry/index.js",
+      "to": "src/registry/index.js"
+    },
+    {
+      "from": "src/runtime/engine.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/runtime/contracts.js"
+    },
+    {
+      "from": "src/runtime/worker.js",
+      "kind": "static",
+      "specifier": "./contracts.js",
+      "to": "src/runtime/contracts.js"
+    },
+    {
+      "from": "src/runtime/worker.js",
+      "kind": "worker-host-registry",
+      "specifier": "../../examples/fixtures/workspace-registry.js",
+      "to": "examples/fixtures/workspace-registry.js"
+    },
+    {
+      "from": "src/runtime/worker.js",
+      "kind": "worker-host-registry",
+      "specifier": "../../examples/fixtures/scene-registry.js",
+      "to": "examples/fixtures/scene-registry.js"
+    },
+    {
+      "from": "examples/scene-and-assets.mjs",
+      "kind": "static",
+      "specifier": "../src/dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "examples/scene-and-assets.mjs",
+      "kind": "static",
+      "specifier": "./fixtures/scene-registry.js",
+      "to": "examples/fixtures/scene-registry.js"
+    },
+    {
+      "from": "examples/scene-and-assets.mjs",
+      "kind": "local-module-url",
+      "specifier": "./fixtures/scene-registry.js",
+      "to": "examples/fixtures/scene-registry.js"
+    },
+    {
+      "from": "examples/workspace.mjs",
+      "kind": "static",
+      "specifier": "node:assert/strict",
+      "to": "node:assert/strict"
+    },
+    {
+      "from": "examples/workspace.mjs",
+      "kind": "static",
+      "specifier": "node:url",
+      "to": "node:url"
+    },
+    {
+      "from": "examples/workspace.mjs",
+      "kind": "static",
+      "specifier": "../src/core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "examples/workspace.mjs",
+      "kind": "static",
+      "specifier": "../src/runtime/index.js",
+      "to": "src/runtime/index.js"
+    },
+    {
+      "from": "examples/workspace.mjs",
+      "kind": "static",
+      "specifier": "../src/workspace/index.js",
+      "to": "src/workspace/index.js"
+    },
+    {
+      "from": "examples/workspace.mjs",
+      "kind": "static",
+      "specifier": "./scene-and-assets.mjs",
+      "to": "examples/scene-and-assets.mjs"
+    },
+    {
+      "from": "examples/workspace.mjs",
+      "kind": "static",
+      "specifier": "./fixtures/workspace-registry.js",
+      "to": "examples/fixtures/workspace-registry.js"
+    },
+    {
+      "from": "examples/workspace.mjs",
+      "kind": "local-module-url",
+      "specifier": "./fixtures/workspace-registry.js",
+      "to": "examples/fixtures/workspace-registry.js"
+    },
+    {
+      "from": "experiments/f11-author.mjs",
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "to": "node:fs/promises"
+    },
+    {
+      "from": "experiments/f11-author.mjs",
+      "kind": "static",
+      "specifier": "../examples/fixtures/workspace-registry.js",
+      "to": "examples/fixtures/workspace-registry.js"
+    },
+    {
+      "from": "experiments/f11-author.mjs",
+      "kind": "static",
+      "specifier": "../src/core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "experiments/f11-author.mjs",
+      "kind": "static",
+      "specifier": "../src/dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "experiments/f11-author.mjs",
+      "kind": "static",
+      "specifier": "../src/portable/format.js",
+      "to": "src/portable/format.js"
+    },
+    {
+      "from": "src/portable/format.js",
+      "kind": "static",
+      "specifier": "node:crypto",
+      "to": "node:crypto"
+    },
+    {
+      "from": "src/portable/format.js",
+      "kind": "static",
+      "specifier": "../timeline/definition.js",
+      "to": "src/timeline/definition.js"
+    },
+    {
+      "from": "src/timeline/definition.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/portable/format.js",
+      "kind": "static",
+      "specifier": "../timeline/configurations.js",
+      "to": "src/timeline/configurations.js"
+    },
+    {
+      "from": "src/timeline/configurations.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/timeline/configurations.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/timeline/configurations.js",
+      "kind": "static",
+      "specifier": "../gateway/commands.js",
+      "to": "src/gateway/commands.js"
+    },
+    {
+      "from": "src/gateway/commands.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/gateway/commands.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/gateway/commands.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/gateway/commands.js",
+      "kind": "static",
+      "specifier": "../registry/index.js",
+      "to": "src/registry/index.js"
+    },
+    {
+      "from": "src/timeline/configurations.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/timeline/configurations.js",
+      "kind": "static",
+      "specifier": "../scene/definitions.js",
+      "to": "src/scene/definitions.js"
+    },
+    {
+      "from": "src/timeline/configurations.js",
+      "kind": "static",
+      "specifier": "../workspace/definitions.js",
+      "to": "src/workspace/definitions.js"
+    },
+    {
+      "from": "src/timeline/configurations.js",
+      "kind": "static",
+      "specifier": "../runtime/contracts.js",
+      "to": "src/runtime/contracts.js"
+    },
+    {
+      "from": "src/timeline/configurations.js",
+      "kind": "static",
+      "specifier": "./definition.js",
+      "to": "src/timeline/definition.js"
+    },
+    {
+      "from": "src/portable/format.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/portable/format.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/portable/format.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/portable/format.js",
+      "kind": "static",
+      "specifier": "../registry/index.js",
+      "to": "src/registry/index.js"
+    },
+    {
+      "from": "src/portable/format.js",
+      "kind": "static",
+      "specifier": "../runtime/contracts.js",
+      "to": "src/runtime/contracts.js"
+    },
+    {
+      "from": "experiments/f11-author.mjs",
+      "kind": "static",
+      "specifier": "../src/timeline/definition.js",
+      "to": "src/timeline/definition.js"
+    },
+    {
+      "from": "experiments/f11-author.mjs",
+      "kind": "static",
+      "specifier": "../src/workspace/index.js",
+      "to": "src/workspace/index.js"
+    },
+    {
+      "from": "scripts/gateway.mjs",
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "to": "node:fs/promises"
+    },
+    {
+      "from": "scripts/gateway.mjs",
+      "kind": "static",
+      "specifier": "node:url",
+      "to": "node:url"
+    },
+    {
+      "from": "scripts/gateway.mjs",
+      "kind": "static",
+      "specifier": "../src/gateway/sdk.js",
+      "to": "src/gateway/sdk.js"
+    },
+    {
+      "from": "src/gateway/sdk.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "static",
+      "specifier": "node:http",
+      "to": "node:http"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "to": "node:fs/promises"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "static",
+      "specifier": "node:os",
+      "to": "node:os"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "static",
+      "specifier": "node:path",
+      "to": "node:path"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "static",
+      "specifier": "node:url",
+      "to": "node:url"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "static",
+      "specifier": "node:crypto",
+      "to": "node:crypto"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "static",
+      "specifier": "../src/runtime/index.js",
+      "to": "src/runtime/index.js"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "static",
+      "specifier": "../src/core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "static",
+      "specifier": "../src/gateway/index.js",
+      "to": "src/gateway/index.js"
+    },
+    {
+      "from": "src/gateway/index.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/gateway/index.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/gateway/index.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "src/gateway/index.js",
+      "kind": "static",
+      "specifier": "./commands.js",
+      "to": "src/gateway/commands.js"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "static",
+      "specifier": "../src/agent-session/index.js",
+      "to": "src/agent-session/index.js"
+    },
+    {
+      "from": "src/agent-session/index.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/agent-session/index.js",
+      "kind": "static",
+      "specifier": "node:crypto",
+      "to": "node:crypto"
+    },
+    {
+      "from": "src/agent-session/index.js",
+      "kind": "static",
+      "specifier": "./context.js",
+      "to": "src/agent-session/context.js"
+    },
+    {
+      "from": "src/agent-session/context.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/agent-session/context.js",
+      "kind": "static",
+      "specifier": "../dataflow/index.js",
+      "to": "src/dataflow/index.js"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "static",
+      "specifier": "../src/agent-session/codex.js",
+      "to": "src/agent-session/codex.js"
+    },
+    {
+      "from": "src/agent-session/codex.js",
+      "kind": "static",
+      "specifier": "node:child_process",
+      "to": "node:child_process"
+    },
+    {
+      "from": "src/agent-session/codex.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/agent-session/codex.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/agent-session/codex.js",
+      "kind": "static",
+      "specifier": "./config.js",
+      "to": "src/agent-session/config.js"
+    },
+    {
+      "from": "src/agent-session/config.js",
+      "kind": "static",
+      "specifier": "node:fs",
+      "to": "node:fs"
+    },
+    {
+      "from": "src/agent-session/config.js",
+      "kind": "static",
+      "specifier": "node:path",
+      "to": "node:path"
+    },
+    {
+      "from": "src/agent-session/config.js",
+      "kind": "static",
+      "specifier": "node:url",
+      "to": "node:url"
+    },
+    {
+      "from": "src/agent-session/config.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/agent-session/config.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/agent-session/codex.js",
+      "kind": "static",
+      "specifier": "./rpc.js",
+      "to": "src/agent-session/rpc.js"
+    },
+    {
+      "from": "src/agent-session/rpc.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/agent-session/rpc.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "static",
+      "specifier": "../examples/scene-and-assets.mjs",
+      "to": "examples/scene-and-assets.mjs"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "dynamic-literal",
+      "specifier": "../examples/workspace.mjs",
+      "to": "examples/workspace.mjs"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "dynamic-literal",
+      "specifier": "../src/portable/store.js",
+      "to": "src/portable/store.js"
+    },
+    {
+      "from": "src/portable/store.js",
+      "kind": "static",
+      "specifier": "node:crypto",
+      "to": "node:crypto"
+    },
+    {
+      "from": "src/portable/store.js",
+      "kind": "static",
+      "specifier": "node:fs",
+      "to": "node:fs"
+    },
+    {
+      "from": "src/portable/store.js",
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "to": "node:fs/promises"
+    },
+    {
+      "from": "src/portable/store.js",
+      "kind": "static",
+      "specifier": "node:path",
+      "to": "node:path"
+    },
+    {
+      "from": "src/portable/store.js",
+      "kind": "static",
+      "specifier": "node:timers/promises",
+      "to": "node:timers/promises"
+    },
+    {
+      "from": "src/portable/store.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "dynamic-literal",
+      "specifier": "../src/portable/workspace.js",
+      "to": "src/portable/workspace.js"
+    },
+    {
+      "from": "src/portable/workspace.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/portable/workspace.js",
+      "kind": "static",
+      "specifier": "../runtime/contracts.js",
+      "to": "src/runtime/contracts.js"
+    },
+    {
+      "from": "src/portable/workspace.js",
+      "kind": "static",
+      "specifier": "../gateway/index.js",
+      "to": "src/gateway/index.js"
+    },
+    {
+      "from": "src/portable/workspace.js",
+      "kind": "static",
+      "specifier": "../runtime/index.js",
+      "to": "src/runtime/index.js"
+    },
+    {
+      "from": "src/portable/workspace.js",
+      "kind": "static",
+      "specifier": "./format.js",
+      "to": "src/portable/format.js"
+    },
+    {
+      "from": "scripts/scene-server.mjs",
+      "kind": "dynamic-literal",
+      "specifier": "./timeline-http.mjs",
+      "to": "scripts/timeline-http.mjs"
+    },
+    {
+      "from": "scripts/timeline-http.mjs",
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "to": "node:fs/promises"
+    },
+    {
+      "from": "scripts/timeline-http.mjs",
+      "kind": "static",
+      "specifier": "node:path",
+      "to": "node:path"
+    },
+    {
+      "from": "scripts/timeline-http.mjs",
+      "kind": "static",
+      "specifier": "node:url",
+      "to": "node:url"
+    },
+    {
+      "from": "scripts/timeline-http.mjs",
+      "kind": "static",
+      "specifier": "../src/timeline/evaluator.js",
+      "to": "src/timeline/evaluator.js"
+    },
+    {
+      "from": "src/timeline/evaluator.js",
+      "kind": "static",
+      "specifier": "three",
+      "to": "node_modules/three/build/three.module.js"
+    },
+    {
+      "from": "src/timeline/evaluator.js",
+      "kind": "static",
+      "specifier": "../core/index.js",
+      "to": "src/core/index.js"
+    },
+    {
+      "from": "src/timeline/evaluator.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/timeline/evaluator.js",
+      "kind": "static",
+      "specifier": "../gateway/index.js",
+      "to": "src/gateway/index.js"
+    },
+    {
+      "from": "src/timeline/evaluator.js",
+      "kind": "static",
+      "specifier": "../portable/format.js",
+      "to": "src/portable/format.js"
+    },
+    {
+      "from": "src/timeline/evaluator.js",
+      "kind": "static",
+      "specifier": "../runtime/index.js",
+      "to": "src/runtime/index.js"
+    },
+    {
+      "from": "src/timeline/evaluator.js",
+      "kind": "static",
+      "specifier": "../runtime/contracts.js",
+      "to": "src/runtime/contracts.js"
+    },
+    {
+      "from": "src/timeline/evaluator.js",
+      "kind": "static",
+      "specifier": "./configurations.js",
+      "to": "src/timeline/configurations.js"
+    },
+    {
+      "from": "src/timeline/evaluator.js",
+      "kind": "static",
+      "specifier": "./definition.js",
+      "to": "src/timeline/definition.js"
+    },
+    {
+      "from": "scripts/timeline-delivery.mjs",
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "to": "node:fs/promises"
+    },
+    {
+      "from": "scripts/timeline-delivery.mjs",
+      "kind": "static",
+      "specifier": "../src/portable/format.js",
+      "to": "src/portable/format.js"
+    },
+    {
+      "from": "scripts/timeline-delivery.mjs",
+      "kind": "static",
+      "specifier": "../src/timeline/export.js",
+      "to": "src/timeline/export.js"
+    },
+    {
+      "from": "src/timeline/export.js",
+      "kind": "static",
+      "specifier": "node:crypto",
+      "to": "node:crypto"
+    },
+    {
+      "from": "src/timeline/export.js",
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "to": "node:fs/promises"
+    },
+    {
+      "from": "src/timeline/export.js",
+      "kind": "static",
+      "specifier": "node:path",
+      "to": "node:path"
+    },
+    {
+      "from": "src/timeline/export.js",
+      "kind": "static",
+      "specifier": "node:url",
+      "to": "node:url"
+    },
+    {
+      "from": "src/timeline/export.js",
+      "kind": "static",
+      "specifier": "../core/data.js",
+      "to": "src/core/data.js"
+    },
+    {
+      "from": "src/timeline/export.js",
+      "kind": "static",
+      "specifier": "../runtime/contracts.js",
+      "to": "src/runtime/contracts.js"
+    },
+    {
+      "from": "src/timeline/export.js",
+      "kind": "static",
+      "specifier": "../portable/format.js",
+      "to": "src/portable/format.js"
+    },
+    {
+      "from": "src/timeline/export.js",
+      "kind": "dynamic-literal",
+      "specifier": "../../scripts/timeline-server.mjs",
+      "to": "scripts/timeline-server.mjs"
+    },
+    {
+      "from": "scripts/timeline-server.mjs",
+      "kind": "static",
+      "specifier": "node:http",
+      "to": "node:http"
+    },
+    {
+      "from": "scripts/timeline-server.mjs",
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "to": "node:fs/promises"
+    },
+    {
+      "from": "scripts/timeline-server.mjs",
+      "kind": "static",
+      "specifier": "node:url",
+      "to": "node:url"
+    },
+    {
+      "from": "scripts/timeline-server.mjs",
+      "kind": "static",
+      "specifier": "../examples/fixtures/workspace-registry.js",
+      "to": "examples/fixtures/workspace-registry.js"
+    },
+    {
+      "from": "scripts/timeline-server.mjs",
+      "kind": "static",
+      "specifier": "../src/workspace/index.js",
+      "to": "src/workspace/index.js"
+    },
+    {
+      "from": "scripts/timeline-server.mjs",
+      "kind": "static",
+      "specifier": "../src/portable/format.js",
+      "to": "src/portable/format.js"
+    },
+    {
+      "from": "scripts/timeline-server.mjs",
+      "kind": "static",
+      "specifier": "./timeline-http.mjs",
+      "to": "scripts/timeline-http.mjs"
+    },
+    {
+      "from": "scripts/timeline-server.mjs",
+      "kind": "local-module-url",
+      "specifier": "../examples/fixtures/workspace-registry.js",
+      "to": "examples/fixtures/workspace-registry.js"
+    },
+    {
+      "from": "src/timeline/export.js",
+      "kind": "dynamic-literal",
+      "specifier": "../../scripts/timeline-server.mjs",
+      "to": "scripts/timeline-server.mjs"
+    }
+  ],
+  "closures": {
+    "kernel": {
+      "entry": "src/core/index.js",
+      "modules": [
+        "src/core/data.js",
+        "src/core/graph.js",
+        "src/core/index.js",
+        "src/core/project.js"
+      ]
+    },
+    "dataflow": {
+      "entry": "src/dataflow/index.js",
+      "modules": [
+        "src/core/data.js",
+        "src/core/graph.js",
+        "src/core/index.js",
+        "src/core/project.js",
+        "src/dataflow/author.js",
+        "src/dataflow/contracts.js",
+        "src/dataflow/evaluate.js",
+        "src/dataflow/graph.js",
+        "src/dataflow/index.js",
+        "src/dataflow/values.js"
+      ]
+    },
+    "registry": {
+      "entry": "src/registry/index.js",
+      "modules": [
+        "src/core/data.js",
+        "src/core/graph.js",
+        "src/core/index.js",
+        "src/core/project.js",
+        "src/dataflow/author.js",
+        "src/dataflow/contracts.js",
+        "src/dataflow/evaluate.js",
+        "src/dataflow/graph.js",
+        "src/dataflow/index.js",
+        "src/dataflow/values.js",
+        "src/registry/binding.js",
+        "src/registry/contracts.js",
+        "src/registry/harness.js",
+        "src/registry/index.js",
+        "src/registry/manifest.js",
+        "src/registry/requirements.js",
+        "src/registry/results.js",
+        "src/registry/schema.js"
+      ]
+    },
+    "worker": {
+      "entry": "src/runtime/index.js",
+      "modules": [
+        "examples/fixtures/registry-extensions.js",
+        "examples/fixtures/runtime-extensions.js",
+        "examples/fixtures/scene-registry.js",
+        "examples/fixtures/workspace-registry.js",
+        "src/core/data.js",
+        "src/core/graph.js",
+        "src/core/index.js",
+        "src/core/project.js",
+        "src/dataflow/author.js",
+        "src/dataflow/contracts.js",
+        "src/dataflow/evaluate.js",
+        "src/dataflow/graph.js",
+        "src/dataflow/index.js",
+        "src/dataflow/values.js",
+        "src/registry/binding.js",
+        "src/registry/contracts.js",
+        "src/registry/harness.js",
+        "src/registry/index.js",
+        "src/registry/manifest.js",
+        "src/registry/requirements.js",
+        "src/registry/results.js",
+        "src/registry/schema.js",
+        "src/runtime/contracts.js",
+        "src/runtime/engine.js",
+        "src/runtime/index.js",
+        "src/runtime/worker.js",
+        "src/scene/assets.js",
+        "src/scene/author.js",
+        "src/scene/bindings.js",
+        "src/scene/contracts.js",
+        "src/scene/definitions.js",
+        "src/scene/index.js",
+        "src/workspace/definitions.js",
+        "src/workspace/index.js"
+      ]
+    },
+    "scene": {
+      "entry": "src/scene/index.js",
+      "modules": [
+        "src/core/data.js",
+        "src/core/graph.js",
+        "src/core/index.js",
+        "src/core/project.js",
+        "src/dataflow/author.js",
+        "src/dataflow/contracts.js",
+        "src/dataflow/evaluate.js",
+        "src/dataflow/graph.js",
+        "src/dataflow/index.js",
+        "src/dataflow/values.js",
+        "src/scene/assets.js",
+        "src/scene/author.js",
+        "src/scene/bindings.js",
+        "src/scene/contracts.js",
+        "src/scene/definitions.js",
+        "src/scene/index.js"
+      ]
+    },
+    "workspaceHost": {
+      "entry": "scripts/scene-server.mjs",
+      "modules": [
+        "examples/fixtures/registry-extensions.js",
+        "examples/fixtures/runtime-extensions.js",
+        "examples/fixtures/scene-registry.js",
+        "examples/fixtures/workspace-registry.js",
+        "examples/scene-and-assets.mjs",
+        "examples/workspace.mjs",
+        "node_modules/three/build/three.core.js",
+        "node_modules/three/build/three.module.js",
+        "scripts/scene-server.mjs",
+        "scripts/timeline-http.mjs",
+        "src/agent-session/codex.js",
+        "src/agent-session/config.js",
+        "src/agent-session/context.js",
+        "src/agent-session/index.js",
+        "src/agent-session/rpc.js",
+        "src/core/data.js",
+        "src/core/graph.js",
+        "src/core/index.js",
+        "src/core/project.js",
+        "src/dataflow/author.js",
+        "src/dataflow/contracts.js",
+        "src/dataflow/evaluate.js",
+        "src/dataflow/graph.js",
+        "src/dataflow/index.js",
+        "src/dataflow/values.js",
+        "src/gateway/commands.js",
+        "src/gateway/index.js",
+        "src/portable/format.js",
+        "src/portable/store.js",
+        "src/portable/workspace.js",
+        "src/registry/binding.js",
+        "src/registry/contracts.js",
+        "src/registry/harness.js",
+        "src/registry/index.js",
+        "src/registry/manifest.js",
+        "src/registry/requirements.js",
+        "src/registry/results.js",
+        "src/registry/schema.js",
+        "src/runtime/contracts.js",
+        "src/runtime/engine.js",
+        "src/runtime/index.js",
+        "src/runtime/worker.js",
+        "src/scene/assets.js",
+        "src/scene/author.js",
+        "src/scene/bindings.js",
+        "src/scene/contracts.js",
+        "src/scene/definitions.js",
+        "src/scene/index.js",
+        "src/timeline/configurations.js",
+        "src/timeline/definition.js",
+        "src/timeline/evaluator.js",
+        "src/workspace/definitions.js",
+        "src/workspace/index.js"
+      ]
+    },
+    "workspaceBrowser": {
+      "entry": "demo/workspace/app.js",
+      "modules": [
+        "demo/workspace/app.js",
+        "node_modules/three/build/three.core.js",
+        "node_modules/three/build/three.module.js",
+        "node_modules/three/examples/jsm/controls/OrbitControls.js",
+        "src/scene/three-adapter.js",
+        "src/workspace/browser.js",
+        "src/workspace/plot-samples.js",
+        "src/workspace/project-files.js",
+        "src/workspace/session.js"
+      ]
+    },
+    "renderer": {
+      "entry": "src/scene/three-adapter.js",
+      "modules": [
+        "node_modules/three/build/three.core.js",
+        "node_modules/three/build/three.module.js",
+        "node_modules/three/examples/jsm/controls/OrbitControls.js",
+        "src/scene/three-adapter.js"
+      ]
+    },
+    "nativeAgent": {
+      "entry": "src/agent-session/codex.js",
+      "modules": [
+        "src/agent-session/codex.js",
+        "src/agent-session/config.js",
+        "src/agent-session/rpc.js",
+        "src/core/data.js",
+        "src/core/graph.js",
+        "src/core/index.js",
+        "src/core/project.js"
+      ]
+    },
+    "agentBridge": {
+      "entry": "src/agent-session/index.js",
+      "modules": [
+        "src/agent-session/context.js",
+        "src/agent-session/index.js",
+        "src/core/data.js",
+        "src/core/graph.js",
+        "src/core/index.js",
+        "src/core/project.js",
+        "src/dataflow/author.js",
+        "src/dataflow/contracts.js",
+        "src/dataflow/evaluate.js",
+        "src/dataflow/graph.js",
+        "src/dataflow/index.js",
+        "src/dataflow/values.js"
+      ]
+    },
+    "gateway": {
+      "entry": "src/gateway/index.js",
+      "modules": [
+        "src/core/data.js",
+        "src/core/graph.js",
+        "src/core/index.js",
+        "src/core/project.js",
+        "src/dataflow/author.js",
+        "src/dataflow/contracts.js",
+        "src/dataflow/evaluate.js",
+        "src/dataflow/graph.js",
+        "src/dataflow/index.js",
+        "src/dataflow/values.js",
+        "src/gateway/commands.js",
+        "src/gateway/index.js",
+        "src/registry/binding.js",
+        "src/registry/contracts.js",
+        "src/registry/harness.js",
+        "src/registry/index.js",
+        "src/registry/manifest.js",
+        "src/registry/requirements.js",
+        "src/registry/results.js",
+        "src/registry/schema.js"
+      ]
+    },
+    "portable": {
+      "entry": "src/portable/format.js",
+      "modules": [
+        "src/core/data.js",
+        "src/core/graph.js",
+        "src/core/index.js",
+        "src/core/project.js",
+        "src/dataflow/author.js",
+        "src/dataflow/contracts.js",
+        "src/dataflow/evaluate.js",
+        "src/dataflow/graph.js",
+        "src/dataflow/index.js",
+        "src/dataflow/values.js",
+        "src/gateway/commands.js",
+        "src/portable/format.js",
+        "src/registry/binding.js",
+        "src/registry/contracts.js",
+        "src/registry/harness.js",
+        "src/registry/index.js",
+        "src/registry/manifest.js",
+        "src/registry/requirements.js",
+        "src/registry/results.js",
+        "src/registry/schema.js",
+        "src/runtime/contracts.js",
+        "src/scene/definitions.js",
+        "src/timeline/configurations.js",
+        "src/timeline/definition.js",
+        "src/workspace/definitions.js"
+      ]
+    },
+    "timelinePlayer": {
+      "entry": "scripts/timeline-server.mjs",
+      "modules": [
+        "examples/fixtures/registry-extensions.js",
+        "examples/fixtures/runtime-extensions.js",
+        "examples/fixtures/scene-registry.js",
+        "examples/fixtures/workspace-registry.js",
+        "node_modules/three/build/three.core.js",
+        "node_modules/three/build/three.module.js",
+        "scripts/timeline-http.mjs",
+        "scripts/timeline-server.mjs",
+        "src/core/data.js",
+        "src/core/graph.js",
+        "src/core/index.js",
+        "src/core/project.js",
+        "src/dataflow/author.js",
+        "src/dataflow/contracts.js",
+        "src/dataflow/evaluate.js",
+        "src/dataflow/graph.js",
+        "src/dataflow/index.js",
+        "src/dataflow/values.js",
+        "src/gateway/commands.js",
+        "src/gateway/index.js",
+        "src/portable/format.js",
+        "src/registry/binding.js",
+        "src/registry/contracts.js",
+        "src/registry/harness.js",
+        "src/registry/index.js",
+        "src/registry/manifest.js",
+        "src/registry/requirements.js",
+        "src/registry/results.js",
+        "src/registry/schema.js",
+        "src/runtime/contracts.js",
+        "src/runtime/engine.js",
+        "src/runtime/index.js",
+        "src/runtime/worker.js",
+        "src/scene/assets.js",
+        "src/scene/author.js",
+        "src/scene/bindings.js",
+        "src/scene/contracts.js",
+        "src/scene/definitions.js",
+        "src/scene/index.js",
+        "src/timeline/configurations.js",
+        "src/timeline/definition.js",
+        "src/timeline/evaluator.js",
+        "src/workspace/definitions.js",
+        "src/workspace/index.js"
+      ]
+    },
+    "timelineBrowser": {
+      "entry": "demo/timeline/app.js",
+      "modules": [
+        "demo/timeline/app.js",
+        "node_modules/three/build/three.core.js",
+        "node_modules/three/build/three.module.js",
+        "node_modules/three/examples/jsm/controls/OrbitControls.js",
+        "src/scene/three-adapter.js",
+        "src/workspace/plot-samples.js"
+      ]
+    },
+    "delivery": {
+      "entry": "scripts/timeline-delivery.mjs",
+      "modules": [
+        "examples/fixtures/registry-extensions.js",
+        "examples/fixtures/runtime-extensions.js",
+        "examples/fixtures/scene-registry.js",
+        "examples/fixtures/workspace-registry.js",
+        "node_modules/three/build/three.core.js",
+        "node_modules/three/build/three.module.js",
+        "scripts/timeline-delivery.mjs",
+        "scripts/timeline-http.mjs",
+        "scripts/timeline-server.mjs",
+        "src/core/data.js",
+        "src/core/graph.js",
+        "src/core/index.js",
+        "src/core/project.js",
+        "src/dataflow/author.js",
+        "src/dataflow/contracts.js",
+        "src/dataflow/evaluate.js",
+        "src/dataflow/graph.js",
+        "src/dataflow/index.js",
+        "src/dataflow/values.js",
+        "src/gateway/commands.js",
+        "src/gateway/index.js",
+        "src/portable/format.js",
+        "src/registry/binding.js",
+        "src/registry/contracts.js",
+        "src/registry/harness.js",
+        "src/registry/index.js",
+        "src/registry/manifest.js",
+        "src/registry/requirements.js",
+        "src/registry/results.js",
+        "src/registry/schema.js",
+        "src/runtime/contracts.js",
+        "src/runtime/engine.js",
+        "src/runtime/index.js",
+        "src/runtime/worker.js",
+        "src/scene/assets.js",
+        "src/scene/author.js",
+        "src/scene/bindings.js",
+        "src/scene/contracts.js",
+        "src/scene/definitions.js",
+        "src/scene/index.js",
+        "src/timeline/configurations.js",
+        "src/timeline/definition.js",
+        "src/timeline/evaluator.js",
+        "src/timeline/export.js",
+        "src/workspace/definitions.js",
+        "src/workspace/index.js"
+      ]
+    },
+    "authorRecipe": {
+      "entry": "experiments/f11-author.mjs",
+      "modules": [
+        "examples/fixtures/registry-extensions.js",
+        "examples/fixtures/runtime-extensions.js",
+        "examples/fixtures/workspace-registry.js",
+        "experiments/f11-author.mjs",
+        "src/core/data.js",
+        "src/core/graph.js",
+        "src/core/index.js",
+        "src/core/project.js",
+        "src/dataflow/author.js",
+        "src/dataflow/contracts.js",
+        "src/dataflow/evaluate.js",
+        "src/dataflow/graph.js",
+        "src/dataflow/index.js",
+        "src/dataflow/values.js",
+        "src/gateway/commands.js",
+        "src/portable/format.js",
+        "src/registry/binding.js",
+        "src/registry/contracts.js",
+        "src/registry/harness.js",
+        "src/registry/index.js",
+        "src/registry/manifest.js",
+        "src/registry/requirements.js",
+        "src/registry/results.js",
+        "src/registry/schema.js",
+        "src/runtime/contracts.js",
+        "src/scene/assets.js",
+        "src/scene/author.js",
+        "src/scene/bindings.js",
+        "src/scene/contracts.js",
+        "src/scene/definitions.js",
+        "src/scene/index.js",
+        "src/timeline/configurations.js",
+        "src/timeline/definition.js",
+        "src/workspace/definitions.js",
+        "src/workspace/index.js"
+      ]
+    }
+  },
+  "external": [
+    {
+      "from": "src/runtime/worker.js",
+      "parameter": "registryModule",
+      "scope": "Local file URL supplied by the staged workspace, timeline or scene host"
+    },
+    {
+      "from": "src/timeline/export.js",
+      "parameter": "COSMIC_LEGO_PLAYWRIGHT",
+      "scope": "External trusted browser driver for export only"
+    }
+  ],
+  "importMaps": {
+    "workspace": {
+      "three": "/vendor/three/three.module.js",
+      "three/addons/controls/OrbitControls.js": "/vendor/three/OrbitControls.js"
+    },
+    "scene": {
+      "three": "/vendor/three/three.module.js",
+      "three/addons/controls/OrbitControls.js": "/vendor/three/OrbitControls.js"
+    },
+    "timeline": {
+      "three": "/vendor/three/three.module.js",
+      "three/addons/controls/OrbitControls.js": "/vendor/three/OrbitControls.js"
+    }
+  },
+  "hostExecutables": [
+    {
+      "from": "src/agent-session/codex.js",
+      "role": "Optional native agent",
+      "configuration": "An absolute executable supplied by the host before a connection"
+    },
+    {
+      "from": "src/timeline/export.js",
+      "role": "Optional export browser",
+      "configuration": "Playwright Chromium or host-configured COSMIC_LEGO_CHROME"
+    }
+  ],
+  "authorRecipe": "experiments/f11-author.mjs",
+  "negativeProbes": [
+    {
+      "specifier": "./src/physics.js",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "./src/sdk.js",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "./src/contract.js",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "./src/app.js",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "./src/scene.js",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "./src/server.js",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "./scripts/serve.mjs",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "./scripts/agent.mjs",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "./examples/tilted-orbits.mjs",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "./examples/eccentric-periapsis.mjs",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "./examples/cosmic-clockwork.mjs",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "./src/domains/exoplanet/index.js",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "cosmic-lego/src/physics.js",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "@cosmic-lego/exoplanet",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "cosmic-lego-exoplanet",
+      "code": "ERR_MODULE_NOT_FOUND"
+    },
+    {
+      "specifier": "cosmic-lego/src/sdk.js",
+      "code": "MODULE_NOT_FOUND",
+      "loader": "require.resolve"
+    },
+    {
+      "specifier": "@cosmic-lego/exoplanet",
+      "code": "MODULE_NOT_FOUND",
+      "loader": "require.resolve"
+    }
+  ],
+  "absentFiles": [
+    "src/physics.js",
+    "src/sdk.js",
+    "src/contract.js",
+    "src/app.js",
+    "src/scene.js",
+    "src/server.js",
+    "scripts/serve.mjs",
+    "scripts/agent.mjs",
+    "examples/tilted-orbits.mjs",
+    "examples/eccentric-periapsis.mjs",
+    "examples/cosmic-clockwork.mjs"
+  ],
+  "registeredExtensions": [
+    "fixture.accumulator",
+    "fixture.moving-point",
+    "fixture.point-geometry",
+    "fixture.point-view",
+    "fixture.scale-length",
+    "fixture.seeded-accumulator",
+    "scene.bind-position",
+    "scene.bind-positions",
+    "scene.bind-scalar-field",
+    "scene.bind-vectors",
+    "scene.camera",
+    "scene.geometry",
+    "scene.group",
+    "scene.label",
+    "scene.material",
+    "scene.mesh",
+    "scene.points",
+    "scene.polyline",
+    "scene.root",
+    "scene.texture",
+    "scene.textured-material",
+    "scene.vectors",
+    "workspace.conversation",
+    "workspace.inspector",
+    "workspace.plot",
+    "workspace.provenance"
+  ],
+  "threeRevision": "187",
+  "nodeVersion": "v24.22.1"
+}

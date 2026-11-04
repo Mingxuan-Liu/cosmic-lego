@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark"><title>Timeline · Cosmic Lego</title>
+  <link rel="icon" href="/assets/branding/cosmic-lego-galaxy.png">
+  <link rel="stylesheet" href="/timeline/style.css">
+  <script type="importmap">{"imports":{"three":"/vendor/three/three.module.js","three/addons/controls/OrbitControls.js":"/vendor/three/OrbitControls.js"}}</script>
+</head>
+<body>
+  <main id="player" aria-label="Authored timeline">
+    <section id="stage" aria-label="Rendered presentation">
+      <canvas id="scene" aria-label="Authored three-dimensional scene"></canvas>
+      <header id="masthead"><img id="brand" src="/assets/branding/cosmic-lego-galaxy.png" alt="Cosmic Lego"><div><div class="eyebrow">Cosmic Lego <span> / </span> Timeline</div><h1 id="title">Timeline player</h1></div></header>
+      <div id="clocks"><div><span>Presentation</span><output id="presentation-time">—</output></div><div><span>Physical</span><output id="physical-time">—</output></div></div>
+      <aside id="panels" aria-label="Authored readouts"></aside>
+      <section id="caption" aria-label="Configuration and annotations"><div class="eyebrow" id="configuration">Original configuration</div><div id="annotations"></div></section>
+      <div id="stage-error" role="alert" hidden></div>
+    </section>
+    <footer id="controls" aria-label="Playback controls">
+      <div class="transport"><button id="play" aria-label="Play timeline" disabled>Play</button><button id="previous" aria-label="Step back a quarter second" disabled>−¼</button><button id="next" aria-label="Step forward a quarter second" disabled>+¼</button></div>
+      <div id="progress"><div class="progress-label"><label for="scrub">Presentation time</label><span id="duration"></span></div><input id="scrub" type="range" min="0" max="1" step="any" value="0" disabled></div>
+      <form id="seek-form"><label for="exact-time">Seek to seconds</label><div><input id="exact-time" type="number" step="any" min="0" value="0" required disabled><button id="go" disabled>Go</button></div></form>
+      <div id="transport-status"><span id="status" role="status">Loading timeline…</span><button id="reload" hidden>Reload timeline</button><details id="notes" hidden><summary>Frame notes</summary><ul></ul></details></div>
+    </footer>
+  </main>
+  <script type="module" src="/timeline/app.js"></script>
+</body>
+</html>

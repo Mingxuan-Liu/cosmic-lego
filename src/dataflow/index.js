@@ -43,13 +43,16 @@ export function createDataflow({ models = {}, adapters = {}, limits = {} } = {})
     inspect,
     // Expose resolved F02 contracts for composition layers (e.g. visual ports),
     // without letting those layers invent a second scientific descriptor system.
-    describe(input) {
+    describe(input, { includeDependencies = false } = {}) {
       try {
         const graph = copyData(input);
         const structural = validateProject(graph);
         if (!structural.valid) return { ...structural, outputs: {} };
         const inspected = analyze(graph, environment);
-        return { valid: inspected.valid, errors: inspected.errors, outputs: copyData(Object.fromEntries(inspected.outputs)) };
+        const result = { valid: inspected.valid, errors: inspected.errors, outputs: copyData(Object.fromEntries(inspected.outputs)) };
+        if (includeDependencies) result.dependencies = Object.fromEntries(
+          [...inspected.dependencies].map(([id, dependencies]) => [id, [...dependencies].sort()]));
+        return result;
       } catch (error) { return { valid: false, errors: [issue(error)], outputs: {} }; }
     },
     dependencies(input, id) {

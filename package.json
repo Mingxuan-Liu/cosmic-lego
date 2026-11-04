@@ -9,7 +9,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "node scripts/serve.mjs",
+    "start": "node apps/exoplanet.mjs",
     "test": "node --test",
     "tools": "node scripts/agent.mjs tools"
   },

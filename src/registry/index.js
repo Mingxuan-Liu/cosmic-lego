@@ -10,6 +10,7 @@ import { prepareCases, runCases } from './harness.js';
 export { prepareManifest, resolvePorts, matchesVersion, API_VERSION, MANIFEST_VERSION } from './manifest.js';
 export { validateSchema, validateData, applyDefaults, SCHEMA_LIMITS } from './schema.js';
 export { REGISTRY_LIMITS } from './contracts.js';
+export { validateSuppliedResult } from './results.js';
 
 const diagnosticCodes = [
   'INVALID_MANIFEST', 'UNSUPPORTED_VERSION', 'INVALID_VERSION', 'INVALID_SCHEMA', 'PORT_TEMPLATE',
@@ -23,6 +24,7 @@ const diagnosticCodes = [
 
 export class ExtensionRegistry {
   #records = new Map();
+  #validators = new Map();
   #capabilities;
   #limits;
   #reports = new Map();
@@ -36,6 +38,17 @@ export class ExtensionRegistry {
     keys(this.#limits, Object.keys(REGISTRY_LIMITS), 'registry limits');
     requireThat(Object.values(this.#limits).every(number => Number.isSafeInteger(number) && number > 0), 'REGISTRY_LIMITS', 'Registry limits must be positive safe integers.');
     Object.freeze(this.#limits);
+  }
+
+  // Trusted composition-root rules can constrain relationships across nodes.
+  // A binding captures its current rule set just as it captures model records.
+  registerValidator(id, validate) {
+    requireThat(typeof id === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$/.test(id) && typeof validate === 'function',
+      'REGISTRY_VALIDATOR', 'A graph validator requires a stable ID and a synchronous validation function.');
+    requireThat(!this.#validators.has(id) && this.#validators.size < this.#limits.maxExtensions,
+      'REGISTRY_VALIDATOR', 'Duplicate or excessive graph validator registration.');
+    this.#validators.set(id, validate);
+    return this;
   }
 
   register(extension) {
@@ -99,7 +112,7 @@ export class ExtensionRegistry {
   inspectRequirements(graph) { return inspectRequirements(graph, this.#records, this.#capabilities); }
   bind({ limits = {}, execute } = {}) {
     requireThat(execute === undefined || typeof execute === 'function', 'RUNTIME_CONTRACT', 'execute must be a trusted runtime function.');
-    return bindRegistry(new Map(this.#records), new Set(this.#capabilities), this.#limits, limits, execute);
+    return bindRegistry(new Map(this.#records), new Set(this.#capabilities), this.#limits, limits, execute, [...this.#validators.values()]);
   }
   runContractTests(id) {
     const record = this.#records.get(id);

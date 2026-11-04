@@ -14,8 +14,12 @@ export function registerSceneExtensions(registry) {
   return registry;
 }
 
-export function createSceneLayer(binding, { limits: inputLimits = {} } = {}) {
+export function createSceneLayer(binding, { limits: inputLimits = {}, additionalViewFormats = [] } = {}) {
   const limits = sceneLimits(inputLimits);
+  additionalViewFormats = copyData(additionalViewFormats);
+  insist(Array.isArray(additionalViewFormats) && additionalViewFormats.every(format => typeof format === 'string' && format.trim()) && new Set(additionalViewFormats).size === additionalViewFormats.length,
+    'RENDER_CAPABILITY', 'Additional view formats must be distinct names explicitly consumed by the composition host.');
+  const externalViews = new Set(additionalViewFormats);
   const manifests = new Map(binding.visuals.map(record => [record.manifest.id, record.manifest]));
   const isBinding = node => manifests.get(node.type)?.artifact.format === 'cosmic.scene.binding.v1';
   const isNode = node => manifests.get(node.type)?.artifact.format === 'cosmic.scene.node.v1';
@@ -88,7 +92,7 @@ export function createSceneLayer(binding, { limits: inputLimits = {} } = {}) {
         if (!validated.valid) { snapshot.diagnostics = validated.errors; return snapshot; }
         for (const node of graph.nodes) {
           const artifact = manifests.get(node.type)?.artifact;
-          insist(!artifact || artifact.kind !== 'view' || isNode(node) || isBinding(node), 'RENDER_CAPABILITY', `No scene adapter consumes ${artifact?.format}.`, node.id);
+          insist(!artifact || artifact.kind !== 'view' || isNode(node) || isBinding(node) || externalViews.has(artifact.format), 'RENDER_CAPABILITY', `No scene adapter consumes ${artifact?.format}.`, node.id);
         }
         snapshot.assets = await resolveAssets(project, binding, graph, limits, { results, time });
         const produced = [];

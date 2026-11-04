@@ -65,6 +65,10 @@ export function author(draft, environment) {
       }
       return create(TYPES.selection, { mode: spec.mode, element: descriptor(element), ...(query ? { query } : {}) }, inputs, options);
     },
+    sample(source, schedule, options = {}) {
+      exactKeys(schedule, ['times', 'unit'], 'sample schedule');
+      return create(TYPES.sample, copyData(schedule), { source }, options);
+    },
     field(source, indices, options = {}) { return create(TYPES.field, { indices: copyData(indices) }, { source }, options); },
     arithmetic(op, left, right, options = {}) {
       exactKeys(options, ['id', 'comparison', 'alignment'], 'arithmetic options');

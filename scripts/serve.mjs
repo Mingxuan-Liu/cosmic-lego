@@ -1,27 +1,44 @@
 #!/usr/bin/env node
-import { readFileSync,writeFileSync,mkdirSync,existsSync } from 'node:fs';
-import { fileURLToPath,pathToFileURL } from 'node:url';
-import path from 'node:path';
-import { createApp } from '../src/server.js';
-import { toScript } from '../src/sdk.js';
-const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const args=process.argv.slice(2),flags=new Map();
-for(let i=0;i<args.length;i++){if(args[i]==='--resume')flags.set('--resume',true);else if(['--port','--example'].includes(args[i])&&args[i+1]&&!args[i+1].startsWith('--'))flags.set(args[i],args[++i]);else throw new Error(`Unknown or incomplete option ${args[i]}.`);}
-const port=Number(flags.get('--port')??4317);if(!Number.isInteger(port)||port<0||port>65535)throw new Error('Invalid port.');
-const examples=[
-  {id:'cosmic-clockwork',title:'Three planets · one shared shadow',description:'Independent orbits and one combined photometer, including overlapping silhouettes.'},
-  {id:'tilted-orbits',title:'Tilt a planet · move the observer',description:'A structural revision adds another observer and measurement.'},
-  {id:'eccentric-periapsis',title:'Eccentricity · what stays fixed?',description:'Compare changing e at fixed semimajor axis and at fixed periapsis.'},
-  {id:'agent-a-overlap',title:'Agent A · overlapping shadows',description:'An independently authored three-planet world with six linked photometers.'},
-  {id:'agent-b-eccentricity',title:'Agent B · four separate orbital clocks',description:'An independently authored world using creation, removal, eccentricity constraints and observer rewiring.'}
-];
-async function loadExample(id){if(!examples.some(e=>e.id===id))throw new Error('Unknown example.');const file=path.join(root,id.startsWith('agent-')?'experiments':'examples',`${id}.mjs`);const module=await import(pathToFileURL(file));const world=typeof module.default==='function'?module.default():module.default;return {scene:world.build(),source:readFileSync(file,'utf8')};}
-const saved=path.join(root,'.local/world-v2.json');
-const initial=flags.has('--resume')&&existsSync(saved)?{scene:JSON.parse(readFileSync(saved,'utf8'))}:await loadExample(flags.get('--example')??'cosmic-clockwork');
-const server=createApp({root,initialScene:initial.scene,initialSource:initial.source??toScript(initial.scene),examples,loadExample,onScene:scene=>{mkdirSync(path.dirname(saved),{recursive:true});writeFileSync(saved,JSON.stringify(scene,null,2)+'\n');}});
-server.listen(port,'127.0.0.1',()=>console.log(`Cosmic Lego v0.2: http://127.0.0.1:${server.address().port}\nAgent construction tools: GET /api/tools · POST /api/commands\nCtrl+C to stop.`));
-server.on('error',e=>{console.error(e.message);process.exitCode=1;});
-for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>{
-  server.close(()=>process.exit(0));
-  server.closeAllConnections();
-});
+// Compatibility launcher for trusted v0.2 recipes and the previous local save.
+// Convert into a fresh shared workspace. The input is never overwritten.
+import { readFile } from 'node:fs/promises';
+import { runExoplanet, startExoplanetServer } from '../apps/exoplanet.mjs';
+import { importLegacy } from '../packages/exoplanet/importer.mjs';
+import { parseSceneFlags } from './scene-server.mjs';
+
+const args = process.argv.slice(2);
+const examples = new Map([
+  ...['cosmic-clockwork', 'tilted-orbits', 'eccentric-periapsis'].map(id => [id, '../examples/' + id + '.mjs']),
+  ...['agent-a-overlap', 'agent-b-eccentricity'].map(id => [id, '../experiments/' + id + '.mjs']),
+]);
+async function main() {
+  const flags = [], choices = [];
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--resume') choices.push({ resume: true });
+    else if (args[i] === '--example') {
+      const file = examples.get(args[++i]);
+      if (!file) throw new Error('Choose a known v0.2 recipe: ' + [...examples.keys()].join(', '));
+      choices.push({ file });
+    } else flags.push(args[i]);
+  }
+  if (choices.length > 1) throw new Error('Choose one saved world or one example.');
+  const [choice] = choices;
+  if (!choice) return runExoplanet(flags);
+  let document;
+  if (choice.resume) {
+    try { document = await readFile(new URL('../.local/world-v2.json', import.meta.url), 'utf8'); }
+    catch (e) { if (e.code === 'ENOENT') return runExoplanet(flags); throw e; }
+  } else {
+    const file = new URL(choice.file, import.meta.url), { default: recipe } = await import(file);
+    const world = typeof recipe === 'function' ? recipe() : recipe;
+    document = { scene: world.build(), source: await readFile(file, 'utf8') };
+  }
+  const { manifest, warnings } = importLegacy(document);
+  for (const item of warnings) console.log(item.path + ' · ' + item.message);
+  const app = await startExoplanetServer(parseSceneFlags(flags));
+  try { await app.portable.action('import', { document: manifest, expected: app.project.token }); }
+  catch (error) { await app.close(); throw error; }
+  console.log('Cosmic Lego workspace: ' + app.url + '/workspace/');
+  for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, async () => { await app.close(); process.exit(0); });
+}
+try { await main(); } catch (error) { console.error(error.message); process.exitCode = 1; }

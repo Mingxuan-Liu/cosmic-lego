@@ -30,13 +30,14 @@ function checkSize(v, environment) {
 
 // Synthetic nonzero values infer the supported operator's descriptor, using the
 // same arithmetic contracts as evaluation. They are never exposed as results.
-function probe(description) {
+function probe(description, declaredTimeGrid) {
   const d = copyData(description);
   const shape = d.shape.map(length => length === null ? 1 : length);
+  if (declaredTimeGrid) shape[0] = declaredTimeGrid.values.length;
   const make = dimensions => dimensions.length ? Array.from({ length: dimensions[0] }, () => make(dimensions.slice(1))) : 1;
   const spec = { ...d, data: make(shape), shape, coordinates: null, objectIds: null, time: null };
   if (d.kind === 'collection') spec.objectIds = Array.from({ length: shape[0] }, (_, i) => `probe-${i}`);
-  if (d.kind === 'series') spec.coordinates = { kind: 'time', unit: 's', values: Array.from({ length: shape[0] }, (_, i) => i) };
+  if (d.kind === 'series') spec.coordinates = declaredTimeGrid ?? { kind: 'time', unit: 's', values: Array.from({ length: shape[0] }, (_, i) => i) };
   if (d.kind === 'field') spec.coordinates = { kind: 'space', unit: 'm', frame: { id: 'probe', kind: 'position' }, values: Array.from({ length: shape[0] }, (_, i) => [i, 0, 0]) };
   return value(spec);
 }
@@ -45,6 +46,7 @@ function inferred(result, original) {
   const d = descriptorOf(result);
   // Sample coordinates/time belong to evaluated values, not invented probes.
   delete d.coordinates; delete d.objectIds; delete d.time;
+  if (d.kind === 'series' && original?.coordinates) d.coordinates = copyData(original.coordinates);
   if (original && ['collection', 'field', 'series'].includes(d.kind) && original.shape[0] === null) d.shape[0] = null;
   return d;
 }
@@ -56,7 +58,7 @@ function validateDefinition(node, environment) {
   const keys = {
     [TYPES.constant]: ['value'],
     [TYPES.selection]: ['mode', 'query', 'element', 'inputs'],
-    [TYPES.field]: ['indices', 'inputs'],
+    [TYPES.field]: ['indices', 'inputs'], [TYPES.sample]: ['times', 'unit', 'inputs'],
     [TYPES.arithmetic]: ['op', 'comparison', 'alignment', 'inputs'],
     [TYPES.map]: ['op', 'inputs'], [TYPES.reduce]: ['op', 'inputs'],
     [TYPES.adapt]: ['adapter', 'inputs'],
@@ -78,7 +80,7 @@ function validateDefinition(node, environment) {
     'DEPENDENCY_DECLARATION', `${node.id}.dependsOn must match its explicit input references.`);
   const slots = Object.keys(inputs).sort();
   const expectedSlots = {
-    [TYPES.constant]: [], [TYPES.field]: ['source'], [TYPES.arithmetic]: ['left', 'right'],
+    [TYPES.constant]: [], [TYPES.field]: ['source'], [TYPES.sample]: ['source'], [TYPES.arithmetic]: ['left', 'right'],
     [TYPES.map]: ['source'], [TYPES.reduce]: ['source'], [TYPES.adapt]: ['source'],
   }[node.type];
   if (expectedSlots) insist(JSON.stringify(slots) === JSON.stringify(expectedSlots), 'MISSING_INPUT', `${node.id} requires input slots ${expectedSlots.join(', ')}.`);
@@ -117,7 +119,8 @@ function validateDefinition(node, environment) {
     if (model.validate) {
       const errors = invoke(model.validate, node);
       insist(Array.isArray(errors), 'IMPLEMENTATION_CONTRACT', 'Model validate must return diagnostics.');
-      if (errors.length) reject(errors[0].code ?? 'MODEL_PARAMETERS', errors[0].message ?? 'Model validation failed.', errors[0].path);
+      if (errors.length) reject(errors[0].code ?? 'MODEL_PARAMETERS', errors[0].message ?? 'Model validation failed.', errors[0].path,
+        typeof errors[0].category === 'string' ? { category: errors[0].category } : {});
     }
   }
 }
@@ -147,6 +150,14 @@ function getOutputs(node, graph, environment, outputs) {
     delete result.coordinates; delete result.objectIds; delete result.time;
     return { value: result };
   }
+  if (node.type === TYPES.sample) {
+    const d = source('source'), { times, unit: timeUnit } = node.data;
+    insist(d.kind === 'scalar', 'SAMPLE_SOURCE', 'Time sampling requires a scalar output.');
+    insist(Array.isArray(times) && times.length > 0 && times.length <= Math.min(256, environment.limits.maxValues / 2),
+      'SAMPLE_BUDGET', 'Supply 1–256 physical times within the per-value budget.');
+    const coordinates = { kind: 'time', unit: unit(timeUnit), values: times };
+    return { value: descriptor({ ...d, kind: 'series', shape: [times.length], time: null, coordinates }) };
+  }
   if (node.type === TYPES.field) {
     const d = source('source');
     insist(d.kind === 'field', 'FIELD_SELECTION', 'Field selection requires a field value.');
@@ -157,9 +168,13 @@ function getOutputs(node, graph, environment, outputs) {
   }
   if (node.type === TYPES.arithmetic) {
     const left = source('left'), right = source('right');
-    const rightProbe = ['series', 'collection'].includes(left.kind) && left.kind === right.kind
+    // Evaluate alignment only on a pair of declared grids. Otherwise use
+    // matching placeholders and defer the coordinate check until evaluation.
+    const knownGrids = left.kind === 'series' && right.kind === 'series' && left.coordinates && right.coordinates;
+    const rightProbe = !knownGrids && ['series', 'collection'].includes(left.kind) && left.kind === right.kind
       ? { ...right, shape: [left.shape[0], ...right.shape.slice(1)] } : right;
-    const d = inferred(binaryValue(node.data.op, probe(left), probe(rightProbe), {
+    const d = inferred(binaryValue(node.data.op, probe(left, knownGrids && left.coordinates),
+      probe(rightProbe, knownGrids && right.coordinates), {
       ...(node.data.comparison ? { comparison: node.data.comparison } : {}),
       ...(node.data.alignment ? { alignment: node.data.alignment } : {}),
     }), left.kind === 'scalar' ? right : left);
@@ -187,7 +202,10 @@ function getOutputs(node, graph, environment, outputs) {
   insist(provided.length === Object.keys(required).length && provided.every(slot => Object.hasOwn(required, slot)), 'MISSING_INPUT', `Inputs for ${node.id} must match declared ports ${Object.keys(required).join(', ')}.`);
   for (const [slot, requirement] of Object.entries(required)) {
     const errors = checkPort(source(slot), descriptor(requirement));
-    if (errors.length) reject(errors[0].code, `${node.id}.${slot}: ${errors[0].message}`);
+    if (errors.length) {
+      const origin = `${inputId(node, slot)}.${node.data.inputs[slot].port}`;
+      reject(errors[0].code, `${origin} → ${node.id}.${slot}. ${errors[0].message}`, `${node.id}.${slot}`);
+    }
   }
   const declared = invoke(model.outputs, node);
   insist(isRecord(declared) && Object.keys(declared).length > 0, 'OUTPUT_PORT', 'Model outputs must declare a nonempty port map.');
@@ -222,14 +240,24 @@ export function analyze(graph, environment) {
   const depth = new Map(graph.nodes.map(node => [node.id, 1]));
   for (const node of graph.nodes) for (const id of dependencies.get(node.id)) consumers.get(id).push(node.id);
   const queue = graph.nodes.filter(node => !remaining.get(node.id)).map(node => node.id);
+  const unsampleable = new Set();
   for (let i = 0; i < queue.length; i++) {
     const id = queue[i], node = nodes.get(id);
     try {
       insist(depth.get(id) <= environment.limits.maxDepth, 'DEPTH_BUDGET', `Calculation path exceeds ${environment.limits.maxDepth} nodes.`);
+      if (environment.models[node.type]?.analytic === false || dependencies.get(id).some(key => unsampleable.has(key))) unsampleable.add(id);
+      if (node.type === TYPES.sample) {
+        insist(!unsampleable.has(id), 'SAMPLE_SOURCE', 'Time sampling requires an analytic upstream graph without nested samplers.');
+        unsampleable.add(id);
+      }
       if (isManaged(node, environment)) {
         const declared = getOutputs(node, graph, environment, outputs);
-        for (const d of Object.values(declared)) insist(d.shape.reduce((size, length) => size * (length ?? 1), 1) <= environment.limits.maxValues,
-          'VALUE_BUDGET', `Output ${id} exceeds ${environment.limits.maxValues} values.`);
+        for (const d of Object.values(declared)) {
+          const count = d.kind === 'series' && d.coordinates
+            ? d.coordinates.values.length * (1 + (d.shape[1] ?? 1))
+            : d.shape.reduce((size, length) => size * (length ?? 1), 1);
+          insist(count <= environment.limits.maxValues, 'VALUE_BUDGET', `Output ${id} exceeds ${environment.limits.maxValues} values.`);
+        }
         outputs.set(id, declared);
       }
     } catch (error) { errors.push(issue(error, id)); }

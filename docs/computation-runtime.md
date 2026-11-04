@@ -397,10 +397,10 @@ observations separately.
 
 The runtime is Node-only. It has no browser worker adapter, renderer, GPU or
 distributed scheduler, global adaptive solver, state interpolation, worker pool,
-agent connection, or authored timeline. F05 should consume achieved scientific
-snapshots and provenance; F07/F08 should cancel and invalidate jobs while preserving
-checked authoring; F09 should preserve checkpoint compatibility metadata and
-extension-owned payloads. Future presentation/export timing must request physical
-times explicitly rather than altering model evolution.
+agent connection, or authored timeline. F05 consumes scientific snapshots and
+provenance. F07 and F08 cancel and invalidate jobs on edits and revoked turns.
+F09 persists inputs, settings, extension pins and physical time, then replays
+from initial conditions in a new runtime. Future presentation and export should
+request physical times explicitly. See the [portable project guide](portable-projects.md).
 
 See the [F04 handoff](handoffs/F04.md) for executed checks and downstream details.

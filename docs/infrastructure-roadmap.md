@@ -1,11 +1,11 @@
 # Cosmic Lego: reusable infrastructure and implementation prompts
 
 Plan dated **2026-11-03**. This replaces the earlier exoplanet-led roadmap.
-It describes intended implementation, not capabilities already delivered.
+The links below separate the original implementation prompts from the current guides and verification record.
 The [README](../README.md) remains the blueprint; inspect the current checkout
 and actual handoffs before implementing a task.
 
-Implementation update, **2026-11-03**: F01–F05 are implemented and tested; read
+Implementation update, **2026-11-03**: the F01–F11 generic foundation and F12 optional astronomy application are implemented. Read
 the [F01 handoff](handoffs/F01.md), [F02 handoff](handoffs/F02.md),
 [composition guide](composition-kernel.md) and [dataflow guide](scientific-dataflow.md).
 The [F03 handoff](handoffs/F03.md) and [registry guide](extension-registry.md) describe
@@ -14,16 +14,24 @@ and [runtime guide](computation-runtime.md) cover analytic/stateful execution,
 cancellation and checkpoints. The [F05 handoff](handoffs/F05.md),
 [scene guide](scene-and-assets.md) and [public example](../examples/scene-and-assets.mjs)
 cover generic 3D authoring, scientific bindings and reusable assets. The fixture
-browser consumes snapshots from the local Node worker host. F06 is next for the
-application shell; F06–F12 remain planned. The existing exoplanet demo has not
-migrated to the new kernel.
+browser consumes snapshots from the local Node worker host. The [F06 handoff](handoffs/F06.md),
+[workspace guide](planetarium-shell.md) and [public recipe](../examples/workspace.mjs)
+cover floating views, current-sample plots, selection and the disconnected
+conversation boundary. The [F07 handoff](handoffs/F07.md),
+[gateway guide](command-gateway.md) and [public recipe](../examples/command-gateway.mjs)
+cover shared SDK/CLI/HTTP commands, atomic edits, retry identity and revocable
+turn permissions. The [F08 handoff](handoffs/F08.md) and
+[session guide](in-app-agent-sessions.md) cover real in-app conversation, native
+Codex tools, permission boundaries and Stop. F09 adds portable project files,
+atomic local saves and agent-free replay. See the [project-file guide](portable-projects.md)
+and [F09 handoff](handoffs/F09.md). The [F10 handoff](handoffs/F10.md)
+and [timeline guide](authored-timelines.md) cover isolated configuration comparisons,
+a common evaluator, PNG delivery and the offline player. The [F11 exercise](domain-independent-readiness.md) passed the astronomy-free construction, live agent, reopen and export checks. See the [F11 handoff](handoffs/F11.md). The default [F12 astronomy application](exoplanet-authoring.md) installs the migrated Kepler and photometry package on that same kernel.
 
 The objective is a reusable authoring application that works with **no astronomy
 package installed**. It must assemble scientific components, arithmetic, geometry,
 materials, views, and authored sequences through shared interfaces. In-app
-conversation with the user's own agent is part of this foundation. The exoplanet
-demonstration becomes a later optional package and regression case; improving its
-transit curves is not the infrastructure readiness gate.
+conversation with the user's own agent is part of this foundation. The exoplanet application now supplies the first optional domain package and its own scientific regressions. The F11 exercise remains the independent, astronomy-free readiness gate.
 
 ## The intended working experience
 
@@ -104,11 +112,7 @@ tested interfaces, not merely another agent starting work.
 | F11 | [Domain-independent readiness](prompts/F11-domain-independent-readiness.md) | Independent complete workflow with astronomy disabled | F01–F10 |
 | F12 | [Exoplanet package migration](prompts/F12-exoplanet-package-migration.md) | Existing science as an optional package with regressions | F11 |
 
-F01→F02→F03→F04→F05 are integrated. Start F06 next; F06 and F07 can proceed in parallel with
-explicit ownership and agreed interfaces. Their integration enables F08, then
-F09→F10→F11. F12 follows the generic gate. Do not dispatch every prompt
-simultaneously into one checkout: shared contracts cannot safely acquire
-conflicting implementations.
+F01 through F12 are integrated. Use the [current implementation record](demo-status.md) for executed checks, the [generic acceptance study](domain-independent-readiness.md) for F11, and the [exoplanet authoring guide](exoplanet-authoring.md) to run or modify the first astronomy package.
 
 ## Readiness fixtures independent of astronomy
 
@@ -217,6 +221,4 @@ existing scientific evidence. Do not pre-fill future completion claims.
 
 Defer cloud accounts, collaborative editing, GPU/distributed execution, a plug-in
 marketplace, universal scientific ontology, symbolic algebra, and support for
-every agent or renderer. F11 must demonstrate the generic workflow before F12
-migration or substantive new topic development. Real learner studies remain
-separate from infrastructure readiness.
+every agent or renderer. F11 demonstrated the generic workflow before the F12 migration. Future scientific packages need their own applicability checks, references and authoring cases. Real learner studies remain separate from infrastructure readiness.

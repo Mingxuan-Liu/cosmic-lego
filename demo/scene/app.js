@@ -3,6 +3,13 @@ import { createThreeAdapter } from '/src/scene/three-adapter.js';
 const $ = id => document.getElementById(id), canvas = $('scene');
 let state, snapshot, results = [], selected = null, sequence = 0, playing = false, timer, disposed = false;
 let editQueue = Promise.resolve(), initialized;
+let pendingEdits = 0, polling = false, lastSummary = '', activeRefreshes = 0, refreshNeeded = true;
+let retryAt = 0, supersessions = 0;
+const sameIdentity = (a, b) => a && b && ['projectId', 'generation', 'revision'].every(key => a[key] === b[key]);
+const summaryText = summary => typeof summary === 'string' ? summary : ['created', 'updated', 'removed']
+  .filter(key => summary?.[key]?.length).map(key => `${key[0].toUpperCase() + key.slice(1)} ${summary[key].length === 1 ? summary[key][0] : `${summary[key].length} objects`}`).join(' · ');
+const undoButton = $('undo');
+undoButton.addEventListener('click', () => edit('undo'));
 const showError = error => { $('diagnostics').hidden = false; $('diagnostics').textContent = `${error.code ?? 'Scene'}: ${error.message}`; };
 let adapter;
 try { adapter = createThreeAdapter({ canvas, onSelect: select, onDiagnostic: showError }); }
@@ -38,6 +45,7 @@ function inspectStats() {
   $('resources').textContent = `${stats.objects} objects · ${stats.geometries} shared geometries · ${stats.materials} materials · ${stats.textures} textures`;
 }
 function syncControls() {
+  undoButton.disabled = !state?.history?.canUndo;
   const nodes = state?.graph?.nodes ?? [];
   const camera = nodes.find(node => node.id === 'camera')?.data.parameters;
   const marker = nodes.find(node => node.id === 'shared-sphere')?.data.parameters;
@@ -47,8 +55,10 @@ function syncControls() {
     $('marker-output').textContent = Number(marker.radius).toFixed(2);
   }
 }
-async function refresh() {
+async function refresh({ retry = false } = {}) {
   if (!state || disposed) return;
+  if (!retry) { retryAt = 0; supersessions = 0; }
+  activeRefreshes++; refreshNeeded = true;
   const mine = ++sequence, time = { value: Number($('time').value), unit: 's' };
   $('time-output').textContent = `${time.value.toFixed(2)} s`;
   $('status').textContent = 'Computing…';
@@ -59,21 +69,30 @@ async function refresh() {
     const applied = adapter.apply(computed.snapshot);
     if (!applied.valid) throw applied.diagnostics[0];
     snapshot = computed.snapshot; results = computed.results;
+    refreshNeeded = false; retryAt = 0; supersessions = 0;
     $('diagnostics').hidden = true;
-    $('status').textContent = `${snapshot.nodes.length} scene nodes · ready`;
+    $('status').textContent = lastSummary ? `${lastSummary} · ready` : `${snapshot.nodes.length} scene nodes · ready`;
     const current = selected;
     $('objects').replaceChildren(new Option('Choose an object…', ''));
     for (const node of snapshot.nodes.filter(node => ['mesh', 'points', 'polyline', 'vectors', 'label'].includes(node.kind) && !node.id.startsWith('grid-'))) $('objects').append(new Option(node.id, node.id));
     select(current && snapshot.nodes.some(node => node.id === current.nodeId) ? current : null);
     inspectStats();
   } catch (error) {
-    if (mine !== sequence || disposed || error.code === 'STALE_RESULT') return;
+    if (mine !== sequence || disposed) return;
+    if (['STALE_RESULT', 'SUPERSEDED'].includes(error.code)) {
+      // Let the competing view finish before retrying this read.
+      retryAt = Date.now() + Math.min(16000, 1000 * 2 ** Math.min(supersessions++, 4) + Math.random() * 500);
+      $('status').textContent = 'Waiting for current sample…';
+      return;
+    }
+    refreshNeeded = false;
     showError(error); $('status').textContent = 'Needs attention';
-  }
+  } finally { activeRefreshes--; }
 }
 function edit(action, id, value) {
   playing = false; clearTimeout(timer); $('play').textContent = '▶';
   $('play').setAttribute('aria-label', 'Play physical time');
+  pendingEdits++;
   const operation = async () => {
     await initialized;
     if (disposed) return;
@@ -82,7 +101,7 @@ function edit(action, id, value) {
     try {
       // Capture the accepted token when this queued edit starts. A prior edit
       // may have advanced the revision since the user chose this action.
-      const submit = () => api('/api/scene/edit', { identity: state.identity, action,
+      const submit = () => api('/api/scene/edit', { identity: state.identity, action, idempotencyKey: crypto.randomUUID(),
         ...(id === undefined ? {} : { id }), ...(value === undefined ? {} : { value }) });
       try { state = await submit(); }
       catch (error) {
@@ -94,6 +113,7 @@ function edit(action, id, value) {
         state = await submit();
       }
       if (disposed) return;
+      lastSummary = summaryText(state.summary);
       syncControls();
       await refresh();
     } catch (error) {
@@ -103,10 +123,31 @@ function edit(action, id, value) {
       showError(error); $('status').textContent = 'Needs attention';
     }
   };
-  const queued = editQueue.then(operation, operation);
+  const queued = editQueue.then(operation, operation).finally(() => { pendingEdits--; });
   editQueue = queued.catch(() => {});
   return queued;
 }
+async function pollChanges() {
+  if (disposed || !state || pendingEdits || activeRefreshes || polling) return;
+  polling = true;
+  try {
+    const observed = await api('/api/gateway/state');
+    const current = () => sameIdentity(observed.identity, state.identity) && sameIdentity(snapshot?.identity, state.identity) && !refreshNeeded;
+    if (disposed || pendingEdits || activeRefreshes || current()) return;
+    if (sameIdentity(observed.identity, state.identity) && Date.now() < retryAt) return;
+    const synchronize = async () => {
+      if (disposed || pendingEdits || activeRefreshes || current()) return;
+      playing = false; clearTimeout(timer); $('play').textContent = '▶'; $('play').setAttribute('aria-label', 'Play physical time'); ++sequence;
+      if (!sameIdentity(observed.identity, state.identity)) {
+        state = await api('/api/scene/state'); lastSummary = summaryText(state.lastChange?.summary) || 'Project changed';
+      }
+      syncControls(); await refresh({ retry: true });
+    };
+    const synchronized = editQueue.then(synchronize, synchronize); editQueue = synchronized.catch(() => {}); await synchronized;
+  } catch (error) { if (!disposed) showError(error); }
+  finally { polling = false; }
+}
+const changeTimer = setInterval(pollChanges, 1000);
 $('objects').addEventListener('change', () => adapter.select($('objects').value ? { nodeId: $('objects').value } : null));
 $('reset-camera').addEventListener('click', () => adapter.setCamera('camera'));
 $('frame-all').addEventListener('click', () => adapter.frameAll());
@@ -127,7 +168,7 @@ $('play').addEventListener('click', () => {
   playing = !playing; $('play').textContent = playing ? 'Ⅱ' : '▶'; $('play').setAttribute('aria-label', playing ? 'Pause physical time' : 'Play physical time');
   if (playing) advance(); else clearTimeout(timer);
 });
-window.addEventListener('pagehide', () => { disposed = true; ++sequence; clearTimeout(timer); clearTimeout(scrubTimer); resizeObserver.disconnect(); adapter.dispose(); });
+window.addEventListener('pagehide', () => { disposed = true; ++sequence; clearTimeout(timer); clearTimeout(scrubTimer); clearInterval(changeTimer); resizeObserver.disconnect(); adapter.dispose(); });
 // Public diagnostic surface for local inspection. Authoritative edits stay on
 // the checked server route; the renderer never evaluates scientific definitions.
 globalThis.sceneLab = Object.freeze({ adapter, refresh, edit,

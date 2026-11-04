@@ -1,57 +1,34 @@
-# Agent construction interface v0.2
+# Agent construction interfaces
 
-For new infrastructure, use [the F01 composition-kernel guide](composition-kernel.md),
-the [F02 scientific-dataflow guide](scientific-dataflow.md), `src/core/index.js`
-and `src/dataflow/index.js`. F03 adds the [extension-registry interface](extension-registry.md)
-in `src/registry/index.js`: discover installed schemas/requirements, then instantiate
-through an immutable registry binding. Use `binding.validators` for registry-backed
-projects; saved pins do not install code. Mutations require a complete project/load/revision
-token, and its draft authoring API supports generic components, relationships,
-calculation definitions and presentation definitions. F02 adds scientific port
-checks and bounded synchronous evaluation through the same graph. Supply
-`flow.validators` when constructing/reopening a scientific project. The shared command gateway
-and in-app agent session remain later F07/F08 tasks.
+An agent can inspect the current project, add a registered orbit, wire a photometer, create a plot, and commit the complete construction in one checked transaction. The same gateway serves the local SDK, JSON CLI, HTTP host and native agent tools. The running workspace selects the installed vocabulary. [Command schemas, SDK, retries and errors](command-gateway.md)
 
-F04 adds [worker computation](computation-runtime.md) through `src/runtime/index.js`.
-The trusted host selects `registryModule`; jobs submit accepted projects, output
-IDs, physical time and numerical settings. Check `valid`, diagnostics and the full
-identity triple before consuming results. Stop/supersession discards worker work;
-it does not undo accepted graph changes. A checkpoint is continuation data, never
-authorization to edit or execute project source.
+## Discover the current workspace
 
-F05 adds [scene and asset authoring](scene-and-assets.md) through
-`src/scene/index.js`. The trusted composition root registers the scene extensions;
-create `layer = createSceneLayer(binding)` and use `layer.validators` for a project
-containing scene nodes. `layer.author(draft)` creates ordinary F01 handles for
-visual instances, reusable assets, and scientific bindings. It supports grouping,
-duplication, reparenting and removal without editing a renderer object directly.
-See the [public scene recipe](../examples/scene-and-assets.mjs) and
-[F05 handoff](handoffs/F05.md).
+Start the astronomy app in one terminal and inspect it from a second:
 
-Evaluate each `layer.sources(project)` output through F04 at the chosen physical
-time, then pass the results to `await layer.compile(project, {results, time})`.
-The compiler consumes supplied snapshots, preserving units, frames, mappings and
-source metadata. It rejects missing, stale or mismatched results. Camera and
-material changes remain presentation edits. The browser adapter consumes the
-compiled data; scientific workers still run in the local Node host.
+```sh
+bash scripts/node.sh apps/exoplanet.mjs
+# In the second terminal
+bash scripts/node.sh scripts/gateway.mjs discover --url http://127.0.0.1:4317
+bash scripts/node.sh scripts/gateway.mjs inspect transit --url http://127.0.0.1:4317
+```
 
-F01–F05 are implemented. F06 is next for the application shell. The F05 fixture
-server exposes state, evaluation and a few checked demonstration edits; it does
-not replace the planned F07 gateway or provide F08 agent conversation.
+The astronomy registry exposes `exoplanet.primary`, `exoplanet.orbit`, `exoplanet.observer`, `exoplanet.projection`, `exoplanet.photometry` and `exoplanet.silhouette`, plus generic scene, overlay and dataflow operations. The worker and UI share the accepted project and implementation pins. At conjunction in the unmodified **When shadows overlap** project, `transit.flux` is the combined relative flux. `naive-flux.value` is the comparison built from individual depths. The package guide supplies a fourth-planet construction with predicted values for both. [Exoplanet authoring](exoplanet-authoring.md)
 
-The interface below describes the existing exoplanet prototype, which has not
-yet migrated to the generic kernel. Its optional numeric revision checks are
-not the identity contract for new infrastructure.
+The separate generic host uses `bash scripts/node.sh scripts/scene-server.mjs --workspace --port 4326`. Use `scripts/gateway.mjs discover` against that port to inspect its fixture registry. A portable document declares requirements. It cannot install extensions or select worker code.
 
-Start with semantic handles and operations. JSON is used to serialize a world or
-tool request; it does not define the ceiling of the authoring workflow.
+## Construct, inspect and replay
 
-## Public JavaScript SDK
+1. **Read the contracts.** `discover` returns command and port schemas. `inspect` returns accepted content, including the project ID, load generation and current revision. Use the F07 SDK for handles, selection, arithmetic, scene bindings and plots. Author scripts execute in their own local process. [Gateway](command-gateway.md) · [SDK example](../examples/command-gateway.mjs)
+2. **Commit a coherent edit.** Every write carries the current full identity and an idempotency key. Optional preview checks the candidate. Acceptance validates graph references, scientific contracts, package coupling, bindings and resources before committing. Undo restores the previous content under a new revision. [Kernel](composition-kernel.md) · [Registry](extension-registry.md)
+3. **Measure at an explicit physical time.** F04 workers return values, units, coordinates and implementation identity. The scene compiler and floating plots consume those results. The generic F02 sampler can build a time series from an analytic scalar source at declared physical coordinates. [Dataflow](scientific-dataflow.md) · [Worker runtime](computation-runtime.md) · [Visual bindings](scene-and-assets.md)
+4. **Keep authoring and playback separate.** The F08 host scopes the native Codex tool to a turn. Stop and disconnect revoke that turn. F09 saves and the F10 player operate without an agent. Opening a project installs a new generation and opens any included public conversation as disconnected history. [Sessions](in-app-agent-sessions.md) · [Portable projects](portable-projects.md) · [Timelines](authored-timelines.md)
+
+## Compatibility SDK for v0.2 World recipes
 
 An agent can write an ordinary local `.mjs` script. For scripts in `examples/` or
 `experiments/`, import `World` from `../src/sdk.js`. Export a World, or a function
-returning one. Execute with `node scripts/agent.mjs run path/to/recipe.mjs`.
-Use `--dry-run` to validate and print the scene without a running server.
+returning one. Run `bash scripts/node.sh scripts/agent.mjs run path/to/recipe.mjs --dry-run` to validate and print its legacy scene in your authoring process.
 
 ```js
 import { World } from '../src/sdk.js';
@@ -121,60 +98,8 @@ planets, and requires total planet/host mass ≤1%. This is not a stability guar
 The core has no limb darkening, interacting N-body dynamics, or RV observable.
 See `docs/physics.md` for equations and conventions.
 
-## Discoverable tools and atomic edits
+## Migrate an existing authoring program
 
-```sh
-node scripts/agent.mjs tools
-node scripts/agent.mjs inspect
-node scripts/agent.mjs run experiments/my-world.mjs --dry-run
-node scripts/agent.mjs run experiments/my-world.mjs --base-revision 1
-node scripts/agent.mjs transact operations.json --base-revision 2
-node scripts/agent.mjs evaluate --time-days 0
-```
+For a bare v0.2 scene or saved API response, run `bash scripts/node.sh scripts/exoplanet-project.mjs import input.json /tmp/migrated.json` and import the new file in the shared astronomy workspace. A dry-run envelope (`{valid:true,scene}`) contains the graph. An envelope with a `source` string also preserves that author text. When starting directly from a trusted local `.mjs`, call `importLegacy({scene: world.build(), source: originalText})` in that author's process. The old HTTP tool names and numeric revisions belong to the v0.2 transport. New edits to an imported construction use F07. [Migration rules and source association](exoplanet-authoring.md#import-a-v02-world)
 
-`bash scripts/node.sh` can replace `node` on the original workstation.
-`--url http://127.0.0.1:4317` selects a different local server for commands requiring
-one. `tools` and SDK dry-runs work offline. CLI flags are checked; use `help` to list
-commands. The server serves only loopback HTTP and does not execute submitted JS.
-
-`GET /api/tools` returns tool descriptions and physical capabilities.
-Its argument descriptions are human/agent-readable metadata, not provider-specific
-function-calling JSON Schemas. A provider adapter must supply its own binding.
-Annotation cues have stable IDs and can be removed with a semantic `remove`
-operation; editable annotation handles are not yet part of the SDK.
-`GET /api/scene` returns `{revision,scene,source,history}`.
-`POST /api/commands` accepts `{baseRevision?,commands:[...]}`. For example:
-
-```json
-{
-  "baseRevision": 1,
-  "commands": [
-    {"op":"add_body","body":{"id":"new-planet","kind":"planet","name":"New planet","radiusJupiter":0.7,"massJupiter":0.1}},
-    {"op":"attach_orbit","orbit":{"id":"new-orbit","bodyId":"new-planet","hostId":"sun","semiMajorAxisAU":0.08,"eccentricity":0.2,"inclinationDeg":86}}
-  ]
-}
-```
-
-Both operations commit together, or neither does. Existing `'orbiting'` photometers
-automatically include the attached body. API errors return structured validation
-details; HTTP 409 means a stale revision. Re-read and reconcile before retrying.
-
-Other routes: `GET /api/capabilities`, `GET /api/examples`, `POST /api/example {id}`,
-`POST /api/scene {scene,source?,baseRevision?}`, `POST /api/validate {scene}`,
-`POST /api/evaluate {timeDays,scene?}`, `POST /api/sample {samples,scene?}`.
-Use JSON content type. Source is displayed as text, never executed by the server.
-
-`publish(world,{url?,baseRevision?,source?})`, exported by the SDK, applies a world
-directly. External agents can execute scripts in their own authorized process or
-bind these semantic operations as tools. A remote chat assistant may generate a
-script/operation plan for the user to run; it cannot directly reach loopback.
-There is no embedded LLM and no fake natural-language command parser. An MCP adapter
-has not been implemented; these are the operations it would wrap.
-
-## Author challenge boundary
-
-Use the public SDK and discoverable tools. You may create arbitrary numbers of
-supported bodies/relationships up to the documented resource limits, select
-measurements, write loops, compare constructions, and add explanatory cues. Do not
-modify physics or rendering to make a scenario appear to work. Report missing
-capabilities and errors: a useful abstraction must survive new compositions.
+The original JavaScript examples still exercise this route, including independently configured observers and both eccentricity conventions. [Overlapping shadows](../experiments/agent-a-report.md) · [Eccentricity and preserved distances](../experiments/agent-b-report.md)

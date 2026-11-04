@@ -7,10 +7,10 @@ import { value } from '../src/dataflow/index.js';
 import { createRegistry } from './fixtures/scene-registry.js';
 
 export const registryModule = new URL('./fixtures/scene-registry.js', import.meta.url);
-export function buildExample() {
-  const registry = createRegistry(), binding = registry.bind(), layer = createSceneLayer(binding);
+export function buildExample({ registry = createRegistry(), createLayer = createSceneLayer } = {}) {
+  const binding = registry.bind(), layer = createLayer(binding);
   const project = new Project({ id: 'scene-fixtures', title: 'Motion, fields, and reusable scene pieces', validators: layer.validators });
-  const draft = project.begin(), a = binding.author(draft), s = layer.author(draft);
+  const draft = project.begin(), a = binding.author(draft), s = (layer.scene ?? layer).author(draft);
   const root = s.root();
   const geometry = s.geometry({ id: 'shared-sphere', radius: 0.12, segments: 20 });
   const gold = s.material({ id: 'gold', color: '#f2c063', unlit: false });

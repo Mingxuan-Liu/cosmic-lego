@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Workspace · Cosmic Lego</title>
+  <link rel="icon" href="/assets/branding/cosmic-lego-galaxy.png">
+  <link rel="stylesheet" href="/workspace/style.css">
+  <script type="importmap">{"imports":{"three":"/vendor/three/three.module.js","three/addons/controls/OrbitControls.js":"/vendor/three/OrbitControls.js"}}</script>
+</head>
+<body>
+  <main id="stage" aria-label="Cosmic Lego workspace">
+    <canvas id="scene" aria-label="3D scene. Drag to orbit, right drag to pan, scroll to zoom. Press F to fit." tabindex="0"></canvas>
+    <header class="topbar">
+      <div class="brand"><img src="/assets/branding/cosmic-lego-galaxy.png" alt="Cosmic Lego" width="38" height="38"><div><strong>Cosmic Lego</strong><span id="workspace-title">Workspace</span></div></div>
+      <nav aria-label="Workspace controls">
+        <button id="project-toggle" aria-expanded="false" aria-controls="project-menu">Project<span id="project-dirty-dot" aria-hidden="true" hidden></span></button>
+        <button id="views-toggle" aria-expanded="false" aria-controls="view-menu">Views <span id="view-count"></span></button>
+        <button id="scene-only" aria-pressed="false" title="Toggle scene only (V)">Scene only <kbd>V</kbd></button>
+        <button id="help-toggle" aria-expanded="false" aria-controls="help">?</button>
+      </nav>
+    </header>
+    <section id="project-menu" class="popover" aria-label="Project files" hidden>
+      <div class="menu-heading"><strong>Project files</strong><button id="project-close">Close</button></div>
+      <dl class="detail-list project-facts">
+        <dt>Local save</dt><dd id="project-current">New project</dd>
+        <dt>Changes</dt><dd id="project-dirty">Checking…</dd>
+        <dt>Author recipe</dt><dd id="project-source">Checking…</dd>
+        <dt>Reopen at</dt><dd id="project-replay">Checking…</dd>
+        <dt>Conversation</dt><dd id="project-privacy">Checking…</dd>
+      </dl>
+      <form id="project-save-form" class="project-section">
+        <label for="project-name">Local save name</label><input id="project-name" maxlength="64" pattern="[a-z0-9][a-z0-9_\-]{0,63}" placeholder="motion-study" required autocomplete="off">
+        <label class="project-check"><input id="project-save-transcript" type="checkbox"> Include public conversation in local save</label>
+        <button id="project-save" type="submit">Save locally</button>
+      </form>
+      <div class="project-section">
+        <label for="project-list">Saved projects</label><select id="project-list" aria-label="Saved projects"><option value="">Choose a local save…</option></select>
+        <div class="project-actions"><button id="project-open" disabled>Open selected</button><button id="project-list-refresh">Refresh list</button></div>
+      </div>
+      <div class="project-section">
+        <strong>Portable file</strong>
+        <label class="project-check"><input id="project-share-transcript" type="checkbox"> Include public conversation in download</label>
+        <div class="project-actions"><button id="project-download">Download JSON</button><button id="project-import">Import JSON…</button></div>
+        <input id="project-file" type="file" accept=".json,application/json" aria-label="Portable project file" hidden>
+        <small>Opening a project replaces the current workspace. Save edits you want to keep.</small>
+      </div>
+      <a class="timeline-link" href="/timeline/">Open timeline player <span aria-hidden="true">↗</span></a>
+      <div id="project-feedback" role="status" aria-live="polite"></div>
+    </section>
+    <section id="view-menu" class="popover" aria-label="Manage views" hidden>
+      <div class="menu-heading"><strong>Your views</strong><button id="fold-all">Fold all</button></div>
+      <div id="view-list"></div>
+      <form id="new-plot"><h2>Add a linked plot</h2><label for="plot-source">Scientific output</label><select id="plot-source"></select><label for="plot-title">Title</label><input id="plot-title" placeholder="A new comparison" maxlength="100"><button type="submit">Create plot</button></form>
+    </section>
+    <section id="help" class="popover" aria-label="Workspace shortcuts" hidden>
+      <h2>Explore the scene</h2><p>Drag to orbit · right drag to pan · scroll to zoom.<br>Touch: one finger orbits; two fingers pan and pinch.</p>
+      <p><kbd>V</kbd> Scene only / restore · <kbd>F</kbd> Fit scene<br><kbd>Escape</kbd> Close menu or restore workspace</p>
+      <p>Tab to a window title; arrow keys move it. Shift + arrows resize. Every window can be folded or hidden, then restored from Views.</p>
+    </section>
+    <div class="camera-tools" aria-label="Presentation camera"><label class="sr-only" for="projection">Projection</label><select id="projection"><option value="perspective">Perspective</option><option value="orthographic">Orthographic</option></select><button id="fit">Fit <kbd>F</kbd></button><button id="reset">Reset</button></div>
+    <div class="stage-caption"><span class="live-dot"></span> Model <span class="caption-detail">· evaluated at the displayed physical time</span></div>
+    <div id="diagnostics" role="alert" hidden></div>
+    <div id="overlays" aria-label="Floating views" tabindex="-1"></div>
+    <footer class="timeline">
+      <button id="play" aria-label="Play physical time">▶</button><label for="time">Physical time</label><input id="time" type="range" min="0" max="8" step="0.25" value="0"><output id="time-output">0.00 s</output>
+      <span class="timeline-divider"></span><button id="undo" disabled title="Undo accepted edit">Undo</button><button id="redo" disabled title="Redo accepted edit">Redo</button><span id="status" role="status">Opening…</span>
+    </footer>
+  </main>
+  <script type="module" src="/workspace/app.js"></script>
+</body>
+</html>

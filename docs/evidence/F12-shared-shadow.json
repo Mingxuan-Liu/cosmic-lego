@@ -1,0 +1,3045 @@
+{
+  "format": "cosmic-lego.project",
+  "version": 1,
+  "savedFrom": {
+    "projectId": "shared-shadow",
+    "generation": "load-6e75dcd7-47ea-487b-8cbb-ed8f72ac631d",
+    "revision": 0
+  },
+  "graph": {
+    "schemaVersion": 1,
+    "id": "shared-shadow",
+    "title": "When two planets cast one shadow",
+    "nodes": [
+      {
+        "id": "primary",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "massSolar": 1,
+            "radiusSolar": 1
+          },
+          "inputs": {},
+          "extension": {
+            "id": "exoplanet.primary",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.primary.analytic",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "exoplanet.primary"
+      },
+      {
+        "id": "ember",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "primaryId": "primary",
+            "massJupiter": 0.9,
+            "radiusJupiter": 1.4,
+            "shape": {
+              "eccentricity": 0.075,
+              "hold": "semiMajorAxis",
+              "distanceAU": 0.047
+            },
+            "inclinationDeg": 90,
+            "longitudeAscendingNodeDeg": 0,
+            "argumentPeriapsisDeg": 90,
+            "meanAnomalyDegAtEpoch": 0,
+            "epochDays": 0
+          },
+          "inputs": {
+            "gm": {
+              "port": "gm"
+            },
+            "primaryRadius": {
+              "port": "radius"
+            }
+          },
+          "extension": {
+            "id": "exoplanet.orbit",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.orbit.analytic",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {
+          "input.gm": "primary",
+          "input.primaryRadius": "primary"
+        },
+        "dependsOn": [
+          "primary"
+        ],
+        "type": "exoplanet.orbit"
+      },
+      {
+        "id": "ember-orbit",
+        "kind": "relationship",
+        "data": {
+          "name": "Ember"
+        },
+        "references": {
+          "source": "ember",
+          "target": "primary"
+        },
+        "dependsOn": [],
+        "type": "exoplanet.attached-orbit"
+      },
+      {
+        "id": "cinder",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "primaryId": "primary",
+            "massJupiter": 0.35,
+            "radiusJupiter": 0.8,
+            "shape": {
+              "eccentricity": 0.18,
+              "hold": "semiMajorAxis",
+              "distanceAU": 0.079
+            },
+            "inclinationDeg": 90,
+            "longitudeAscendingNodeDeg": 38,
+            "argumentPeriapsisDeg": 90,
+            "meanAnomalyDegAtEpoch": 0,
+            "epochDays": 0
+          },
+          "inputs": {
+            "gm": {
+              "port": "gm"
+            },
+            "primaryRadius": {
+              "port": "radius"
+            }
+          },
+          "extension": {
+            "id": "exoplanet.orbit",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.orbit.analytic",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {
+          "input.gm": "primary",
+          "input.primaryRadius": "primary"
+        },
+        "dependsOn": [
+          "primary"
+        ],
+        "type": "exoplanet.orbit"
+      },
+      {
+        "id": "cinder-orbit",
+        "kind": "relationship",
+        "data": {
+          "name": "Cinder"
+        },
+        "references": {
+          "source": "cinder",
+          "target": "primary"
+        },
+        "dependsOn": [],
+        "type": "exoplanet.attached-orbit"
+      },
+      {
+        "id": "ash",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "primaryId": "primary",
+            "massJupiter": 0.1,
+            "radiusJupiter": 0.5,
+            "shape": {
+              "eccentricity": 0.11,
+              "hold": "semiMajorAxis",
+              "distanceAU": 0.1
+            },
+            "inclinationDeg": 90,
+            "longitudeAscendingNodeDeg": -21,
+            "argumentPeriapsisDeg": -90,
+            "meanAnomalyDegAtEpoch": 0,
+            "epochDays": 0
+          },
+          "inputs": {
+            "gm": {
+              "port": "gm"
+            },
+            "primaryRadius": {
+              "port": "radius"
+            }
+          },
+          "extension": {
+            "id": "exoplanet.orbit",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.orbit.analytic",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {
+          "input.gm": "primary",
+          "input.primaryRadius": "primary"
+        },
+        "dependsOn": [
+          "primary"
+        ],
+        "type": "exoplanet.orbit"
+      },
+      {
+        "id": "ash-orbit",
+        "kind": "relationship",
+        "data": {
+          "name": "Ash"
+        },
+        "references": {
+          "source": "ash",
+          "target": "primary"
+        },
+        "dependsOn": [],
+        "type": "exoplanet.attached-orbit"
+      },
+      {
+        "id": "earthward",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "direction": [
+              0,
+              0,
+              1
+            ]
+          },
+          "inputs": {},
+          "extension": {
+            "id": "exoplanet.observer",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.observer.analytic",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "exoplanet.observer"
+      },
+      {
+        "id": "shape-primary",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "primaryId": "primary",
+            "quantity": "primary-radius"
+          },
+          "inputs": {
+            "radius": {
+              "port": "radius"
+            }
+          },
+          "extension": {
+            "id": "exoplanet.silhouette",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.silhouette.geometry",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {
+          "input.radius": "primary"
+        },
+        "dependsOn": [
+          "primary"
+        ],
+        "type": "exoplanet.silhouette"
+      },
+      {
+        "id": "paint-primary",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "color": "#F2BE71",
+            "unlit": true,
+            "opacity": 1,
+            "source": "Cosmic Lego original local presentation asset",
+            "license": "BSD-3-Clause"
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.material",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.material.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "scene.material"
+      },
+      {
+        "id": "scene-root",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.root",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.root.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "scene.root"
+      },
+      {
+        "id": "disk-primary",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.mesh",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.mesh.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.geometry": "shape-primary",
+          "asset.material": "paint-primary",
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "shape-primary",
+          "paint-primary",
+          "scene-root"
+        ],
+        "type": "scene.mesh"
+      },
+      {
+        "id": "shape-ember",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "primaryId": "primary",
+            "quantity": "planet-radius"
+          },
+          "inputs": {
+            "radius": {
+              "port": "radius"
+            }
+          },
+          "extension": {
+            "id": "exoplanet.silhouette",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.silhouette.geometry",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {
+          "input.radius": "ember"
+        },
+        "dependsOn": [
+          "ember"
+        ],
+        "type": "exoplanet.silhouette"
+      },
+      {
+        "id": "paint-ember",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "color": "#272238",
+            "unlit": true,
+            "opacity": 1,
+            "source": "Cosmic Lego original local presentation asset",
+            "license": "BSD-3-Clause"
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.material",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.material.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "scene.material"
+      },
+      {
+        "id": "disk-ember",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.mesh",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.mesh.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.geometry": "shape-ember",
+          "asset.material": "paint-ember",
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "shape-ember",
+          "paint-ember",
+          "scene-root"
+        ],
+        "type": "scene.mesh"
+      },
+      {
+        "id": "sky-ember",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "primaryId": "primary",
+            "observerId": "earthward"
+          },
+          "inputs": {
+            "position": {
+              "port": "position"
+            },
+            "radius": {
+              "port": "radius"
+            },
+            "primaryRadius": {
+              "port": "radius"
+            },
+            "direction": {
+              "port": "direction"
+            }
+          },
+          "extension": {
+            "id": "exoplanet.projection",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.projection.analytic",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {
+          "input.position": "ember",
+          "input.radius": "ember",
+          "input.primaryRadius": "primary",
+          "input.direction": "earthward"
+        },
+        "dependsOn": [
+          "ember",
+          "primary",
+          "earthward"
+        ],
+        "type": "exoplanet.projection"
+      },
+      {
+        "id": "place-ember",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "sourceId": "sky-ember",
+            "port": "skyPosition",
+            "unit": "m",
+            "quantity": "position",
+            "displayUnit": "m",
+            "displayFrame": "earthward",
+            "frame": "earthward",
+            "scale": 1.4374011786689664e-9,
+            "positionUnit": "m",
+            "rotation": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ],
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "translationUnit": "m",
+            "colorRange": [
+              0,
+              1
+            ],
+            "palette": "blue-gold"
+          },
+          "inputs": {
+            "source": {
+              "port": "skyPosition"
+            }
+          },
+          "extension": {
+            "id": "scene.bind-position",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "cosmic-lego.scene.bindings",
+              "version": "1.0.0",
+              "build": "f05-1"
+            }
+          }
+        },
+        "references": {
+          "input.source": "sky-ember",
+          "asset.target": "disk-ember"
+        },
+        "dependsOn": [
+          "sky-ember",
+          "disk-ember"
+        ],
+        "type": "scene.bind-position"
+      },
+      {
+        "id": "shape-cinder",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "primaryId": "primary",
+            "quantity": "planet-radius"
+          },
+          "inputs": {
+            "radius": {
+              "port": "radius"
+            }
+          },
+          "extension": {
+            "id": "exoplanet.silhouette",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.silhouette.geometry",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {
+          "input.radius": "cinder"
+        },
+        "dependsOn": [
+          "cinder"
+        ],
+        "type": "exoplanet.silhouette"
+      },
+      {
+        "id": "paint-cinder",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "color": "#484052",
+            "unlit": true,
+            "opacity": 1,
+            "source": "Cosmic Lego original local presentation asset",
+            "license": "BSD-3-Clause"
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.material",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.material.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "scene.material"
+      },
+      {
+        "id": "disk-cinder",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.mesh",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.mesh.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.geometry": "shape-cinder",
+          "asset.material": "paint-cinder",
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "shape-cinder",
+          "paint-cinder",
+          "scene-root"
+        ],
+        "type": "scene.mesh"
+      },
+      {
+        "id": "sky-cinder",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "primaryId": "primary",
+            "observerId": "earthward"
+          },
+          "inputs": {
+            "position": {
+              "port": "position"
+            },
+            "radius": {
+              "port": "radius"
+            },
+            "primaryRadius": {
+              "port": "radius"
+            },
+            "direction": {
+              "port": "direction"
+            }
+          },
+          "extension": {
+            "id": "exoplanet.projection",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.projection.analytic",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {
+          "input.position": "cinder",
+          "input.radius": "cinder",
+          "input.primaryRadius": "primary",
+          "input.direction": "earthward"
+        },
+        "dependsOn": [
+          "cinder",
+          "primary",
+          "earthward"
+        ],
+        "type": "exoplanet.projection"
+      },
+      {
+        "id": "place-cinder",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "sourceId": "sky-cinder",
+            "port": "skyPosition",
+            "unit": "m",
+            "quantity": "position",
+            "displayUnit": "m",
+            "displayFrame": "earthward",
+            "frame": "earthward",
+            "scale": 1.4374011786689664e-9,
+            "positionUnit": "m",
+            "rotation": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ],
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "translationUnit": "m",
+            "colorRange": [
+              0,
+              1
+            ],
+            "palette": "blue-gold"
+          },
+          "inputs": {
+            "source": {
+              "port": "skyPosition"
+            }
+          },
+          "extension": {
+            "id": "scene.bind-position",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "cosmic-lego.scene.bindings",
+              "version": "1.0.0",
+              "build": "f05-1"
+            }
+          }
+        },
+        "references": {
+          "input.source": "sky-cinder",
+          "asset.target": "disk-cinder"
+        },
+        "dependsOn": [
+          "sky-cinder",
+          "disk-cinder"
+        ],
+        "type": "scene.bind-position"
+      },
+      {
+        "id": "shape-ash",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "primaryId": "primary",
+            "quantity": "planet-radius"
+          },
+          "inputs": {
+            "radius": {
+              "port": "radius"
+            }
+          },
+          "extension": {
+            "id": "exoplanet.silhouette",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.silhouette.geometry",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {
+          "input.radius": "ash"
+        },
+        "dependsOn": [
+          "ash"
+        ],
+        "type": "exoplanet.silhouette"
+      },
+      {
+        "id": "paint-ash",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "color": "#50495D",
+            "unlit": true,
+            "opacity": 1,
+            "source": "Cosmic Lego original local presentation asset",
+            "license": "BSD-3-Clause"
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.material",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.material.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "scene.material"
+      },
+      {
+        "id": "disk-ash",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.mesh",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.mesh.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.geometry": "shape-ash",
+          "asset.material": "paint-ash",
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "shape-ash",
+          "paint-ash",
+          "scene-root"
+        ],
+        "type": "scene.mesh"
+      },
+      {
+        "id": "sky-ash",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "primaryId": "primary",
+            "observerId": "earthward"
+          },
+          "inputs": {
+            "position": {
+              "port": "position"
+            },
+            "radius": {
+              "port": "radius"
+            },
+            "primaryRadius": {
+              "port": "radius"
+            },
+            "direction": {
+              "port": "direction"
+            }
+          },
+          "extension": {
+            "id": "exoplanet.projection",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.projection.analytic",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {
+          "input.position": "ash",
+          "input.radius": "ash",
+          "input.primaryRadius": "primary",
+          "input.direction": "earthward"
+        },
+        "dependsOn": [
+          "ash",
+          "primary",
+          "earthward"
+        ],
+        "type": "exoplanet.projection"
+      },
+      {
+        "id": "place-ash",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "sourceId": "sky-ash",
+            "port": "skyPosition",
+            "unit": "m",
+            "quantity": "position",
+            "displayUnit": "m",
+            "displayFrame": "earthward",
+            "frame": "earthward",
+            "scale": 1.4374011786689664e-9,
+            "positionUnit": "m",
+            "rotation": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ],
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "translationUnit": "m",
+            "colorRange": [
+              0,
+              1
+            ],
+            "palette": "blue-gold"
+          },
+          "inputs": {
+            "source": {
+              "port": "skyPosition"
+            }
+          },
+          "extension": {
+            "id": "scene.bind-position",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "cosmic-lego.scene.bindings",
+              "version": "1.0.0",
+              "build": "f05-1"
+            }
+          }
+        },
+        "references": {
+          "input.source": "sky-ash",
+          "asset.target": "disk-ash"
+        },
+        "dependsOn": [
+          "sky-ash",
+          "disk-ash"
+        ],
+        "type": "scene.bind-position"
+      },
+      {
+        "id": "sky-camera",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "position": [
+              0,
+              0,
+              2300
+            ],
+            "target": [
+              0,
+              0,
+              0
+            ],
+            "projection": "orthographic",
+            "span": 3.9,
+            "near": 0.1,
+            "far": 4602,
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true,
+            "fov": 45
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.camera",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.camera.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "scene-root"
+        ],
+        "type": "scene.camera"
+      },
+      {
+        "id": "sky-key",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "text": "OBSERVER SKY  /  earthward",
+            "position": [
+              0,
+              1.27,
+              0
+            ],
+            "size": 0.12,
+            "color": "#C8D3E6",
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.label",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.label.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "scene-root"
+        ],
+        "type": "scene.label"
+      },
+      {
+        "id": "all-positions",
+        "kind": "calculation",
+        "data": {
+          "mode": "live",
+          "element": {
+            "kind": "vector",
+            "shape": [
+              3
+            ],
+            "unit": {
+              "symbol": "m",
+              "dimensions": {
+                "length": 1
+              },
+              "scale": 1
+            },
+            "meaning": "position",
+            "reference": "primary",
+            "normalization": null,
+            "frame": {
+              "id": "exoplanet.world",
+              "kind": "position"
+            }
+          },
+          "query": {
+            "type": "exoplanet.orbit",
+            "port": "position"
+          },
+          "inputs": {}
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "dataflow.selection"
+      },
+      {
+        "id": "all-radii",
+        "kind": "calculation",
+        "data": {
+          "mode": "live",
+          "element": {
+            "kind": "scalar",
+            "shape": [],
+            "unit": {
+              "symbol": "m",
+              "dimensions": {
+                "length": 1
+              },
+              "scale": 1
+            },
+            "meaning": "planet-radius",
+            "reference": "primary",
+            "normalization": null,
+            "frame": null
+          },
+          "query": {
+            "type": "exoplanet.orbit",
+            "port": "radius"
+          },
+          "inputs": {}
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "dataflow.selection"
+      },
+      {
+        "id": "transit",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "primaryId": "primary",
+            "observerId": "earthward"
+          },
+          "inputs": {
+            "positions": {
+              "port": "value"
+            },
+            "radii": {
+              "port": "value"
+            },
+            "primaryRadius": {
+              "port": "radius"
+            },
+            "direction": {
+              "port": "direction"
+            }
+          },
+          "extension": {
+            "id": "exoplanet.photometry",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.photometry.analytic",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {
+          "input.positions": "all-positions",
+          "input.radii": "all-radii",
+          "input.primaryRadius": "primary",
+          "input.direction": "earthward"
+        },
+        "dependsOn": [
+          "all-positions",
+          "all-radii",
+          "primary",
+          "earthward"
+        ],
+        "type": "exoplanet.photometry"
+      },
+      {
+        "id": "curve-transit",
+        "kind": "calculation",
+        "data": {
+          "times": [
+            -7200,
+            -6750,
+            -6300,
+            -5850,
+            -5400,
+            -4950,
+            -4500,
+            -4050,
+            -3600,
+            -3150,
+            -2700,
+            -2250,
+            -1800,
+            -1350,
+            -900,
+            -450,
+            0,
+            450,
+            900,
+            1350,
+            1800,
+            2250,
+            2700,
+            3150,
+            3600,
+            4050,
+            4500,
+            4950,
+            5400,
+            5850,
+            6300,
+            6750,
+            7200
+          ],
+          "unit": "s",
+          "inputs": {
+            "source": {
+              "port": "flux"
+            }
+          }
+        },
+        "references": {
+          "input.source": "transit"
+        },
+        "dependsOn": [
+          "transit"
+        ],
+        "type": "dataflow.sample"
+      },
+      {
+        "id": "plot-transit",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "title": "Combined flux · stellar flux",
+            "x": 16,
+            "y": 80,
+            "width": 292,
+            "height": 175,
+            "hidden": false,
+            "folded": false,
+            "component": -1
+          },
+          "inputs": {},
+          "extension": {
+            "id": "workspace.plot",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "workspace.plot.implementation",
+              "version": "1.0.0",
+              "build": "workspace-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "workspace.plot"
+      },
+      {
+        "id": "bind-plot-transit",
+        "kind": "relationship",
+        "data": {
+          "port": "flux",
+          "contract": {
+            "kind": "scalar",
+            "shape": [],
+            "unit": {
+              "symbol": "1",
+              "dimensions": {},
+              "scale": 1
+            },
+            "meaning": "relative-flux",
+            "reference": "earthward",
+            "normalization": {
+              "reference": "primary",
+              "definition": "unobscured-uniform-stellar-flux"
+            },
+            "frame": null
+          }
+        },
+        "references": {
+          "source": "transit",
+          "target": "plot-transit"
+        },
+        "dependsOn": [
+          "transit",
+          "plot-transit"
+        ],
+        "type": "workspace.plot-source"
+      },
+      {
+        "id": "plot-curve-transit",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "title": "Combined flux · time (s)",
+            "x": 16,
+            "y": 266,
+            "width": 292,
+            "height": 182,
+            "hidden": false,
+            "folded": false,
+            "component": -1
+          },
+          "inputs": {},
+          "extension": {
+            "id": "workspace.plot",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "workspace.plot.implementation",
+              "version": "1.0.0",
+              "build": "workspace-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "workspace.plot"
+      },
+      {
+        "id": "bind-plot-curve-transit",
+        "kind": "relationship",
+        "data": {
+          "port": "value",
+          "contract": {
+            "kind": "series",
+            "shape": [
+              33
+            ],
+            "unit": {
+              "symbol": "1",
+              "dimensions": {},
+              "scale": 1
+            },
+            "meaning": "relative-flux",
+            "reference": "earthward",
+            "normalization": {
+              "reference": "primary",
+              "definition": "unobscured-uniform-stellar-flux"
+            },
+            "frame": null,
+            "time": null,
+            "coordinates": {
+              "kind": "time",
+              "unit": {
+                "symbol": "s",
+                "dimensions": {
+                  "time": 1
+                },
+                "scale": 1
+              },
+              "values": [
+                -7200,
+                -6750,
+                -6300,
+                -5850,
+                -5400,
+                -4950,
+                -4500,
+                -4050,
+                -3600,
+                -3150,
+                -2700,
+                -2250,
+                -1800,
+                -1350,
+                -900,
+                -450,
+                0,
+                450,
+                900,
+                1350,
+                1800,
+                2250,
+                2700,
+                3150,
+                3600,
+                4050,
+                4500,
+                4950,
+                5400,
+                5850,
+                6300,
+                6750,
+                7200
+              ]
+            }
+          }
+        },
+        "references": {
+          "source": "curve-transit",
+          "target": "plot-curve-transit"
+        },
+        "dependsOn": [
+          "curve-transit",
+          "plot-curve-transit"
+        ],
+        "type": "workspace.plot-source"
+      },
+      {
+        "id": "independent-depth-sum",
+        "kind": "calculation",
+        "data": {
+          "op": "sum",
+          "inputs": {
+            "source": {
+              "port": "independentDepths"
+            }
+          }
+        },
+        "references": {
+          "input.source": "transit"
+        },
+        "dependsOn": [
+          "transit"
+        ],
+        "type": "dataflow.reduce"
+      },
+      {
+        "id": "unobscured",
+        "kind": "calculation",
+        "data": {
+          "op": "add",
+          "comparison": {
+            "meaning": "unobscured-reference-flux",
+            "reference": "earthward"
+          },
+          "inputs": {
+            "left": {
+              "port": "flux"
+            },
+            "right": {
+              "port": "depth"
+            }
+          }
+        },
+        "references": {
+          "input.left": "transit",
+          "input.right": "transit"
+        },
+        "dependsOn": [
+          "transit"
+        ],
+        "type": "dataflow.arithmetic"
+      },
+      {
+        "id": "naive-flux",
+        "kind": "calculation",
+        "data": {
+          "op": "subtract",
+          "comparison": {
+            "meaning": "naive-independent-depth-flux",
+            "reference": "earthward"
+          },
+          "inputs": {
+            "left": {
+              "port": "value"
+            },
+            "right": {
+              "port": "value"
+            }
+          }
+        },
+        "references": {
+          "input.left": "unobscured",
+          "input.right": "independent-depth-sum"
+        },
+        "dependsOn": [
+          "unobscured",
+          "independent-depth-sum"
+        ],
+        "type": "dataflow.arithmetic"
+      },
+      {
+        "id": "curve-naive",
+        "kind": "calculation",
+        "data": {
+          "times": [
+            -7200,
+            -6750,
+            -6300,
+            -5850,
+            -5400,
+            -4950,
+            -4500,
+            -4050,
+            -3600,
+            -3150,
+            -2700,
+            -2250,
+            -1800,
+            -1350,
+            -900,
+            -450,
+            0,
+            450,
+            900,
+            1350,
+            1800,
+            2250,
+            2700,
+            3150,
+            3600,
+            4050,
+            4500,
+            4950,
+            5400,
+            5850,
+            6300,
+            6750,
+            7200
+          ],
+          "unit": "s",
+          "inputs": {
+            "source": {
+              "port": "value"
+            }
+          }
+        },
+        "references": {
+          "input.source": "naive-flux"
+        },
+        "dependsOn": [
+          "naive-flux"
+        ],
+        "type": "dataflow.sample"
+      },
+      {
+        "id": "plot-naive",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "title": "Naive flux · summed depths",
+            "x": 16,
+            "y": 458,
+            "width": 292,
+            "height": 145,
+            "folded": false,
+            "hidden": false,
+            "component": -1
+          },
+          "inputs": {},
+          "extension": {
+            "id": "workspace.plot",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "workspace.plot.implementation",
+              "version": "1.0.0",
+              "build": "workspace-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "workspace.plot"
+      },
+      {
+        "id": "bind-plot-naive",
+        "kind": "relationship",
+        "data": {
+          "port": "value",
+          "contract": {
+            "kind": "scalar",
+            "shape": [],
+            "unit": {
+              "symbol": "1",
+              "dimensions": {},
+              "scale": 1
+            },
+            "meaning": "naive-independent-depth-flux",
+            "reference": "earthward",
+            "frame": null,
+            "normalization": {
+              "reference": "primary",
+              "definition": "unobscured-uniform-stellar-flux"
+            }
+          }
+        },
+        "references": {
+          "source": "naive-flux",
+          "target": "plot-naive"
+        },
+        "dependsOn": [
+          "naive-flux",
+          "plot-naive"
+        ],
+        "type": "workspace.plot-source"
+      },
+      {
+        "id": "plot-curve-naive",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "title": "Naive curve · ignores overlap",
+            "x": 325,
+            "y": 266,
+            "width": 292,
+            "height": 175,
+            "hidden": true,
+            "folded": false,
+            "component": -1
+          },
+          "inputs": {},
+          "extension": {
+            "id": "workspace.plot",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "workspace.plot.implementation",
+              "version": "1.0.0",
+              "build": "workspace-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "workspace.plot"
+      },
+      {
+        "id": "bind-plot-curve-naive",
+        "kind": "relationship",
+        "data": {
+          "port": "value",
+          "contract": {
+            "kind": "series",
+            "shape": [
+              33
+            ],
+            "unit": {
+              "symbol": "1",
+              "dimensions": {},
+              "scale": 1
+            },
+            "meaning": "naive-independent-depth-flux",
+            "reference": "earthward",
+            "frame": null,
+            "normalization": {
+              "reference": "primary",
+              "definition": "unobscured-uniform-stellar-flux"
+            },
+            "time": null,
+            "coordinates": {
+              "kind": "time",
+              "unit": {
+                "symbol": "s",
+                "dimensions": {
+                  "time": 1
+                },
+                "scale": 1
+              },
+              "values": [
+                -7200,
+                -6750,
+                -6300,
+                -5850,
+                -5400,
+                -4950,
+                -4500,
+                -4050,
+                -3600,
+                -3150,
+                -2700,
+                -2250,
+                -1800,
+                -1350,
+                -900,
+                -450,
+                0,
+                450,
+                900,
+                1350,
+                1800,
+                2250,
+                2700,
+                3150,
+                3600,
+                4050,
+                4500,
+                4950,
+                5400,
+                5850,
+                6300,
+                6750,
+                7200
+              ]
+            }
+          }
+        },
+        "references": {
+          "source": "curve-naive",
+          "target": "plot-curve-naive"
+        },
+        "dependsOn": [
+          "curve-naive",
+          "plot-curve-naive"
+        ],
+        "type": "workspace.plot-source"
+      },
+      {
+        "id": "conversation",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "title": "Study conversation",
+            "x": 1030,
+            "y": 80,
+            "width": 330,
+            "height": 315,
+            "folded": false,
+            "hidden": false
+          },
+          "inputs": {},
+          "extension": {
+            "id": "workspace.conversation",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "workspace.conversation.implementation",
+              "version": "1.0.0",
+              "build": "workspace-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "workspace.conversation"
+      },
+      {
+        "id": "inspector",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "title": "Selected component",
+            "x": 1030,
+            "y": 407,
+            "width": 330,
+            "height": 210,
+            "folded": true,
+            "hidden": false
+          },
+          "inputs": {},
+          "extension": {
+            "id": "workspace.inspector",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "workspace.inspector.implementation",
+              "version": "1.0.0",
+              "build": "workspace-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "workspace.inspector"
+      },
+      {
+        "id": "provenance",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "title": "Model and assumptions",
+            "x": 312,
+            "y": 82,
+            "width": 320,
+            "height": 235,
+            "hidden": true,
+            "folded": false
+          },
+          "inputs": {},
+          "extension": {
+            "id": "workspace.provenance",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "workspace.provenance.implementation",
+              "version": "1.0.0",
+              "build": "workspace-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "workspace.provenance"
+      },
+      {
+        "id": "fourth",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "primaryId": "primary",
+            "massJupiter": 0.2,
+            "radiusJupiter": 1.8,
+            "shape": {
+              "eccentricity": 0,
+              "hold": "semiMajorAxis",
+              "distanceAU": 0.12
+            },
+            "inclinationDeg": 90,
+            "longitudeAscendingNodeDeg": 0,
+            "argumentPeriapsisDeg": 90,
+            "epochDays": 0,
+            "meanAnomalyDegAtEpoch": 0
+          },
+          "inputs": {
+            "gm": {
+              "port": "gm"
+            },
+            "primaryRadius": {
+              "port": "radius"
+            }
+          },
+          "extension": {
+            "id": "exoplanet.orbit",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.orbit.analytic",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {
+          "input.gm": "primary",
+          "input.primaryRadius": "primary"
+        },
+        "dependsOn": [
+          "primary"
+        ],
+        "type": "exoplanet.orbit"
+      },
+      {
+        "id": "fourth-orbit",
+        "kind": "relationship",
+        "data": {
+          "name": "fourth"
+        },
+        "references": {
+          "source": "fourth",
+          "target": "primary"
+        },
+        "dependsOn": [],
+        "type": "exoplanet.attached-orbit"
+      },
+      {
+        "id": "sky-fourth",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "primaryId": "primary",
+            "observerId": "earthward"
+          },
+          "inputs": {
+            "primaryRadius": {
+              "port": "radius"
+            },
+            "direction": {
+              "port": "direction"
+            },
+            "position": {
+              "port": "position"
+            },
+            "radius": {
+              "port": "radius"
+            }
+          },
+          "extension": {
+            "id": "exoplanet.projection",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.projection.analytic",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {
+          "input.primaryRadius": "primary",
+          "input.direction": "earthward",
+          "input.position": "fourth",
+          "input.radius": "fourth"
+        },
+        "dependsOn": [
+          "primary",
+          "earthward",
+          "fourth"
+        ],
+        "type": "exoplanet.projection"
+      },
+      {
+        "id": "shape-fourth",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "primaryId": "primary",
+            "quantity": "planet-radius"
+          },
+          "inputs": {
+            "radius": {
+              "port": "radius"
+            }
+          },
+          "extension": {
+            "id": "exoplanet.silhouette",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "exoplanet.silhouette.geometry",
+              "version": "1.0.0",
+              "build": "f12-1"
+            }
+          }
+        },
+        "references": {
+          "input.radius": "fourth"
+        },
+        "dependsOn": [
+          "fourth"
+        ],
+        "type": "exoplanet.silhouette"
+      },
+      {
+        "id": "disk-fourth",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.mesh",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.mesh.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.geometry": "shape-fourth",
+          "asset.material": "paint-ember",
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "shape-fourth",
+          "paint-ember",
+          "scene-root"
+        ],
+        "type": "scene.mesh"
+      },
+      {
+        "id": "place-fourth",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "sourceId": "sky-fourth",
+            "port": "skyPosition",
+            "unit": "m",
+            "quantity": "position",
+            "displayUnit": "m",
+            "displayFrame": "earthward",
+            "frame": "earthward",
+            "scale": 1.4374011786689664e-9,
+            "positionUnit": "m",
+            "rotation": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ],
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "translationUnit": "m",
+            "colorRange": [
+              0,
+              1
+            ],
+            "palette": "blue-gold"
+          },
+          "inputs": {
+            "source": {
+              "port": "skyPosition"
+            }
+          },
+          "extension": {
+            "id": "scene.bind-position",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "cosmic-lego.scene.bindings",
+              "version": "1.0.0",
+              "build": "f05-1"
+            }
+          }
+        },
+        "references": {
+          "input.source": "sky-fourth",
+          "asset.target": "disk-fourth"
+        },
+        "dependsOn": [
+          "sky-fourth",
+          "disk-fourth"
+        ],
+        "type": "scene.bind-position"
+      },
+      {
+        "id": "overlap-overcount",
+        "kind": "calculation",
+        "data": {
+          "op": "subtract",
+          "comparison": {
+            "meaning": "overlap-overcount",
+            "reference": "earthward"
+          },
+          "inputs": {
+            "left": {
+              "port": "flux"
+            },
+            "right": {
+              "port": "value"
+            }
+          }
+        },
+        "references": {
+          "input.left": "transit",
+          "input.right": "naive-flux"
+        },
+        "dependsOn": [
+          "transit",
+          "naive-flux"
+        ],
+        "type": "dataflow.arithmetic"
+      },
+      {
+        "id": "overlap-bias-plot",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "title": "Overlap counted twice · fractional flux",
+            "x": 1020,
+            "y": 470,
+            "width": 310,
+            "height": 210,
+            "hidden": false,
+            "folded": false,
+            "component": -1
+          },
+          "inputs": {},
+          "extension": {
+            "id": "workspace.plot",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "workspace.plot.implementation",
+              "version": "1.0.0",
+              "build": "workspace-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "workspace.plot"
+      },
+      {
+        "id": "bind-overlap-bias-plot",
+        "kind": "relationship",
+        "data": {
+          "port": "value",
+          "contract": {
+            "kind": "scalar",
+            "shape": [],
+            "unit": {
+              "symbol": "1",
+              "dimensions": {},
+              "scale": 1
+            },
+            "meaning": "overlap-overcount",
+            "reference": "earthward",
+            "frame": null,
+            "normalization": {
+              "reference": "primary",
+              "definition": "unobscured-uniform-stellar-flux"
+            }
+          }
+        },
+        "references": {
+          "source": "overlap-overcount",
+          "target": "overlap-bias-plot"
+        },
+        "dependsOn": [
+          "overlap-overcount",
+          "overlap-bias-plot"
+        ],
+        "type": "workspace.plot-source"
+      }
+    ]
+  },
+  "requirements": [
+    {
+      "id": "exoplanet.primary",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "exoplanet.primary.analytic",
+        "version": "1.0.0",
+        "build": "f12-1"
+      },
+      "kind": "model",
+      "capabilities": [
+        "dataflow.sync"
+      ],
+      "nodeIds": [
+        "ash",
+        "cinder",
+        "ember",
+        "fourth",
+        "primary",
+        "sky-ash",
+        "sky-cinder",
+        "sky-ember",
+        "sky-fourth",
+        "transit"
+      ],
+      "dependencyOf": [
+        "exoplanet.orbit",
+        "exoplanet.photometry",
+        "exoplanet.projection"
+      ]
+    },
+    {
+      "id": "exoplanet.orbit",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "exoplanet.orbit.analytic",
+        "version": "1.0.0",
+        "build": "f12-1"
+      },
+      "kind": "model",
+      "capabilities": [
+        "dataflow.sync"
+      ],
+      "nodeIds": [
+        "ash",
+        "cinder",
+        "ember",
+        "fourth",
+        "sky-ash",
+        "sky-cinder",
+        "sky-ember",
+        "sky-fourth",
+        "transit"
+      ],
+      "dependencyOf": [
+        "exoplanet.photometry",
+        "exoplanet.projection"
+      ]
+    },
+    {
+      "id": "exoplanet.observer",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "exoplanet.observer.analytic",
+        "version": "1.0.0",
+        "build": "f12-1"
+      },
+      "kind": "model",
+      "capabilities": [
+        "dataflow.sync"
+      ],
+      "nodeIds": [
+        "earthward",
+        "sky-ash",
+        "sky-cinder",
+        "sky-ember",
+        "sky-fourth",
+        "transit"
+      ],
+      "dependencyOf": [
+        "exoplanet.photometry",
+        "exoplanet.projection"
+      ]
+    },
+    {
+      "id": "exoplanet.silhouette",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "exoplanet.silhouette.geometry",
+        "version": "1.0.0",
+        "build": "f12-1"
+      },
+      "kind": "asset-factory",
+      "capabilities": [
+        "scene.data"
+      ],
+      "nodeIds": [
+        "shape-ash",
+        "shape-cinder",
+        "shape-ember",
+        "shape-fourth",
+        "shape-primary"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.material",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "scene.material.implementation",
+        "version": "1.0.0",
+        "build": "scene-1"
+      },
+      "kind": "asset-factory",
+      "capabilities": [],
+      "nodeIds": [
+        "paint-ash",
+        "paint-cinder",
+        "paint-ember",
+        "paint-primary"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.root",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "scene.root.implementation",
+        "version": "1.0.0",
+        "build": "scene-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "scene-root"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.mesh",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "scene.mesh.implementation",
+        "version": "1.0.0",
+        "build": "scene-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "disk-ash",
+        "disk-cinder",
+        "disk-ember",
+        "disk-fourth",
+        "disk-primary"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "exoplanet.projection",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "exoplanet.projection.analytic",
+        "version": "1.0.0",
+        "build": "f12-1"
+      },
+      "kind": "model",
+      "capabilities": [
+        "dataflow.sync"
+      ],
+      "nodeIds": [
+        "sky-ash",
+        "sky-cinder",
+        "sky-ember",
+        "sky-fourth"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.bind-position",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "cosmic-lego.scene.bindings",
+        "version": "1.0.0",
+        "build": "f05-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [
+        "scene.data"
+      ],
+      "nodeIds": [
+        "place-ash",
+        "place-cinder",
+        "place-ember",
+        "place-fourth"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.camera",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "scene.camera.implementation",
+        "version": "1.0.0",
+        "build": "scene-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "sky-camera"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.label",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "scene.label.implementation",
+        "version": "1.0.0",
+        "build": "scene-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "sky-key"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "exoplanet.photometry",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "exoplanet.photometry.analytic",
+        "version": "1.0.0",
+        "build": "f12-1"
+      },
+      "kind": "model",
+      "capabilities": [
+        "dataflow.sync"
+      ],
+      "nodeIds": [
+        "transit"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "workspace.plot",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "workspace.plot.implementation",
+        "version": "1.0.0",
+        "build": "workspace-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "overlap-bias-plot",
+        "plot-curve-naive",
+        "plot-curve-transit",
+        "plot-naive",
+        "plot-transit"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "workspace.conversation",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "workspace.conversation.implementation",
+        "version": "1.0.0",
+        "build": "workspace-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "conversation"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "workspace.inspector",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "workspace.inspector.implementation",
+        "version": "1.0.0",
+        "build": "workspace-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "inspector"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "workspace.provenance",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "workspace.provenance.implementation",
+        "version": "1.0.0",
+        "build": "workspace-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "provenance"
+      ],
+      "dependencyOf": []
+    }
+  ],
+  "assets": [
+    {
+      "nodeId": "shape-primary",
+      "extension": "exoplanet.silhouette",
+      "kind": "geometry",
+      "format": "cosmic.geometry.v1",
+      "definitionHash": "sha256:cbb45a0f5302cc04460758c169d7333133025483c6b0c8952a3feef4e037b14d",
+      "source": "Cosmic Lego geometric silhouette from a modeled physical radius",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego geometric silhouette from a modeled physical radius",
+        "license": "BSD-3-Clause"
+      }
+    },
+    {
+      "nodeId": "paint-primary",
+      "extension": "scene.material",
+      "kind": "material",
+      "format": "cosmic.material.v1",
+      "definitionHash": "sha256:64435b2e1bb72e3f94a4e155eaa62393445f5075e6a3a249344e20c58f156ad2",
+      "source": "Cosmic Lego original local presentation asset",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego original local presentation asset",
+        "license": "BSD-3-Clause"
+      }
+    },
+    {
+      "nodeId": "shape-ember",
+      "extension": "exoplanet.silhouette",
+      "kind": "geometry",
+      "format": "cosmic.geometry.v1",
+      "definitionHash": "sha256:d95bc887c05c6529df4a086517cbea952d5b015147418c8026e5aef74d74d8df",
+      "source": "Cosmic Lego geometric silhouette from a modeled physical radius",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego geometric silhouette from a modeled physical radius",
+        "license": "BSD-3-Clause"
+      }
+    },
+    {
+      "nodeId": "paint-ember",
+      "extension": "scene.material",
+      "kind": "material",
+      "format": "cosmic.material.v1",
+      "definitionHash": "sha256:76d41e06ad41b65cf0f792ab534e121e9704ecf83fad73a6c6d086aa03e8ab9d",
+      "source": "Cosmic Lego original local presentation asset",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego original local presentation asset",
+        "license": "BSD-3-Clause"
+      }
+    },
+    {
+      "nodeId": "shape-cinder",
+      "extension": "exoplanet.silhouette",
+      "kind": "geometry",
+      "format": "cosmic.geometry.v1",
+      "definitionHash": "sha256:62139b902a98d4258fbca1fbdb3b2ffa77a4a2c51afd501d8ef446e3d2b69f5d",
+      "source": "Cosmic Lego geometric silhouette from a modeled physical radius",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego geometric silhouette from a modeled physical radius",
+        "license": "BSD-3-Clause"
+      }
+    },
+    {
+      "nodeId": "paint-cinder",
+      "extension": "scene.material",
+      "kind": "material",
+      "format": "cosmic.material.v1",
+      "definitionHash": "sha256:25ee292eb200172d9eb9847c76ad4ffb0b6be89c2c9912424f56a9593baddf37",
+      "source": "Cosmic Lego original local presentation asset",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego original local presentation asset",
+        "license": "BSD-3-Clause"
+      }
+    },
+    {
+      "nodeId": "shape-ash",
+      "extension": "exoplanet.silhouette",
+      "kind": "geometry",
+      "format": "cosmic.geometry.v1",
+      "definitionHash": "sha256:5b873e27d771f646e09587cff38982f491318b0fee352c8121d04380e576c5bc",
+      "source": "Cosmic Lego geometric silhouette from a modeled physical radius",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego geometric silhouette from a modeled physical radius",
+        "license": "BSD-3-Clause"
+      }
+    },
+    {
+      "nodeId": "paint-ash",
+      "extension": "scene.material",
+      "kind": "material",
+      "format": "cosmic.material.v1",
+      "definitionHash": "sha256:df1284bb7ce948aef050bc65e5561ae2637a2cebf2356241aee34294935efb11",
+      "source": "Cosmic Lego original local presentation asset",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego original local presentation asset",
+        "license": "BSD-3-Clause"
+      }
+    },
+    {
+      "nodeId": "shape-fourth",
+      "extension": "exoplanet.silhouette",
+      "kind": "geometry",
+      "format": "cosmic.geometry.v1",
+      "definitionHash": "sha256:3e2d121acc41a262d01aa560e9eca5f1e24424265c58345829689d655ee7f8d2",
+      "source": "Cosmic Lego geometric silhouette from a modeled physical radius",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego geometric silhouette from a modeled physical radius",
+        "license": "BSD-3-Clause"
+      }
+    }
+  ],
+  "source": {
+    "original": {
+      "path": "packages/exoplanet/recipe.mjs",
+      "language": "javascript",
+      "sha256": "sha256:d2dea363675750430780842b7ae7de91e4f84cfbc0e2d6ad024081df40abbe61",
+      "files": [],
+      "producedGraphPath": "_portable/original-construction.json",
+      "producedGraphHash": "sha256:f3b5cccc13bf1eec60e7d81e546ff56f17e4a5d8154f08261c7c2f7cbe2ef820"
+    },
+    "reconstruction": {
+      "path": "_portable/reconstruction.mjs",
+      "language": "javascript",
+      "sha256": "sha256:ec98e91b58b5103346f36198487bda04960c5e2b6ead8b1ae091562f962da57e",
+      "producedGraphHash": "sha256:0c9095bdd971c3ecdabc55771851581c07b17cf8151861c4d6399ca173041eec"
+    }
+  },
+  "resources": [
+    {
+      "path": "packages/exoplanet/recipe.mjs",
+      "mediaType": "text/plain",
+      "content": "// Public authoring recipe. Scientific models own the orbit and occultation calculations.\nimport { readFileSync } from 'node:fs';\nimport { Project } from '../../src/core/index.js';\nimport { createPortableManifest } from '../../src/portable/format.js';\nimport { createTimeline } from '../../src/timeline/definition.js';\nimport { createWorkspaceLayer } from '../../src/workspace/index.js';\nimport { createRegistry } from './registry.js';\nimport { orbitParameters, orbitPorts } from './models.js';\nimport { skyDisplayMetres } from './visuals.js';\n\nexport const registryModule = new URL('./registry.js', import.meta.url);\nconst port = (node, port) => ({ node, port });\nconst secondsPerDay = 86400;\nconst original = 'Original Cosmic Lego synthetic double-transit study, packages/exoplanet/recipe.mjs';\nconst defaultBodies = [\n  { id: 'ember', name: 'Ember', massJupiter: 0.9, radiusJupiter: 1.4, color: '#272238',\n    orbit: { id: 'ember-orbit', semiMajorAxisAU: 0.047, eccentricity: 0.075, longitudeAscendingNodeDeg: 0 } },\n  { id: 'cinder', name: 'Cinder', massJupiter: 0.35, radiusJupiter: 0.8, color: '#484052',\n    orbit: { id: 'cinder-orbit', semiMajorAxisAU: 0.079, eccentricity: 0.18, longitudeAscendingNodeDeg: 38 } },\n  { id: 'ash', name: 'Ash', massJupiter: 0.1, radiusJupiter: 0.5, color: '#50495D',\n    orbit: { id: 'ash-orbit', semiMajorAxisAU: 0.10, eccentricity: 0.11, longitudeAscendingNodeDeg: -21,\n      argumentPeriapsisDeg: -90 } },\n];\nconst baseline = {\n  id: 'shared-shadow', title: 'When two planets cast one shadow',\n  star: { id: 'primary', name: 'Primary', massSolar: 1, radiusSolar: 1, color: '#F2BE71' },\n  planets: defaultBodies, observers: [{ id: 'earthward', name: 'Earthward detector', direction: [0, 0, 1] }],\n  meters: [{ id: 'transit', name: 'Combined flux', observerId: 'earthward', occulters: 'orbiting' }],\n  start: -7200, end: 7200, initial: 0, duration: 8, comparison: true,\n};\n\nfunction drawing(science, scene, body, primaryId, observerId, name) {\n  const star = body.id === primaryId;\n  const shape = science.instantiate('exoplanet.silhouette', {\n    id: name('shape-' + body.id), parameters: { primaryId, quantity: star ? 'primary-radius' : 'planet-radius' },\n    inputs: { radius: port(body.id, 'radius') },\n  });\n  const material = scene.material({ id: name('paint-' + body.id), color: body.color, unlit: true });\n  const mesh = scene.mesh({ id: name('disk-' + body.id), geometry: shape, material });\n  if (!star) {\n    const projected = science.instantiate('exoplanet.projection', {\n      id: name('sky-' + body.id), parameters: { primaryId, observerId },\n      inputs: { position: port(body.id, 'position'), radius: port(body.id, 'radius'),\n        primaryRadius: port(primaryId, 'radius'), direction: port(observerId, 'direction') },\n    });\n    scene.bind(mesh, projected, { id: name('place-' + body.id), property: 'position', port: 'skyPosition',\n      quantity: 'position', unit: 'm', displayUnit: 'm', frame: observerId, displayFrame: observerId,\n      scale: 1 / skyDisplayMetres });\n  }\n}\n\n// Shared constructor for a new author study and an explicitly translated legacy document.\nexport function constructStudy(study) {\n  const registry = createRegistry(), binding = registry.bind(), layer = createWorkspaceLayer(binding);\n  const project = new Project({ id: study.id, title: study.title, validators: layer.validators });\n  const draft = project.begin(), science = binding.author(draft), scene = layer.scene.author(draft), views = layer.author(draft);\n  const { star, planets, observers, meters } = study, primaryId = star.id;\n  const name = id => (study.prefix ?? '') + id;\n  science.instantiate('exoplanet.primary', { id: primaryId,\n    parameters: { massSolar: star.massSolar, radiusSolar: star.radiusSolar } });\n  for (const planet of planets) {\n    const { id: orbitId, ...elements } = planet.orbit;\n    const parameters = orbitParameters({ primaryId, massJupiter: planet.massJupiter, radiusJupiter: planet.radiusJupiter,\n      inclinationDeg: 90, longitudeAscendingNodeDeg: 0, argumentPeriapsisDeg: 90,\n      meanAnomalyDegAtEpoch: 0, epochDays: 0, ...elements });\n    science.instantiate('exoplanet.orbit', { id: planet.id, parameters,\n      inputs: { gm: port(primaryId, 'gm'), primaryRadius: port(primaryId, 'radius') } });\n    draft.connect('exoplanet.attached-orbit', planet.id, primaryId, { id: orbitId, data: { name: planet.name } });\n  }\n  for (const observer of observers) science.instantiate('exoplanet.observer', {\n    id: observer.id, parameters: { direction: observer.direction },\n  });\n  const displayObserver = meters[0]?.observerId ?? observers[0]?.id;\n  drawing(science, scene, star, primaryId, displayObserver, name);\n  if (displayObserver) for (const body of planets) drawing(science, scene, body, primaryId, displayObserver, name);\n\n  // Orthographic viewing from the declared observer keeps the projected radii at one common scale.\n  const zLimit = 2300; // Encloses 5 AU * (1 + 0.85) in nominal solar radii.\n  scene.camera({ id: name('sky-camera'), position: [0, 0, zLimit], target: [0, 0, 0],\n    projection: 'orthographic', span: 3.9 * star.radiusSolar, near: 0.1, far: zLimit * 2 + 2 });\n  scene.label({ id: name('sky-key'), text: displayObserver ? 'OBSERVER SKY  /  ' + displayObserver : 'FIXED PRIMARY',\n    position: [0, 1.27 * star.radiusSolar, 0], size: 0.12 * star.radiusSolar, color: '#C8D3E6' });\n\n  const selections = new Map(), outputs = [];\n  const times = Array.from({ length: 33 }, (_, i) => study.start + i * (study.end - study.start) / 32);\n  function members(which, index) {\n    const key = JSON.stringify(which);\n    if (!selections.has(key)) {\n      const result = {}, descriptions = orbitPorts(primaryId);\n      for (const [slot, output] of [['positions', 'position'], ['radii', 'radius']]) {\n        const spec = which === 'orbiting' ? { mode: 'live', type: 'exoplanet.orbit', port: output }\n          : { mode: 'fixed', members: which.map(id => port(id, output)) };\n        result[slot] = science.select({ ...spec, element: descriptions[output] },\n          { id: name((which === 'orbiting' ? 'all' : 'set-' + index) + '-' + slot) });\n      }\n      selections.set(key, result);\n    }\n    return selections.get(key);\n  }\n  const addPlot = (id, title, source, options = {}) => {\n    const plot = views.plot({ id: name(id), title, x: 16, y: 80, width: 292, height: 175, ...options });\n    views.bind(plot, source.node ?? source, { port: source.port ?? 'value', id: name('bind-' + id) });\n    return plot;\n  };\n  for (const [i, meter] of meters.entries()) {\n    const observed = science.instantiate('exoplanet.photometry', { id: meter.id,\n      parameters: { primaryId, observerId: meter.observerId },\n      inputs: { ...members(meter.occulters, i), primaryRadius: port(primaryId, 'radius'),\n        direction: port(meter.observerId, 'direction') } });\n    const curve = science.sample(port(observed, 'flux'), { times, unit: 's' }, { id: name('curve-' + meter.id) });\n    addPlot('plot-' + meter.id, meter.name + ' · stellar flux', port(observed, 'flux'), { hidden: i > 0 });\n    addPlot('plot-curve-' + meter.id, meter.name + ' · time (s)', curve,\n      { y: 266, height: 182, hidden: i > 0 });\n    outputs.push({ nodeId: meter.id, port: 'flux' });\n    if (i === 0 && study.comparison) {\n      const sum = science.reduce('sum', port(observed, 'independentDepths'), { id: name('independent-depth-sum') });\n      const unity = science.arithmetic('add', port(observed, 'flux'), port(observed, 'depth'), {\n        id: name('unobscured'), comparison: { meaning: 'unobscured-reference-flux', reference: meter.observerId },\n      });\n      const naive = science.arithmetic('subtract', unity, sum, {\n        id: name('naive-flux'), comparison: { meaning: 'naive-independent-depth-flux', reference: meter.observerId },\n      });\n      const naiveCurve = science.sample(naive, { times, unit: 's' }, { id: name('curve-naive') });\n      addPlot('plot-naive', 'Naive flux · summed depths', naive, { y: 458, height: 145 });\n      addPlot('plot-curve-naive', 'Naive curve · ignores overlap', naiveCurve, { x: 325, y: 266, hidden: true });\n      outputs.push({ nodeId: naive.id, port: 'value' });\n    }\n  }\n  views.conversation({ id: name('conversation'), title: 'Study conversation', x: 1030, y: 80, width: 330, height: 315 });\n  views.inspector({ id: name('inspector'), title: 'Selected component', x: 1030, y: 407, width: 330, height: 210, folded: true });\n  views.provenance({ id: name('provenance'), title: 'Model and assumptions', x: 312, y: 82, width: 320, height: 235, hidden: true });\n  draft.accept();\n\n  const sequence = createTimeline({ id: name('passage'), title: study.title, duration: study.duration });\n  sequence.track({ id: 'clock', kind: 'physical-time', keys: study.clock ?? [\n    { at: 0, value: study.start }, { at: study.duration, value: study.end },\n  ] });\n  if (study.captions?.length) sequence.track({ id: 'guide', kind: 'annotation', keys: study.captions });\n  if (study.comparison) sequence.track({ id: 'read-naive', kind: 'emphasis', target: name('plot-naive'), keys: [\n    { at: 0, value: false }, { at: 3, value: true }, { at: 5, value: false },\n  ] });\n  const sourceRecords = [star, ...planets, ...observers, ...meters].map(item => ({\n    nodeId: item.id, source: study.source ?? original, license: study.license ?? 'BSD-3-Clause',\n    description: 'Model inputs or derived measurement: ' + item.name,\n  }));\n  return { project, registry, binding, layer, dataSources: sourceRecords, timeline: sequence.snapshot(),\n    playback: { time: { value: study.initial, unit: 's' }, mode: 'analytic', targets: outputs },\n    presentation: { title: study.title, caption: study.caption ?? 'Synthetic observing geometry · true relative radii',\n      timeRange: { min: study.start, max: study.end, step: (study.end - study.start) / 480 } } };\n}\n\nexport const dataSources = [baseline.star, ...baseline.planets, ...baseline.observers, ...baseline.meters].map(item => ({\n  nodeId: item.id, source: original, license: 'BSD-3-Clause', description: 'Model inputs or derived measurement: ' + item.name,\n}));\n\nexport function buildExample() {\n  const context = constructStudy({ ...baseline,\n    clock: [{ at: 0, value: -7200 }, { at: 3, value: 0 }, { at: 5, value: 0 }, { at: 8, value: 7200 }],\n    captions: [\n      { at: 0, value: 'Watch the two foreground planets cross the uniformly bright star from different directions.' },\n      { at: 3, value: 'At conjunction their disks overlap. The overlap blocks the same light once.' },\n      { at: 5, value: 'As the shadows separate, compare the union with the sum of the individual deficits.' },\n    ],\n  });\n  return { ...context, source: { path: 'packages/exoplanet/recipe.mjs', language: 'javascript',\n    text: readFileSync(new URL(import.meta.url), 'utf8'), producedGraph: context.project.snapshot() } };\n}\n\nexport function buildExoplanetManifest() { return createPortableManifest(buildExample()); }\nexport { secondsPerDay };\n",
+      "sha256": "sha256:d2dea363675750430780842b7ae7de91e4f84cfbc0e2d6ad024081df40abbe61"
+    },
+    {
+      "path": "_portable/original-construction.json",
+      "mediaType": "application/json",
+      "content": "{\"id\":\"shared-shadow\",\"nodes\":[{\"data\":{\"extension\":{\"id\":\"exoplanet.primary\",\"implementation\":{\"build\":\"f12-1\",\"id\":\"exoplanet.primary.analytic\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"massSolar\":1,\"radiusSolar\":1}},\"dependsOn\":[],\"id\":\"primary\",\"kind\":\"component\",\"references\":{},\"type\":\"exoplanet.primary\"},{\"data\":{\"extension\":{\"id\":\"exoplanet.orbit\",\"implementation\":{\"build\":\"f12-1\",\"id\":\"exoplanet.orbit.analytic\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"gm\":{\"port\":\"gm\"},\"primaryRadius\":{\"port\":\"radius\"}},\"parameters\":{\"argumentPeriapsisDeg\":90,\"epochDays\":0,\"inclinationDeg\":90,\"longitudeAscendingNodeDeg\":0,\"massJupiter\":0.9,\"meanAnomalyDegAtEpoch\":0,\"primaryId\":\"primary\",\"radiusJupiter\":1.4,\"shape\":{\"distanceAU\":0.047,\"eccentricity\":0.075,\"hold\":\"semiMajorAxis\"}}},\"dependsOn\":[\"primary\"],\"id\":\"ember\",\"kind\":\"component\",\"references\":{\"input.gm\":\"primary\",\"input.primaryRadius\":\"primary\"},\"type\":\"exoplanet.orbit\"},{\"data\":{\"name\":\"Ember\"},\"dependsOn\":[],\"id\":\"ember-orbit\",\"kind\":\"relationship\",\"references\":{\"source\":\"ember\",\"target\":\"primary\"},\"type\":\"exoplanet.attached-orbit\"},{\"data\":{\"extension\":{\"id\":\"exoplanet.orbit\",\"implementation\":{\"build\":\"f12-1\",\"id\":\"exoplanet.orbit.analytic\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"gm\":{\"port\":\"gm\"},\"primaryRadius\":{\"port\":\"radius\"}},\"parameters\":{\"argumentPeriapsisDeg\":90,\"epochDays\":0,\"inclinationDeg\":90,\"longitudeAscendingNodeDeg\":38,\"massJupiter\":0.35,\"meanAnomalyDegAtEpoch\":0,\"primaryId\":\"primary\",\"radiusJupiter\":0.8,\"shape\":{\"distanceAU\":0.079,\"eccentricity\":0.18,\"hold\":\"semiMajorAxis\"}}},\"dependsOn\":[\"primary\"],\"id\":\"cinder\",\"kind\":\"component\",\"references\":{\"input.gm\":\"primary\",\"input.primaryRadius\":\"primary\"},\"type\":\"exoplanet.orbit\"},{\"data\":{\"name\":\"Cinder\"},\"dependsOn\":[],\"id\":\"cinder-orbit\",\"kind\":\"relationship\",\"references\":{\"source\":\"cinder\",\"target\":\"primary\"},\"type\":\"exoplanet.attached-orbit\"},{\"data\":{\"extension\":{\"id\":\"exoplanet.orbit\",\"implementation\":{\"build\":\"f12-1\",\"id\":\"exoplanet.orbit.analytic\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"gm\":{\"port\":\"gm\"},\"primaryRadius\":{\"port\":\"radius\"}},\"parameters\":{\"argumentPeriapsisDeg\":-90,\"epochDays\":0,\"inclinationDeg\":90,\"longitudeAscendingNodeDeg\":-21,\"massJupiter\":0.1,\"meanAnomalyDegAtEpoch\":0,\"primaryId\":\"primary\",\"radiusJupiter\":0.5,\"shape\":{\"distanceAU\":0.1,\"eccentricity\":0.11,\"hold\":\"semiMajorAxis\"}}},\"dependsOn\":[\"primary\"],\"id\":\"ash\",\"kind\":\"component\",\"references\":{\"input.gm\":\"primary\",\"input.primaryRadius\":\"primary\"},\"type\":\"exoplanet.orbit\"},{\"data\":{\"name\":\"Ash\"},\"dependsOn\":[],\"id\":\"ash-orbit\",\"kind\":\"relationship\",\"references\":{\"source\":\"ash\",\"target\":\"primary\"},\"type\":\"exoplanet.attached-orbit\"},{\"data\":{\"extension\":{\"id\":\"exoplanet.observer\",\"implementation\":{\"build\":\"f12-1\",\"id\":\"exoplanet.observer.analytic\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"direction\":[0,0,1]}},\"dependsOn\":[],\"id\":\"earthward\",\"kind\":\"component\",\"references\":{},\"type\":\"exoplanet.observer\"},{\"data\":{\"extension\":{\"id\":\"exoplanet.silhouette\",\"implementation\":{\"build\":\"f12-1\",\"id\":\"exoplanet.silhouette.geometry\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"radius\":{\"port\":\"radius\"}},\"parameters\":{\"primaryId\":\"primary\",\"quantity\":\"primary-radius\"}},\"dependsOn\":[\"primary\"],\"id\":\"shape-primary\",\"kind\":\"presentation\",\"references\":{\"input.radius\":\"primary\"},\"type\":\"exoplanet.silhouette\"},{\"data\":{\"extension\":{\"id\":\"scene.material\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.material.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#F2BE71\",\"license\":\"BSD-3-Clause\",\"opacity\":1,\"source\":\"Cosmic Lego original local presentation asset\",\"unlit\":true}},\"dependsOn\":[],\"id\":\"paint-primary\",\"kind\":\"presentation\",\"references\":{},\"type\":\"scene.material\"},{\"data\":{\"extension\":{\"id\":\"scene.root\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.root.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"position\":[0,0,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"visible\":true}},\"dependsOn\":[],\"id\":\"scene-root\",\"kind\":\"presentation\",\"references\":{},\"type\":\"scene.root\"},{\"data\":{\"extension\":{\"id\":\"scene.mesh\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.mesh.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"position\":[0,0,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"visible\":true}},\"dependsOn\":[\"shape-primary\",\"paint-primary\",\"scene-root\"],\"id\":\"disk-primary\",\"kind\":\"presentation\",\"references\":{\"asset.geometry\":\"shape-primary\",\"asset.material\":\"paint-primary\",\"asset.parent\":\"scene-root\"},\"type\":\"scene.mesh\"},{\"data\":{\"extension\":{\"id\":\"exoplanet.silhouette\",\"implementation\":{\"build\":\"f12-1\",\"id\":\"exoplanet.silhouette.geometry\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"radius\":{\"port\":\"radius\"}},\"parameters\":{\"primaryId\":\"primary\",\"quantity\":\"planet-radius\"}},\"dependsOn\":[\"ember\"],\"id\":\"shape-ember\",\"kind\":\"presentation\",\"references\":{\"input.radius\":\"ember\"},\"type\":\"exoplanet.silhouette\"},{\"data\":{\"extension\":{\"id\":\"scene.material\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.material.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#272238\",\"license\":\"BSD-3-Clause\",\"opacity\":1,\"source\":\"Cosmic Lego original local presentation asset\",\"unlit\":true}},\"dependsOn\":[],\"id\":\"paint-ember\",\"kind\":\"presentation\",\"references\":{},\"type\":\"scene.material\"},{\"data\":{\"extension\":{\"id\":\"scene.mesh\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.mesh.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"position\":[0,0,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"visible\":true}},\"dependsOn\":[\"shape-ember\",\"paint-ember\",\"scene-root\"],\"id\":\"disk-ember\",\"kind\":\"presentation\",\"references\":{\"asset.geometry\":\"shape-ember\",\"asset.material\":\"paint-ember\",\"asset.parent\":\"scene-root\"},\"type\":\"scene.mesh\"},{\"data\":{\"extension\":{\"id\":\"exoplanet.projection\",\"implementation\":{\"build\":\"f12-1\",\"id\":\"exoplanet.projection.analytic\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"direction\":{\"port\":\"direction\"},\"position\":{\"port\":\"position\"},\"primaryRadius\":{\"port\":\"radius\"},\"radius\":{\"port\":\"radius\"}},\"parameters\":{\"observerId\":\"earthward\",\"primaryId\":\"primary\"}},\"dependsOn\":[\"ember\",\"primary\",\"earthward\"],\"id\":\"sky-ember\",\"kind\":\"component\",\"references\":{\"input.direction\":\"earthward\",\"input.position\":\"ember\",\"input.primaryRadius\":\"primary\",\"input.radius\":\"ember\"},\"type\":\"exoplanet.projection\"},{\"data\":{\"extension\":{\"id\":\"scene.bind-position\",\"implementation\":{\"build\":\"f05-1\",\"id\":\"cosmic-lego.scene.bindings\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"source\":{\"port\":\"skyPosition\"}},\"parameters\":{\"colorRange\":[0,1],\"displayFrame\":\"earthward\",\"displayUnit\":\"m\",\"frame\":\"earthward\",\"palette\":\"blue-gold\",\"port\":\"skyPosition\",\"positionUnit\":\"m\",\"quantity\":\"position\",\"rotation\":[[1,0,0],[0,1,0],[0,0,1]],\"scale\":1.4374011786689664e-9,\"sourceId\":\"sky-ember\",\"translation\":[0,0,0],\"translationUnit\":\"m\",\"unit\":\"m\"}},\"dependsOn\":[\"sky-ember\",\"disk-ember\"],\"id\":\"place-ember\",\"kind\":\"presentation\",\"references\":{\"asset.target\":\"disk-ember\",\"input.source\":\"sky-ember\"},\"type\":\"scene.bind-position\"},{\"data\":{\"extension\":{\"id\":\"exoplanet.silhouette\",\"implementation\":{\"build\":\"f12-1\",\"id\":\"exoplanet.silhouette.geometry\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"radius\":{\"port\":\"radius\"}},\"parameters\":{\"primaryId\":\"primary\",\"quantity\":\"planet-radius\"}},\"dependsOn\":[\"cinder\"],\"id\":\"shape-cinder\",\"kind\":\"presentation\",\"references\":{\"input.radius\":\"cinder\"},\"type\":\"exoplanet.silhouette\"},{\"data\":{\"extension\":{\"id\":\"scene.material\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.material.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#484052\",\"license\":\"BSD-3-Clause\",\"opacity\":1,\"source\":\"Cosmic Lego original local presentation asset\",\"unlit\":true}},\"dependsOn\":[],\"id\":\"paint-cinder\",\"kind\":\"presentation\",\"references\":{},\"type\":\"scene.material\"},{\"data\":{\"extension\":{\"id\":\"scene.mesh\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.mesh.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"position\":[0,0,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"visible\":true}},\"dependsOn\":[\"shape-cinder\",\"paint-cinder\",\"scene-root\"],\"id\":\"disk-cinder\",\"kind\":\"presentation\",\"references\":{\"asset.geometry\":\"shape-cinder\",\"asset.material\":\"paint-cinder\",\"asset.parent\":\"scene-root\"},\"type\":\"scene.mesh\"},{\"data\":{\"extension\":{\"id\":\"exoplanet.projection\",\"implementation\":{\"build\":\"f12-1\",\"id\":\"exoplanet.projection.analytic\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"direction\":{\"port\":\"direction\"},\"position\":{\"port\":\"position\"},\"primaryRadius\":{\"port\":\"radius\"},\"radius\":{\"port\":\"radius\"}},\"parameters\":{\"observerId\":\"earthward\",\"primaryId\":\"primary\"}},\"dependsOn\":[\"cinder\",\"primary\",\"earthward\"],\"id\":\"sky-cinder\",\"kind\":\"component\",\"references\":{\"input.direction\":\"earthward\",\"input.position\":\"cinder\",\"input.primaryRadius\":\"primary\",\"input.radius\":\"cinder\"},\"type\":\"exoplanet.projection\"},{\"data\":{\"extension\":{\"id\":\"scene.bind-position\",\"implementation\":{\"build\":\"f05-1\",\"id\":\"cosmic-lego.scene.bindings\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"source\":{\"port\":\"skyPosition\"}},\"parameters\":{\"colorRange\":[0,1],\"displayFrame\":\"earthward\",\"displayUnit\":\"m\",\"frame\":\"earthward\",\"palette\":\"blue-gold\",\"port\":\"skyPosition\",\"positionUnit\":\"m\",\"quantity\":\"position\",\"rotation\":[[1,0,0],[0,1,0],[0,0,1]],\"scale\":1.4374011786689664e-9,\"sourceId\":\"sky-cinder\",\"translation\":[0,0,0],\"translationUnit\":\"m\",\"unit\":\"m\"}},\"dependsOn\":[\"sky-cinder\",\"disk-cinder\"],\"id\":\"place-cinder\",\"kind\":\"presentation\",\"references\":{\"asset.target\":\"disk-cinder\",\"input.source\":\"sky-cinder\"},\"type\":\"scene.bind-position\"},{\"data\":{\"extension\":{\"id\":\"exoplanet.silhouette\",\"implementation\":{\"build\":\"f12-1\",\"id\":\"exoplanet.silhouette.geometry\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"radius\":{\"port\":\"radius\"}},\"parameters\":{\"primaryId\":\"primary\",\"quantity\":\"planet-radius\"}},\"dependsOn\":[\"ash\"],\"id\":\"shape-ash\",\"kind\":\"presentation\",\"references\":{\"input.radius\":\"ash\"},\"type\":\"exoplanet.silhouette\"},{\"data\":{\"extension\":{\"id\":\"scene.material\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.material.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#50495D\",\"license\":\"BSD-3-Clause\",\"opacity\":1,\"source\":\"Cosmic Lego original local presentation asset\",\"unlit\":true}},\"dependsOn\":[],\"id\":\"paint-ash\",\"kind\":\"presentation\",\"references\":{},\"type\":\"scene.material\"},{\"data\":{\"extension\":{\"id\":\"scene.mesh\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.mesh.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"position\":[0,0,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"visible\":true}},\"dependsOn\":[\"shape-ash\",\"paint-ash\",\"scene-root\"],\"id\":\"disk-ash\",\"kind\":\"presentation\",\"references\":{\"asset.geometry\":\"shape-ash\",\"asset.material\":\"paint-ash\",\"asset.parent\":\"scene-root\"},\"type\":\"scene.mesh\"},{\"data\":{\"extension\":{\"id\":\"exoplanet.projection\",\"implementation\":{\"build\":\"f12-1\",\"id\":\"exoplanet.projection.analytic\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"direction\":{\"port\":\"direction\"},\"position\":{\"port\":\"position\"},\"primaryRadius\":{\"port\":\"radius\"},\"radius\":{\"port\":\"radius\"}},\"parameters\":{\"observerId\":\"earthward\",\"primaryId\":\"primary\"}},\"dependsOn\":[\"ash\",\"primary\",\"earthward\"],\"id\":\"sky-ash\",\"kind\":\"component\",\"references\":{\"input.direction\":\"earthward\",\"input.position\":\"ash\",\"input.primaryRadius\":\"primary\",\"input.radius\":\"ash\"},\"type\":\"exoplanet.projection\"},{\"data\":{\"extension\":{\"id\":\"scene.bind-position\",\"implementation\":{\"build\":\"f05-1\",\"id\":\"cosmic-lego.scene.bindings\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"source\":{\"port\":\"skyPosition\"}},\"parameters\":{\"colorRange\":[0,1],\"displayFrame\":\"earthward\",\"displayUnit\":\"m\",\"frame\":\"earthward\",\"palette\":\"blue-gold\",\"port\":\"skyPosition\",\"positionUnit\":\"m\",\"quantity\":\"position\",\"rotation\":[[1,0,0],[0,1,0],[0,0,1]],\"scale\":1.4374011786689664e-9,\"sourceId\":\"sky-ash\",\"translation\":[0,0,0],\"translationUnit\":\"m\",\"unit\":\"m\"}},\"dependsOn\":[\"sky-ash\",\"disk-ash\"],\"id\":\"place-ash\",\"kind\":\"presentation\",\"references\":{\"asset.target\":\"disk-ash\",\"input.source\":\"sky-ash\"},\"type\":\"scene.bind-position\"},{\"data\":{\"extension\":{\"id\":\"scene.camera\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.camera.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"far\":4602,\"fov\":45,\"near\":0.1,\"position\":[0,0,2300],\"projection\":\"orthographic\",\"rotation\":[0,0,0],\"scale\":[1,1,1],\"span\":3.9,\"target\":[0,0,0],\"visible\":true}},\"dependsOn\":[\"scene-root\"],\"id\":\"sky-camera\",\"kind\":\"presentation\",\"references\":{\"asset.parent\":\"scene-root\"},\"type\":\"scene.camera\"},{\"data\":{\"extension\":{\"id\":\"scene.label\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.label.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#C8D3E6\",\"position\":[0,1.27,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"size\":0.12,\"text\":\"OBSERVER SKY  /  earthward\",\"visible\":true}},\"dependsOn\":[\"scene-root\"],\"id\":\"sky-key\",\"kind\":\"presentation\",\"references\":{\"asset.parent\":\"scene-root\"},\"type\":\"scene.label\"},{\"data\":{\"element\":{\"frame\":{\"id\":\"exoplanet.world\",\"kind\":\"position\"},\"kind\":\"vector\",\"meaning\":\"position\",\"normalization\":null,\"reference\":\"primary\",\"shape\":[3],\"unit\":{\"dimensions\":{\"length\":1},\"scale\":1,\"symbol\":\"m\"}},\"inputs\":{},\"mode\":\"live\",\"query\":{\"port\":\"position\",\"type\":\"exoplanet.orbit\"}},\"dependsOn\":[],\"id\":\"all-positions\",\"kind\":\"calculation\",\"references\":{},\"type\":\"dataflow.selection\"},{\"data\":{\"element\":{\"frame\":null,\"kind\":\"scalar\",\"meaning\":\"planet-radius\",\"normalization\":null,\"reference\":\"primary\",\"shape\":[],\"unit\":{\"dimensions\":{\"length\":1},\"scale\":1,\"symbol\":\"m\"}},\"inputs\":{},\"mode\":\"live\",\"query\":{\"port\":\"radius\",\"type\":\"exoplanet.orbit\"}},\"dependsOn\":[],\"id\":\"all-radii\",\"kind\":\"calculation\",\"references\":{},\"type\":\"dataflow.selection\"},{\"data\":{\"extension\":{\"id\":\"exoplanet.photometry\",\"implementation\":{\"build\":\"f12-1\",\"id\":\"exoplanet.photometry.analytic\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"direction\":{\"port\":\"direction\"},\"positions\":{\"port\":\"value\"},\"primaryRadius\":{\"port\":\"radius\"},\"radii\":{\"port\":\"value\"}},\"parameters\":{\"observerId\":\"earthward\",\"primaryId\":\"primary\"}},\"dependsOn\":[\"all-positions\",\"all-radii\",\"primary\",\"earthward\"],\"id\":\"transit\",\"kind\":\"component\",\"references\":{\"input.direction\":\"earthward\",\"input.positions\":\"all-positions\",\"input.primaryRadius\":\"primary\",\"input.radii\":\"all-radii\"},\"type\":\"exoplanet.photometry\"},{\"data\":{\"inputs\":{\"source\":{\"port\":\"flux\"}},\"times\":[-7200,-6750,-6300,-5850,-5400,-4950,-4500,-4050,-3600,-3150,-2700,-2250,-1800,-1350,-900,-450,0,450,900,1350,1800,2250,2700,3150,3600,4050,4500,4950,5400,5850,6300,6750,7200],\"unit\":\"s\"},\"dependsOn\":[\"transit\"],\"id\":\"curve-transit\",\"kind\":\"calculation\",\"references\":{\"input.source\":\"transit\"},\"type\":\"dataflow.sample\"},{\"data\":{\"extension\":{\"id\":\"workspace.plot\",\"implementation\":{\"build\":\"workspace-1\",\"id\":\"workspace.plot.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"component\":-1,\"folded\":false,\"height\":175,\"hidden\":false,\"title\":\"Combined flux · stellar flux\",\"width\":292,\"x\":16,\"y\":80}},\"dependsOn\":[],\"id\":\"plot-transit\",\"kind\":\"presentation\",\"references\":{},\"type\":\"workspace.plot\"},{\"data\":{\"contract\":{\"frame\":null,\"kind\":\"scalar\",\"meaning\":\"relative-flux\",\"normalization\":{\"definition\":\"unobscured-uniform-stellar-flux\",\"reference\":\"primary\"},\"reference\":\"earthward\",\"shape\":[],\"unit\":{\"dimensions\":{},\"scale\":1,\"symbol\":\"1\"}},\"port\":\"flux\"},\"dependsOn\":[\"transit\",\"plot-transit\"],\"id\":\"bind-plot-transit\",\"kind\":\"relationship\",\"references\":{\"source\":\"transit\",\"target\":\"plot-transit\"},\"type\":\"workspace.plot-source\"},{\"data\":{\"extension\":{\"id\":\"workspace.plot\",\"implementation\":{\"build\":\"workspace-1\",\"id\":\"workspace.plot.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"component\":-1,\"folded\":false,\"height\":182,\"hidden\":false,\"title\":\"Combined flux · time (s)\",\"width\":292,\"x\":16,\"y\":266}},\"dependsOn\":[],\"id\":\"plot-curve-transit\",\"kind\":\"presentation\",\"references\":{},\"type\":\"workspace.plot\"},{\"data\":{\"contract\":{\"coordinates\":{\"kind\":\"time\",\"unit\":{\"dimensions\":{\"time\":1},\"scale\":1,\"symbol\":\"s\"},\"values\":[-7200,-6750,-6300,-5850,-5400,-4950,-4500,-4050,-3600,-3150,-2700,-2250,-1800,-1350,-900,-450,0,450,900,1350,1800,2250,2700,3150,3600,4050,4500,4950,5400,5850,6300,6750,7200]},\"frame\":null,\"kind\":\"series\",\"meaning\":\"relative-flux\",\"normalization\":{\"definition\":\"unobscured-uniform-stellar-flux\",\"reference\":\"primary\"},\"reference\":\"earthward\",\"shape\":[33],\"time\":null,\"unit\":{\"dimensions\":{},\"scale\":1,\"symbol\":\"1\"}},\"port\":\"value\"},\"dependsOn\":[\"curve-transit\",\"plot-curve-transit\"],\"id\":\"bind-plot-curve-transit\",\"kind\":\"relationship\",\"references\":{\"source\":\"curve-transit\",\"target\":\"plot-curve-transit\"},\"type\":\"workspace.plot-source\"},{\"data\":{\"inputs\":{\"source\":{\"port\":\"independentDepths\"}},\"op\":\"sum\"},\"dependsOn\":[\"transit\"],\"id\":\"independent-depth-sum\",\"kind\":\"calculation\",\"references\":{\"input.source\":\"transit\"},\"type\":\"dataflow.reduce\"},{\"data\":{\"comparison\":{\"meaning\":\"unobscured-reference-flux\",\"reference\":\"earthward\"},\"inputs\":{\"left\":{\"port\":\"flux\"},\"right\":{\"port\":\"depth\"}},\"op\":\"add\"},\"dependsOn\":[\"transit\"],\"id\":\"unobscured\",\"kind\":\"calculation\",\"references\":{\"input.left\":\"transit\",\"input.right\":\"transit\"},\"type\":\"dataflow.arithmetic\"},{\"data\":{\"comparison\":{\"meaning\":\"naive-independent-depth-flux\",\"reference\":\"earthward\"},\"inputs\":{\"left\":{\"port\":\"value\"},\"right\":{\"port\":\"value\"}},\"op\":\"subtract\"},\"dependsOn\":[\"unobscured\",\"independent-depth-sum\"],\"id\":\"naive-flux\",\"kind\":\"calculation\",\"references\":{\"input.left\":\"unobscured\",\"input.right\":\"independent-depth-sum\"},\"type\":\"dataflow.arithmetic\"},{\"data\":{\"inputs\":{\"source\":{\"port\":\"value\"}},\"times\":[-7200,-6750,-6300,-5850,-5400,-4950,-4500,-4050,-3600,-3150,-2700,-2250,-1800,-1350,-900,-450,0,450,900,1350,1800,2250,2700,3150,3600,4050,4500,4950,5400,5850,6300,6750,7200],\"unit\":\"s\"},\"dependsOn\":[\"naive-flux\"],\"id\":\"curve-naive\",\"kind\":\"calculation\",\"references\":{\"input.source\":\"naive-flux\"},\"type\":\"dataflow.sample\"},{\"data\":{\"extension\":{\"id\":\"workspace.plot\",\"implementation\":{\"build\":\"workspace-1\",\"id\":\"workspace.plot.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"component\":-1,\"folded\":false,\"height\":145,\"hidden\":false,\"title\":\"Naive flux · summed depths\",\"width\":292,\"x\":16,\"y\":458}},\"dependsOn\":[],\"id\":\"plot-naive\",\"kind\":\"presentation\",\"references\":{},\"type\":\"workspace.plot\"},{\"data\":{\"contract\":{\"frame\":null,\"kind\":\"scalar\",\"meaning\":\"naive-independent-depth-flux\",\"normalization\":{\"definition\":\"unobscured-uniform-stellar-flux\",\"reference\":\"primary\"},\"reference\":\"earthward\",\"shape\":[],\"unit\":{\"dimensions\":{},\"scale\":1,\"symbol\":\"1\"}},\"port\":\"value\"},\"dependsOn\":[\"naive-flux\",\"plot-naive\"],\"id\":\"bind-plot-naive\",\"kind\":\"relationship\",\"references\":{\"source\":\"naive-flux\",\"target\":\"plot-naive\"},\"type\":\"workspace.plot-source\"},{\"data\":{\"extension\":{\"id\":\"workspace.plot\",\"implementation\":{\"build\":\"workspace-1\",\"id\":\"workspace.plot.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"component\":-1,\"folded\":false,\"height\":175,\"hidden\":true,\"title\":\"Naive curve · ignores overlap\",\"width\":292,\"x\":325,\"y\":266}},\"dependsOn\":[],\"id\":\"plot-curve-naive\",\"kind\":\"presentation\",\"references\":{},\"type\":\"workspace.plot\"},{\"data\":{\"contract\":{\"coordinates\":{\"kind\":\"time\",\"unit\":{\"dimensions\":{\"time\":1},\"scale\":1,\"symbol\":\"s\"},\"values\":[-7200,-6750,-6300,-5850,-5400,-4950,-4500,-4050,-3600,-3150,-2700,-2250,-1800,-1350,-900,-450,0,450,900,1350,1800,2250,2700,3150,3600,4050,4500,4950,5400,5850,6300,6750,7200]},\"frame\":null,\"kind\":\"series\",\"meaning\":\"naive-independent-depth-flux\",\"normalization\":{\"definition\":\"unobscured-uniform-stellar-flux\",\"reference\":\"primary\"},\"reference\":\"earthward\",\"shape\":[33],\"time\":null,\"unit\":{\"dimensions\":{},\"scale\":1,\"symbol\":\"1\"}},\"port\":\"value\"},\"dependsOn\":[\"curve-naive\",\"plot-curve-naive\"],\"id\":\"bind-plot-curve-naive\",\"kind\":\"relationship\",\"references\":{\"source\":\"curve-naive\",\"target\":\"plot-curve-naive\"},\"type\":\"workspace.plot-source\"},{\"data\":{\"extension\":{\"id\":\"workspace.conversation\",\"implementation\":{\"build\":\"workspace-1\",\"id\":\"workspace.conversation.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"folded\":false,\"height\":315,\"hidden\":false,\"title\":\"Study conversation\",\"width\":330,\"x\":1030,\"y\":80}},\"dependsOn\":[],\"id\":\"conversation\",\"kind\":\"presentation\",\"references\":{},\"type\":\"workspace.conversation\"},{\"data\":{\"extension\":{\"id\":\"workspace.inspector\",\"implementation\":{\"build\":\"workspace-1\",\"id\":\"workspace.inspector.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"folded\":true,\"height\":210,\"hidden\":false,\"title\":\"Selected component\",\"width\":330,\"x\":1030,\"y\":407}},\"dependsOn\":[],\"id\":\"inspector\",\"kind\":\"presentation\",\"references\":{},\"type\":\"workspace.inspector\"},{\"data\":{\"extension\":{\"id\":\"workspace.provenance\",\"implementation\":{\"build\":\"workspace-1\",\"id\":\"workspace.provenance.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"folded\":false,\"height\":235,\"hidden\":true,\"title\":\"Model and assumptions\",\"width\":320,\"x\":312,\"y\":82}},\"dependsOn\":[],\"id\":\"provenance\",\"kind\":\"presentation\",\"references\":{},\"type\":\"workspace.provenance\"}],\"schemaVersion\":1,\"title\":\"When two planets cast one shadow\"}",
+      "sha256": "sha256:f3b5cccc13bf1eec60e7d81e546ff56f17e4a5d8154f08261c7c2f7cbe2ef820"
+    },
+    {
+      "path": "_portable/reconstruction.mjs",
+      "mediaType": "text/plain",
+      "content": "// Generated reconstruction of the accepted graph. Supply the installed validators.\nexport function reconstruct(Project, validators) {\n  const graph = JSON.parse(\"{\\\"id\\\":\\\"shared-shadow\\\",\\\"nodes\\\":[{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.primary\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.primary.analytic\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"massSolar\\\":1,\\\"radiusSolar\\\":1}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"primary\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{},\\\"type\\\":\\\"exoplanet.primary\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.orbit\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.orbit.analytic\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"gm\\\":{\\\"port\\\":\\\"gm\\\"},\\\"primaryRadius\\\":{\\\"port\\\":\\\"radius\\\"}},\\\"parameters\\\":{\\\"argumentPeriapsisDeg\\\":90,\\\"epochDays\\\":0,\\\"inclinationDeg\\\":90,\\\"longitudeAscendingNodeDeg\\\":0,\\\"massJupiter\\\":0.9,\\\"meanAnomalyDegAtEpoch\\\":0,\\\"primaryId\\\":\\\"primary\\\",\\\"radiusJupiter\\\":1.4,\\\"shape\\\":{\\\"distanceAU\\\":0.047,\\\"eccentricity\\\":0.075,\\\"hold\\\":\\\"semiMajorAxis\\\"}}},\\\"dependsOn\\\":[\\\"primary\\\"],\\\"id\\\":\\\"ember\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{\\\"input.gm\\\":\\\"primary\\\",\\\"input.primaryRadius\\\":\\\"primary\\\"},\\\"type\\\":\\\"exoplanet.orbit\\\"},{\\\"data\\\":{\\\"name\\\":\\\"Ember\\\"},\\\"dependsOn\\\":[],\\\"id\\\":\\\"ember-orbit\\\",\\\"kind\\\":\\\"relationship\\\",\\\"references\\\":{\\\"source\\\":\\\"ember\\\",\\\"target\\\":\\\"primary\\\"},\\\"type\\\":\\\"exoplanet.attached-orbit\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.orbit\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.orbit.analytic\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"gm\\\":{\\\"port\\\":\\\"gm\\\"},\\\"primaryRadius\\\":{\\\"port\\\":\\\"radius\\\"}},\\\"parameters\\\":{\\\"argumentPeriapsisDeg\\\":90,\\\"epochDays\\\":0,\\\"inclinationDeg\\\":90,\\\"longitudeAscendingNodeDeg\\\":38,\\\"massJupiter\\\":0.35,\\\"meanAnomalyDegAtEpoch\\\":0,\\\"primaryId\\\":\\\"primary\\\",\\\"radiusJupiter\\\":0.8,\\\"shape\\\":{\\\"distanceAU\\\":0.079,\\\"eccentricity\\\":0.18,\\\"hold\\\":\\\"semiMajorAxis\\\"}}},\\\"dependsOn\\\":[\\\"primary\\\"],\\\"id\\\":\\\"cinder\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{\\\"input.gm\\\":\\\"primary\\\",\\\"input.primaryRadius\\\":\\\"primary\\\"},\\\"type\\\":\\\"exoplanet.orbit\\\"},{\\\"data\\\":{\\\"name\\\":\\\"Cinder\\\"},\\\"dependsOn\\\":[],\\\"id\\\":\\\"cinder-orbit\\\",\\\"kind\\\":\\\"relationship\\\",\\\"references\\\":{\\\"source\\\":\\\"cinder\\\",\\\"target\\\":\\\"primary\\\"},\\\"type\\\":\\\"exoplanet.attached-orbit\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.orbit\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.orbit.analytic\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"gm\\\":{\\\"port\\\":\\\"gm\\\"},\\\"primaryRadius\\\":{\\\"port\\\":\\\"radius\\\"}},\\\"parameters\\\":{\\\"argumentPeriapsisDeg\\\":-90,\\\"epochDays\\\":0,\\\"inclinationDeg\\\":90,\\\"longitudeAscendingNodeDeg\\\":-21,\\\"massJupiter\\\":0.1,\\\"meanAnomalyDegAtEpoch\\\":0,\\\"primaryId\\\":\\\"primary\\\",\\\"radiusJupiter\\\":0.5,\\\"shape\\\":{\\\"distanceAU\\\":0.1,\\\"eccentricity\\\":0.11,\\\"hold\\\":\\\"semiMajorAxis\\\"}}},\\\"dependsOn\\\":[\\\"primary\\\"],\\\"id\\\":\\\"ash\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{\\\"input.gm\\\":\\\"primary\\\",\\\"input.primaryRadius\\\":\\\"primary\\\"},\\\"type\\\":\\\"exoplanet.orbit\\\"},{\\\"data\\\":{\\\"name\\\":\\\"Ash\\\"},\\\"dependsOn\\\":[],\\\"id\\\":\\\"ash-orbit\\\",\\\"kind\\\":\\\"relationship\\\",\\\"references\\\":{\\\"source\\\":\\\"ash\\\",\\\"target\\\":\\\"primary\\\"},\\\"type\\\":\\\"exoplanet.attached-orbit\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.observer\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.observer.analytic\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"direction\\\":[0,0,1]}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"earthward\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{},\\\"type\\\":\\\"exoplanet.observer\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.silhouette\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.silhouette.geometry\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"radius\\\":{\\\"port\\\":\\\"radius\\\"}},\\\"parameters\\\":{\\\"primaryId\\\":\\\"primary\\\",\\\"quantity\\\":\\\"primary-radius\\\"}},\\\"dependsOn\\\":[\\\"primary\\\"],\\\"id\\\":\\\"shape-primary\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"input.radius\\\":\\\"primary\\\"},\\\"type\\\":\\\"exoplanet.silhouette\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.material\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.material.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#F2BE71\\\",\\\"license\\\":\\\"BSD-3-Clause\\\",\\\"opacity\\\":1,\\\"source\\\":\\\"Cosmic Lego original local presentation asset\\\",\\\"unlit\\\":true}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"paint-primary\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"scene.material\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.root\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.root.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"position\\\":[0,0,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"visible\\\":true}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"scene-root\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"scene.root\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.mesh\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.mesh.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"position\\\":[0,0,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"shape-primary\\\",\\\"paint-primary\\\",\\\"scene-root\\\"],\\\"id\\\":\\\"disk-primary\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.geometry\\\":\\\"shape-primary\\\",\\\"asset.material\\\":\\\"paint-primary\\\",\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.mesh\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.silhouette\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.silhouette.geometry\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"radius\\\":{\\\"port\\\":\\\"radius\\\"}},\\\"parameters\\\":{\\\"primaryId\\\":\\\"primary\\\",\\\"quantity\\\":\\\"planet-radius\\\"}},\\\"dependsOn\\\":[\\\"ember\\\"],\\\"id\\\":\\\"shape-ember\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"input.radius\\\":\\\"ember\\\"},\\\"type\\\":\\\"exoplanet.silhouette\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.material\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.material.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#272238\\\",\\\"license\\\":\\\"BSD-3-Clause\\\",\\\"opacity\\\":1,\\\"source\\\":\\\"Cosmic Lego original local presentation asset\\\",\\\"unlit\\\":true}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"paint-ember\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"scene.material\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.mesh\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.mesh.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"position\\\":[0,0,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"shape-ember\\\",\\\"paint-ember\\\",\\\"scene-root\\\"],\\\"id\\\":\\\"disk-ember\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.geometry\\\":\\\"shape-ember\\\",\\\"asset.material\\\":\\\"paint-ember\\\",\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.mesh\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.projection\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.projection.analytic\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"direction\\\":{\\\"port\\\":\\\"direction\\\"},\\\"position\\\":{\\\"port\\\":\\\"position\\\"},\\\"primaryRadius\\\":{\\\"port\\\":\\\"radius\\\"},\\\"radius\\\":{\\\"port\\\":\\\"radius\\\"}},\\\"parameters\\\":{\\\"observerId\\\":\\\"earthward\\\",\\\"primaryId\\\":\\\"primary\\\"}},\\\"dependsOn\\\":[\\\"ember\\\",\\\"primary\\\",\\\"earthward\\\"],\\\"id\\\":\\\"sky-ember\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{\\\"input.direction\\\":\\\"earthward\\\",\\\"input.position\\\":\\\"ember\\\",\\\"input.primaryRadius\\\":\\\"primary\\\",\\\"input.radius\\\":\\\"ember\\\"},\\\"type\\\":\\\"exoplanet.projection\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.bind-position\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f05-1\\\",\\\"id\\\":\\\"cosmic-lego.scene.bindings\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"source\\\":{\\\"port\\\":\\\"skyPosition\\\"}},\\\"parameters\\\":{\\\"colorRange\\\":[0,1],\\\"displayFrame\\\":\\\"earthward\\\",\\\"displayUnit\\\":\\\"m\\\",\\\"frame\\\":\\\"earthward\\\",\\\"palette\\\":\\\"blue-gold\\\",\\\"port\\\":\\\"skyPosition\\\",\\\"positionUnit\\\":\\\"m\\\",\\\"quantity\\\":\\\"position\\\",\\\"rotation\\\":[[1,0,0],[0,1,0],[0,0,1]],\\\"scale\\\":1.4374011786689664e-9,\\\"sourceId\\\":\\\"sky-ember\\\",\\\"translation\\\":[0,0,0],\\\"translationUnit\\\":\\\"m\\\",\\\"unit\\\":\\\"m\\\"}},\\\"dependsOn\\\":[\\\"sky-ember\\\",\\\"disk-ember\\\"],\\\"id\\\":\\\"place-ember\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.target\\\":\\\"disk-ember\\\",\\\"input.source\\\":\\\"sky-ember\\\"},\\\"type\\\":\\\"scene.bind-position\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.silhouette\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.silhouette.geometry\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"radius\\\":{\\\"port\\\":\\\"radius\\\"}},\\\"parameters\\\":{\\\"primaryId\\\":\\\"primary\\\",\\\"quantity\\\":\\\"planet-radius\\\"}},\\\"dependsOn\\\":[\\\"cinder\\\"],\\\"id\\\":\\\"shape-cinder\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"input.radius\\\":\\\"cinder\\\"},\\\"type\\\":\\\"exoplanet.silhouette\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.material\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.material.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#484052\\\",\\\"license\\\":\\\"BSD-3-Clause\\\",\\\"opacity\\\":1,\\\"source\\\":\\\"Cosmic Lego original local presentation asset\\\",\\\"unlit\\\":true}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"paint-cinder\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"scene.material\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.mesh\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.mesh.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"position\\\":[0,0,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"shape-cinder\\\",\\\"paint-cinder\\\",\\\"scene-root\\\"],\\\"id\\\":\\\"disk-cinder\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.geometry\\\":\\\"shape-cinder\\\",\\\"asset.material\\\":\\\"paint-cinder\\\",\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.mesh\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.projection\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.projection.analytic\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"direction\\\":{\\\"port\\\":\\\"direction\\\"},\\\"position\\\":{\\\"port\\\":\\\"position\\\"},\\\"primaryRadius\\\":{\\\"port\\\":\\\"radius\\\"},\\\"radius\\\":{\\\"port\\\":\\\"radius\\\"}},\\\"parameters\\\":{\\\"observerId\\\":\\\"earthward\\\",\\\"primaryId\\\":\\\"primary\\\"}},\\\"dependsOn\\\":[\\\"cinder\\\",\\\"primary\\\",\\\"earthward\\\"],\\\"id\\\":\\\"sky-cinder\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{\\\"input.direction\\\":\\\"earthward\\\",\\\"input.position\\\":\\\"cinder\\\",\\\"input.primaryRadius\\\":\\\"primary\\\",\\\"input.radius\\\":\\\"cinder\\\"},\\\"type\\\":\\\"exoplanet.projection\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.bind-position\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f05-1\\\",\\\"id\\\":\\\"cosmic-lego.scene.bindings\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"source\\\":{\\\"port\\\":\\\"skyPosition\\\"}},\\\"parameters\\\":{\\\"colorRange\\\":[0,1],\\\"displayFrame\\\":\\\"earthward\\\",\\\"displayUnit\\\":\\\"m\\\",\\\"frame\\\":\\\"earthward\\\",\\\"palette\\\":\\\"blue-gold\\\",\\\"port\\\":\\\"skyPosition\\\",\\\"positionUnit\\\":\\\"m\\\",\\\"quantity\\\":\\\"position\\\",\\\"rotation\\\":[[1,0,0],[0,1,0],[0,0,1]],\\\"scale\\\":1.4374011786689664e-9,\\\"sourceId\\\":\\\"sky-cinder\\\",\\\"translation\\\":[0,0,0],\\\"translationUnit\\\":\\\"m\\\",\\\"unit\\\":\\\"m\\\"}},\\\"dependsOn\\\":[\\\"sky-cinder\\\",\\\"disk-cinder\\\"],\\\"id\\\":\\\"place-cinder\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.target\\\":\\\"disk-cinder\\\",\\\"input.source\\\":\\\"sky-cinder\\\"},\\\"type\\\":\\\"scene.bind-position\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.silhouette\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.silhouette.geometry\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"radius\\\":{\\\"port\\\":\\\"radius\\\"}},\\\"parameters\\\":{\\\"primaryId\\\":\\\"primary\\\",\\\"quantity\\\":\\\"planet-radius\\\"}},\\\"dependsOn\\\":[\\\"ash\\\"],\\\"id\\\":\\\"shape-ash\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"input.radius\\\":\\\"ash\\\"},\\\"type\\\":\\\"exoplanet.silhouette\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.material\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.material.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#50495D\\\",\\\"license\\\":\\\"BSD-3-Clause\\\",\\\"opacity\\\":1,\\\"source\\\":\\\"Cosmic Lego original local presentation asset\\\",\\\"unlit\\\":true}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"paint-ash\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"scene.material\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.mesh\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.mesh.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"position\\\":[0,0,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"shape-ash\\\",\\\"paint-ash\\\",\\\"scene-root\\\"],\\\"id\\\":\\\"disk-ash\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.geometry\\\":\\\"shape-ash\\\",\\\"asset.material\\\":\\\"paint-ash\\\",\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.mesh\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.projection\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.projection.analytic\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"direction\\\":{\\\"port\\\":\\\"direction\\\"},\\\"position\\\":{\\\"port\\\":\\\"position\\\"},\\\"primaryRadius\\\":{\\\"port\\\":\\\"radius\\\"},\\\"radius\\\":{\\\"port\\\":\\\"radius\\\"}},\\\"parameters\\\":{\\\"observerId\\\":\\\"earthward\\\",\\\"primaryId\\\":\\\"primary\\\"}},\\\"dependsOn\\\":[\\\"ash\\\",\\\"primary\\\",\\\"earthward\\\"],\\\"id\\\":\\\"sky-ash\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{\\\"input.direction\\\":\\\"earthward\\\",\\\"input.position\\\":\\\"ash\\\",\\\"input.primaryRadius\\\":\\\"primary\\\",\\\"input.radius\\\":\\\"ash\\\"},\\\"type\\\":\\\"exoplanet.projection\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.bind-position\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f05-1\\\",\\\"id\\\":\\\"cosmic-lego.scene.bindings\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"source\\\":{\\\"port\\\":\\\"skyPosition\\\"}},\\\"parameters\\\":{\\\"colorRange\\\":[0,1],\\\"displayFrame\\\":\\\"earthward\\\",\\\"displayUnit\\\":\\\"m\\\",\\\"frame\\\":\\\"earthward\\\",\\\"palette\\\":\\\"blue-gold\\\",\\\"port\\\":\\\"skyPosition\\\",\\\"positionUnit\\\":\\\"m\\\",\\\"quantity\\\":\\\"position\\\",\\\"rotation\\\":[[1,0,0],[0,1,0],[0,0,1]],\\\"scale\\\":1.4374011786689664e-9,\\\"sourceId\\\":\\\"sky-ash\\\",\\\"translation\\\":[0,0,0],\\\"translationUnit\\\":\\\"m\\\",\\\"unit\\\":\\\"m\\\"}},\\\"dependsOn\\\":[\\\"sky-ash\\\",\\\"disk-ash\\\"],\\\"id\\\":\\\"place-ash\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.target\\\":\\\"disk-ash\\\",\\\"input.source\\\":\\\"sky-ash\\\"},\\\"type\\\":\\\"scene.bind-position\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.camera\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.camera.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"far\\\":4602,\\\"fov\\\":45,\\\"near\\\":0.1,\\\"position\\\":[0,0,2300],\\\"projection\\\":\\\"orthographic\\\",\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"span\\\":3.9,\\\"target\\\":[0,0,0],\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"scene-root\\\"],\\\"id\\\":\\\"sky-camera\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.camera\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.label\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.label.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#C8D3E6\\\",\\\"position\\\":[0,1.27,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"size\\\":0.12,\\\"text\\\":\\\"OBSERVER SKY  /  earthward\\\",\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"scene-root\\\"],\\\"id\\\":\\\"sky-key\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.label\\\"},{\\\"data\\\":{\\\"element\\\":{\\\"frame\\\":{\\\"id\\\":\\\"exoplanet.world\\\",\\\"kind\\\":\\\"position\\\"},\\\"kind\\\":\\\"vector\\\",\\\"meaning\\\":\\\"position\\\",\\\"normalization\\\":null,\\\"reference\\\":\\\"primary\\\",\\\"shape\\\":[3],\\\"unit\\\":{\\\"dimensions\\\":{\\\"length\\\":1},\\\"scale\\\":1,\\\"symbol\\\":\\\"m\\\"}},\\\"inputs\\\":{},\\\"mode\\\":\\\"live\\\",\\\"query\\\":{\\\"port\\\":\\\"position\\\",\\\"type\\\":\\\"exoplanet.orbit\\\"}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"all-positions\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{},\\\"type\\\":\\\"dataflow.selection\\\"},{\\\"data\\\":{\\\"element\\\":{\\\"frame\\\":null,\\\"kind\\\":\\\"scalar\\\",\\\"meaning\\\":\\\"planet-radius\\\",\\\"normalization\\\":null,\\\"reference\\\":\\\"primary\\\",\\\"shape\\\":[],\\\"unit\\\":{\\\"dimensions\\\":{\\\"length\\\":1},\\\"scale\\\":1,\\\"symbol\\\":\\\"m\\\"}},\\\"inputs\\\":{},\\\"mode\\\":\\\"live\\\",\\\"query\\\":{\\\"port\\\":\\\"radius\\\",\\\"type\\\":\\\"exoplanet.orbit\\\"}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"all-radii\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{},\\\"type\\\":\\\"dataflow.selection\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.photometry\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.photometry.analytic\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"direction\\\":{\\\"port\\\":\\\"direction\\\"},\\\"positions\\\":{\\\"port\\\":\\\"value\\\"},\\\"primaryRadius\\\":{\\\"port\\\":\\\"radius\\\"},\\\"radii\\\":{\\\"port\\\":\\\"value\\\"}},\\\"parameters\\\":{\\\"observerId\\\":\\\"earthward\\\",\\\"primaryId\\\":\\\"primary\\\"}},\\\"dependsOn\\\":[\\\"all-positions\\\",\\\"all-radii\\\",\\\"primary\\\",\\\"earthward\\\"],\\\"id\\\":\\\"transit\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{\\\"input.direction\\\":\\\"earthward\\\",\\\"input.positions\\\":\\\"all-positions\\\",\\\"input.primaryRadius\\\":\\\"primary\\\",\\\"input.radii\\\":\\\"all-radii\\\"},\\\"type\\\":\\\"exoplanet.photometry\\\"},{\\\"data\\\":{\\\"inputs\\\":{\\\"source\\\":{\\\"port\\\":\\\"flux\\\"}},\\\"times\\\":[-7200,-6750,-6300,-5850,-5400,-4950,-4500,-4050,-3600,-3150,-2700,-2250,-1800,-1350,-900,-450,0,450,900,1350,1800,2250,2700,3150,3600,4050,4500,4950,5400,5850,6300,6750,7200],\\\"unit\\\":\\\"s\\\"},\\\"dependsOn\\\":[\\\"transit\\\"],\\\"id\\\":\\\"curve-transit\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{\\\"input.source\\\":\\\"transit\\\"},\\\"type\\\":\\\"dataflow.sample\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"workspace.plot\\\",\\\"implementation\\\":{\\\"build\\\":\\\"workspace-1\\\",\\\"id\\\":\\\"workspace.plot.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"component\\\":-1,\\\"folded\\\":false,\\\"height\\\":175,\\\"hidden\\\":false,\\\"title\\\":\\\"Combined flux · stellar flux\\\",\\\"width\\\":292,\\\"x\\\":16,\\\"y\\\":80}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"plot-transit\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"workspace.plot\\\"},{\\\"data\\\":{\\\"contract\\\":{\\\"frame\\\":null,\\\"kind\\\":\\\"scalar\\\",\\\"meaning\\\":\\\"relative-flux\\\",\\\"normalization\\\":{\\\"definition\\\":\\\"unobscured-uniform-stellar-flux\\\",\\\"reference\\\":\\\"primary\\\"},\\\"reference\\\":\\\"earthward\\\",\\\"shape\\\":[],\\\"unit\\\":{\\\"dimensions\\\":{},\\\"scale\\\":1,\\\"symbol\\\":\\\"1\\\"}},\\\"port\\\":\\\"flux\\\"},\\\"dependsOn\\\":[\\\"transit\\\",\\\"plot-transit\\\"],\\\"id\\\":\\\"bind-plot-transit\\\",\\\"kind\\\":\\\"relationship\\\",\\\"references\\\":{\\\"source\\\":\\\"transit\\\",\\\"target\\\":\\\"plot-transit\\\"},\\\"type\\\":\\\"workspace.plot-source\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"workspace.plot\\\",\\\"implementation\\\":{\\\"build\\\":\\\"workspace-1\\\",\\\"id\\\":\\\"workspace.plot.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"component\\\":-1,\\\"folded\\\":false,\\\"height\\\":182,\\\"hidden\\\":false,\\\"title\\\":\\\"Combined flux · time (s)\\\",\\\"width\\\":292,\\\"x\\\":16,\\\"y\\\":266}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"plot-curve-transit\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"workspace.plot\\\"},{\\\"data\\\":{\\\"contract\\\":{\\\"coordinates\\\":{\\\"kind\\\":\\\"time\\\",\\\"unit\\\":{\\\"dimensions\\\":{\\\"time\\\":1},\\\"scale\\\":1,\\\"symbol\\\":\\\"s\\\"},\\\"values\\\":[-7200,-6750,-6300,-5850,-5400,-4950,-4500,-4050,-3600,-3150,-2700,-2250,-1800,-1350,-900,-450,0,450,900,1350,1800,2250,2700,3150,3600,4050,4500,4950,5400,5850,6300,6750,7200]},\\\"frame\\\":null,\\\"kind\\\":\\\"series\\\",\\\"meaning\\\":\\\"relative-flux\\\",\\\"normalization\\\":{\\\"definition\\\":\\\"unobscured-uniform-stellar-flux\\\",\\\"reference\\\":\\\"primary\\\"},\\\"reference\\\":\\\"earthward\\\",\\\"shape\\\":[33],\\\"time\\\":null,\\\"unit\\\":{\\\"dimensions\\\":{},\\\"scale\\\":1,\\\"symbol\\\":\\\"1\\\"}},\\\"port\\\":\\\"value\\\"},\\\"dependsOn\\\":[\\\"curve-transit\\\",\\\"plot-curve-transit\\\"],\\\"id\\\":\\\"bind-plot-curve-transit\\\",\\\"kind\\\":\\\"relationship\\\",\\\"references\\\":{\\\"source\\\":\\\"curve-transit\\\",\\\"target\\\":\\\"plot-curve-transit\\\"},\\\"type\\\":\\\"workspace.plot-source\\\"},{\\\"data\\\":{\\\"inputs\\\":{\\\"source\\\":{\\\"port\\\":\\\"independentDepths\\\"}},\\\"op\\\":\\\"sum\\\"},\\\"dependsOn\\\":[\\\"transit\\\"],\\\"id\\\":\\\"independent-depth-sum\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{\\\"input.source\\\":\\\"transit\\\"},\\\"type\\\":\\\"dataflow.reduce\\\"},{\\\"data\\\":{\\\"comparison\\\":{\\\"meaning\\\":\\\"unobscured-reference-flux\\\",\\\"reference\\\":\\\"earthward\\\"},\\\"inputs\\\":{\\\"left\\\":{\\\"port\\\":\\\"flux\\\"},\\\"right\\\":{\\\"port\\\":\\\"depth\\\"}},\\\"op\\\":\\\"add\\\"},\\\"dependsOn\\\":[\\\"transit\\\"],\\\"id\\\":\\\"unobscured\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{\\\"input.left\\\":\\\"transit\\\",\\\"input.right\\\":\\\"transit\\\"},\\\"type\\\":\\\"dataflow.arithmetic\\\"},{\\\"data\\\":{\\\"comparison\\\":{\\\"meaning\\\":\\\"naive-independent-depth-flux\\\",\\\"reference\\\":\\\"earthward\\\"},\\\"inputs\\\":{\\\"left\\\":{\\\"port\\\":\\\"value\\\"},\\\"right\\\":{\\\"port\\\":\\\"value\\\"}},\\\"op\\\":\\\"subtract\\\"},\\\"dependsOn\\\":[\\\"unobscured\\\",\\\"independent-depth-sum\\\"],\\\"id\\\":\\\"naive-flux\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{\\\"input.left\\\":\\\"unobscured\\\",\\\"input.right\\\":\\\"independent-depth-sum\\\"},\\\"type\\\":\\\"dataflow.arithmetic\\\"},{\\\"data\\\":{\\\"inputs\\\":{\\\"source\\\":{\\\"port\\\":\\\"value\\\"}},\\\"times\\\":[-7200,-6750,-6300,-5850,-5400,-4950,-4500,-4050,-3600,-3150,-2700,-2250,-1800,-1350,-900,-450,0,450,900,1350,1800,2250,2700,3150,3600,4050,4500,4950,5400,5850,6300,6750,7200],\\\"unit\\\":\\\"s\\\"},\\\"dependsOn\\\":[\\\"naive-flux\\\"],\\\"id\\\":\\\"curve-naive\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{\\\"input.source\\\":\\\"naive-flux\\\"},\\\"type\\\":\\\"dataflow.sample\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"workspace.plot\\\",\\\"implementation\\\":{\\\"build\\\":\\\"workspace-1\\\",\\\"id\\\":\\\"workspace.plot.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"component\\\":-1,\\\"folded\\\":false,\\\"height\\\":145,\\\"hidden\\\":false,\\\"title\\\":\\\"Naive flux · summed depths\\\",\\\"width\\\":292,\\\"x\\\":16,\\\"y\\\":458}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"plot-naive\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"workspace.plot\\\"},{\\\"data\\\":{\\\"contract\\\":{\\\"frame\\\":null,\\\"kind\\\":\\\"scalar\\\",\\\"meaning\\\":\\\"naive-independent-depth-flux\\\",\\\"normalization\\\":{\\\"definition\\\":\\\"unobscured-uniform-stellar-flux\\\",\\\"reference\\\":\\\"primary\\\"},\\\"reference\\\":\\\"earthward\\\",\\\"shape\\\":[],\\\"unit\\\":{\\\"dimensions\\\":{},\\\"scale\\\":1,\\\"symbol\\\":\\\"1\\\"}},\\\"port\\\":\\\"value\\\"},\\\"dependsOn\\\":[\\\"naive-flux\\\",\\\"plot-naive\\\"],\\\"id\\\":\\\"bind-plot-naive\\\",\\\"kind\\\":\\\"relationship\\\",\\\"references\\\":{\\\"source\\\":\\\"naive-flux\\\",\\\"target\\\":\\\"plot-naive\\\"},\\\"type\\\":\\\"workspace.plot-source\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"workspace.plot\\\",\\\"implementation\\\":{\\\"build\\\":\\\"workspace-1\\\",\\\"id\\\":\\\"workspace.plot.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"component\\\":-1,\\\"folded\\\":false,\\\"height\\\":175,\\\"hidden\\\":true,\\\"title\\\":\\\"Naive curve · ignores overlap\\\",\\\"width\\\":292,\\\"x\\\":325,\\\"y\\\":266}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"plot-curve-naive\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"workspace.plot\\\"},{\\\"data\\\":{\\\"contract\\\":{\\\"coordinates\\\":{\\\"kind\\\":\\\"time\\\",\\\"unit\\\":{\\\"dimensions\\\":{\\\"time\\\":1},\\\"scale\\\":1,\\\"symbol\\\":\\\"s\\\"},\\\"values\\\":[-7200,-6750,-6300,-5850,-5400,-4950,-4500,-4050,-3600,-3150,-2700,-2250,-1800,-1350,-900,-450,0,450,900,1350,1800,2250,2700,3150,3600,4050,4500,4950,5400,5850,6300,6750,7200]},\\\"frame\\\":null,\\\"kind\\\":\\\"series\\\",\\\"meaning\\\":\\\"naive-independent-depth-flux\\\",\\\"normalization\\\":{\\\"definition\\\":\\\"unobscured-uniform-stellar-flux\\\",\\\"reference\\\":\\\"primary\\\"},\\\"reference\\\":\\\"earthward\\\",\\\"shape\\\":[33],\\\"time\\\":null,\\\"unit\\\":{\\\"dimensions\\\":{},\\\"scale\\\":1,\\\"symbol\\\":\\\"1\\\"}},\\\"port\\\":\\\"value\\\"},\\\"dependsOn\\\":[\\\"curve-naive\\\",\\\"plot-curve-naive\\\"],\\\"id\\\":\\\"bind-plot-curve-naive\\\",\\\"kind\\\":\\\"relationship\\\",\\\"references\\\":{\\\"source\\\":\\\"curve-naive\\\",\\\"target\\\":\\\"plot-curve-naive\\\"},\\\"type\\\":\\\"workspace.plot-source\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"workspace.conversation\\\",\\\"implementation\\\":{\\\"build\\\":\\\"workspace-1\\\",\\\"id\\\":\\\"workspace.conversation.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"folded\\\":false,\\\"height\\\":315,\\\"hidden\\\":false,\\\"title\\\":\\\"Study conversation\\\",\\\"width\\\":330,\\\"x\\\":1030,\\\"y\\\":80}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"conversation\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"workspace.conversation\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"workspace.inspector\\\",\\\"implementation\\\":{\\\"build\\\":\\\"workspace-1\\\",\\\"id\\\":\\\"workspace.inspector.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"folded\\\":true,\\\"height\\\":210,\\\"hidden\\\":false,\\\"title\\\":\\\"Selected component\\\",\\\"width\\\":330,\\\"x\\\":1030,\\\"y\\\":407}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"inspector\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"workspace.inspector\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"workspace.provenance\\\",\\\"implementation\\\":{\\\"build\\\":\\\"workspace-1\\\",\\\"id\\\":\\\"workspace.provenance.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"folded\\\":false,\\\"height\\\":235,\\\"hidden\\\":true,\\\"title\\\":\\\"Model and assumptions\\\",\\\"width\\\":320,\\\"x\\\":312,\\\"y\\\":82}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"provenance\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"workspace.provenance\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.orbit\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.orbit.analytic\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"gm\\\":{\\\"port\\\":\\\"gm\\\"},\\\"primaryRadius\\\":{\\\"port\\\":\\\"radius\\\"}},\\\"parameters\\\":{\\\"argumentPeriapsisDeg\\\":90,\\\"epochDays\\\":0,\\\"inclinationDeg\\\":90,\\\"longitudeAscendingNodeDeg\\\":0,\\\"massJupiter\\\":0.2,\\\"meanAnomalyDegAtEpoch\\\":0,\\\"primaryId\\\":\\\"primary\\\",\\\"radiusJupiter\\\":1.8,\\\"shape\\\":{\\\"distanceAU\\\":0.12,\\\"eccentricity\\\":0,\\\"hold\\\":\\\"semiMajorAxis\\\"}}},\\\"dependsOn\\\":[\\\"primary\\\"],\\\"id\\\":\\\"fourth\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{\\\"input.gm\\\":\\\"primary\\\",\\\"input.primaryRadius\\\":\\\"primary\\\"},\\\"type\\\":\\\"exoplanet.orbit\\\"},{\\\"data\\\":{\\\"name\\\":\\\"fourth\\\"},\\\"dependsOn\\\":[],\\\"id\\\":\\\"fourth-orbit\\\",\\\"kind\\\":\\\"relationship\\\",\\\"references\\\":{\\\"source\\\":\\\"fourth\\\",\\\"target\\\":\\\"primary\\\"},\\\"type\\\":\\\"exoplanet.attached-orbit\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.projection\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.projection.analytic\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"direction\\\":{\\\"port\\\":\\\"direction\\\"},\\\"position\\\":{\\\"port\\\":\\\"position\\\"},\\\"primaryRadius\\\":{\\\"port\\\":\\\"radius\\\"},\\\"radius\\\":{\\\"port\\\":\\\"radius\\\"}},\\\"parameters\\\":{\\\"observerId\\\":\\\"earthward\\\",\\\"primaryId\\\":\\\"primary\\\"}},\\\"dependsOn\\\":[\\\"primary\\\",\\\"earthward\\\",\\\"fourth\\\"],\\\"id\\\":\\\"sky-fourth\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{\\\"input.direction\\\":\\\"earthward\\\",\\\"input.position\\\":\\\"fourth\\\",\\\"input.primaryRadius\\\":\\\"primary\\\",\\\"input.radius\\\":\\\"fourth\\\"},\\\"type\\\":\\\"exoplanet.projection\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"exoplanet.silhouette\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f12-1\\\",\\\"id\\\":\\\"exoplanet.silhouette.geometry\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"radius\\\":{\\\"port\\\":\\\"radius\\\"}},\\\"parameters\\\":{\\\"primaryId\\\":\\\"primary\\\",\\\"quantity\\\":\\\"planet-radius\\\"}},\\\"dependsOn\\\":[\\\"fourth\\\"],\\\"id\\\":\\\"shape-fourth\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"input.radius\\\":\\\"fourth\\\"},\\\"type\\\":\\\"exoplanet.silhouette\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.mesh\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.mesh.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"position\\\":[0,0,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"shape-fourth\\\",\\\"paint-ember\\\",\\\"scene-root\\\"],\\\"id\\\":\\\"disk-fourth\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.geometry\\\":\\\"shape-fourth\\\",\\\"asset.material\\\":\\\"paint-ember\\\",\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.mesh\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.bind-position\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f05-1\\\",\\\"id\\\":\\\"cosmic-lego.scene.bindings\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"source\\\":{\\\"port\\\":\\\"skyPosition\\\"}},\\\"parameters\\\":{\\\"colorRange\\\":[0,1],\\\"displayFrame\\\":\\\"earthward\\\",\\\"displayUnit\\\":\\\"m\\\",\\\"frame\\\":\\\"earthward\\\",\\\"palette\\\":\\\"blue-gold\\\",\\\"port\\\":\\\"skyPosition\\\",\\\"positionUnit\\\":\\\"m\\\",\\\"quantity\\\":\\\"position\\\",\\\"rotation\\\":[[1,0,0],[0,1,0],[0,0,1]],\\\"scale\\\":1.4374011786689664e-9,\\\"sourceId\\\":\\\"sky-fourth\\\",\\\"translation\\\":[0,0,0],\\\"translationUnit\\\":\\\"m\\\",\\\"unit\\\":\\\"m\\\"}},\\\"dependsOn\\\":[\\\"sky-fourth\\\",\\\"disk-fourth\\\"],\\\"id\\\":\\\"place-fourth\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.target\\\":\\\"disk-fourth\\\",\\\"input.source\\\":\\\"sky-fourth\\\"},\\\"type\\\":\\\"scene.bind-position\\\"},{\\\"data\\\":{\\\"comparison\\\":{\\\"meaning\\\":\\\"overlap-overcount\\\",\\\"reference\\\":\\\"earthward\\\"},\\\"inputs\\\":{\\\"left\\\":{\\\"port\\\":\\\"flux\\\"},\\\"right\\\":{\\\"port\\\":\\\"value\\\"}},\\\"op\\\":\\\"subtract\\\"},\\\"dependsOn\\\":[\\\"transit\\\",\\\"naive-flux\\\"],\\\"id\\\":\\\"overlap-overcount\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{\\\"input.left\\\":\\\"transit\\\",\\\"input.right\\\":\\\"naive-flux\\\"},\\\"type\\\":\\\"dataflow.arithmetic\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"workspace.plot\\\",\\\"implementation\\\":{\\\"build\\\":\\\"workspace-1\\\",\\\"id\\\":\\\"workspace.plot.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"component\\\":-1,\\\"folded\\\":false,\\\"height\\\":210,\\\"hidden\\\":false,\\\"title\\\":\\\"Overlap counted twice · fractional flux\\\",\\\"width\\\":310,\\\"x\\\":1020,\\\"y\\\":470}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"overlap-bias-plot\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"workspace.plot\\\"},{\\\"data\\\":{\\\"contract\\\":{\\\"frame\\\":null,\\\"kind\\\":\\\"scalar\\\",\\\"meaning\\\":\\\"overlap-overcount\\\",\\\"normalization\\\":{\\\"definition\\\":\\\"unobscured-uniform-stellar-flux\\\",\\\"reference\\\":\\\"primary\\\"},\\\"reference\\\":\\\"earthward\\\",\\\"shape\\\":[],\\\"unit\\\":{\\\"dimensions\\\":{},\\\"scale\\\":1,\\\"symbol\\\":\\\"1\\\"}},\\\"port\\\":\\\"value\\\"},\\\"dependsOn\\\":[\\\"overlap-overcount\\\",\\\"overlap-bias-plot\\\"],\\\"id\\\":\\\"bind-overlap-bias-plot\\\",\\\"kind\\\":\\\"relationship\\\",\\\"references\\\":{\\\"source\\\":\\\"overlap-overcount\\\",\\\"target\\\":\\\"overlap-bias-plot\\\"},\\\"type\\\":\\\"workspace.plot-source\\\"}],\\\"schemaVersion\\\":1,\\\"title\\\":\\\"When two planets cast one shadow\\\"}\");\n  return Project.from(graph, { validators });\n}\n",
+      "sha256": "sha256:ec98e91b58b5103346f36198487bda04960c5e2b6ead8b1ae091562f962da57e"
+    }
+  ],
+  "playback": {
+    "policy": "replay-from-initial",
+    "time": {
+      "value": 0,
+      "unit": {
+        "symbol": "s",
+        "dimensions": {
+          "time": 1
+        },
+        "scale": 1
+      }
+    },
+    "mode": "analytic",
+    "settings": {},
+    "targets": [
+      {
+        "nodeId": "transit",
+        "port": "flux"
+      },
+      {
+        "nodeId": "naive-flux",
+        "port": "value"
+      },
+      {
+        "nodeId": "primary",
+        "port": "radius"
+      },
+      {
+        "nodeId": "ember",
+        "port": "radius"
+      },
+      {
+        "nodeId": "sky-ember",
+        "port": "skyPosition"
+      },
+      {
+        "nodeId": "cinder",
+        "port": "radius"
+      },
+      {
+        "nodeId": "sky-cinder",
+        "port": "skyPosition"
+      },
+      {
+        "nodeId": "ash",
+        "port": "radius"
+      },
+      {
+        "nodeId": "sky-ash",
+        "port": "skyPosition"
+      },
+      {
+        "nodeId": "fourth",
+        "port": "radius"
+      },
+      {
+        "nodeId": "sky-fourth",
+        "port": "skyPosition"
+      },
+      {
+        "nodeId": "curve-transit",
+        "port": "value"
+      },
+      {
+        "nodeId": "curve-naive",
+        "port": "value"
+      },
+      {
+        "nodeId": "overlap-overcount",
+        "port": "value"
+      }
+    ]
+  },
+  "dataSources": [
+    {
+      "nodeId": "primary",
+      "source": "Original Cosmic Lego synthetic double-transit study, packages/exoplanet/recipe.mjs",
+      "license": "BSD-3-Clause",
+      "description": "Model inputs or derived measurement: Primary"
+    },
+    {
+      "nodeId": "ember",
+      "source": "Original Cosmic Lego synthetic double-transit study, packages/exoplanet/recipe.mjs",
+      "license": "BSD-3-Clause",
+      "description": "Model inputs or derived measurement: Ember"
+    },
+    {
+      "nodeId": "cinder",
+      "source": "Original Cosmic Lego synthetic double-transit study, packages/exoplanet/recipe.mjs",
+      "license": "BSD-3-Clause",
+      "description": "Model inputs or derived measurement: Cinder"
+    },
+    {
+      "nodeId": "ash",
+      "source": "Original Cosmic Lego synthetic double-transit study, packages/exoplanet/recipe.mjs",
+      "license": "BSD-3-Clause",
+      "description": "Model inputs or derived measurement: Ash"
+    },
+    {
+      "nodeId": "earthward",
+      "source": "Original Cosmic Lego synthetic double-transit study, packages/exoplanet/recipe.mjs",
+      "license": "BSD-3-Clause",
+      "description": "Model inputs or derived measurement: Earthward detector"
+    },
+    {
+      "nodeId": "transit",
+      "source": "Original Cosmic Lego synthetic double-transit study, packages/exoplanet/recipe.mjs",
+      "license": "BSD-3-Clause",
+      "description": "Model inputs or derived measurement: Combined flux"
+    }
+  ],
+  "timeline": {
+    "version": 1,
+    "data": {
+      "id": "passage",
+      "title": "When shadows overlap",
+      "duration": 8,
+      "tracks": [
+        {
+          "id": "clock",
+          "kind": "physical-time",
+          "keys": [
+            {
+              "at": 0,
+              "value": -7200
+            },
+            {
+              "at": 3,
+              "value": 0
+            },
+            {
+              "at": 5,
+              "value": 0
+            },
+            {
+              "at": 8,
+              "value": 7200
+            }
+          ]
+        },
+        {
+          "id": "guide",
+          "kind": "annotation",
+          "keys": [
+            {
+              "at": 0,
+              "value": "Follow the foreground silhouettes across the uniformly bright stellar disk."
+            },
+            {
+              "at": 3,
+              "value": "At conjunction their disks overlap. The overlap blocks the same light once."
+            },
+            {
+              "at": 5,
+              "value": "As the shadows separate, compare the union with the sum of the individual deficits."
+            }
+          ]
+        },
+        {
+          "id": "read-naive",
+          "kind": "emphasis",
+          "target": "plot-naive",
+          "keys": [
+            {
+              "at": 0,
+              "value": false
+            },
+            {
+              "at": 3,
+              "value": true
+            },
+            {
+              "at": 5,
+              "value": false
+            }
+          ]
+        }
+      ],
+      "boundaries": []
+    },
+    "configurations": []
+  },
+  "sharing": {
+    "transcriptIncluded": false,
+    "receiptsIncluded": true,
+    "transcript": [],
+    "receipts": [
+      {
+        "command": "transaction.commit",
+        "identity": {
+          "projectId": "shared-shadow",
+          "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+          "revision": 2
+        },
+        "summary": {
+          "action": "transaction.commit",
+          "created": [
+            "fourth",
+            "fourth-orbit",
+            "sky-fourth",
+            "shape-fourth",
+            "disk-fourth",
+            "place-fourth"
+          ],
+          "updated": [],
+          "removed": [],
+          "counts": {
+            "created": 6,
+            "updated": 0,
+            "removed": 0
+          },
+          "truncated": false,
+          "before": {
+            "projectId": "shared-shadow",
+            "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+            "revision": 1
+          },
+          "after": {
+            "projectId": "shared-shadow",
+            "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+            "revision": 2
+          }
+        }
+      },
+      {
+        "command": "transaction.commit",
+        "identity": {
+          "projectId": "shared-shadow",
+          "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+          "revision": 3
+        },
+        "summary": {
+          "action": "transaction.commit",
+          "created": [
+            "overlap-overcount",
+            "overlap-bias-plot",
+            "bind-overlap-bias-plot"
+          ],
+          "updated": [],
+          "removed": [],
+          "counts": {
+            "created": 3,
+            "updated": 0,
+            "removed": 0
+          },
+          "truncated": false,
+          "before": {
+            "projectId": "shared-shadow",
+            "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+            "revision": 2
+          },
+          "after": {
+            "projectId": "shared-shadow",
+            "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+            "revision": 3
+          }
+        }
+      },
+      {
+        "command": "history.undo",
+        "identity": {
+          "projectId": "shared-shadow",
+          "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+          "revision": 4
+        },
+        "summary": {
+          "action": "history.undo",
+          "created": [],
+          "updated": [],
+          "removed": [
+            "overlap-overcount",
+            "overlap-bias-plot",
+            "bind-overlap-bias-plot"
+          ],
+          "counts": {
+            "created": 0,
+            "updated": 0,
+            "removed": 3
+          },
+          "truncated": false,
+          "before": {
+            "projectId": "shared-shadow",
+            "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+            "revision": 3
+          },
+          "after": {
+            "projectId": "shared-shadow",
+            "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+            "revision": 4
+          }
+        }
+      },
+      {
+        "command": "history.undo",
+        "identity": {
+          "projectId": "shared-shadow",
+          "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+          "revision": 5
+        },
+        "summary": {
+          "action": "history.undo",
+          "created": [],
+          "updated": [],
+          "removed": [
+            "fourth",
+            "fourth-orbit",
+            "sky-fourth",
+            "shape-fourth",
+            "disk-fourth",
+            "place-fourth"
+          ],
+          "counts": {
+            "created": 0,
+            "updated": 0,
+            "removed": 6
+          },
+          "truncated": false,
+          "before": {
+            "projectId": "shared-shadow",
+            "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+            "revision": 4
+          },
+          "after": {
+            "projectId": "shared-shadow",
+            "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+            "revision": 5
+          }
+        }
+      },
+      {
+        "command": "history.redo",
+        "identity": {
+          "projectId": "shared-shadow",
+          "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+          "revision": 6
+        },
+        "summary": {
+          "action": "history.redo",
+          "created": [
+            "fourth",
+            "fourth-orbit",
+            "sky-fourth",
+            "shape-fourth",
+            "disk-fourth",
+            "place-fourth"
+          ],
+          "updated": [],
+          "removed": [],
+          "counts": {
+            "created": 6,
+            "updated": 0,
+            "removed": 0
+          },
+          "truncated": false,
+          "before": {
+            "projectId": "shared-shadow",
+            "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+            "revision": 5
+          },
+          "after": {
+            "projectId": "shared-shadow",
+            "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+            "revision": 6
+          }
+        }
+      },
+      {
+        "command": "history.redo",
+        "identity": {
+          "projectId": "shared-shadow",
+          "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+          "revision": 7
+        },
+        "summary": {
+          "action": "history.redo",
+          "created": [
+            "overlap-overcount",
+            "overlap-bias-plot",
+            "bind-overlap-bias-plot"
+          ],
+          "updated": [],
+          "removed": [],
+          "counts": {
+            "created": 3,
+            "updated": 0,
+            "removed": 0
+          },
+          "truncated": false,
+          "before": {
+            "projectId": "shared-shadow",
+            "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+            "revision": 6
+          },
+          "after": {
+            "projectId": "shared-shadow",
+            "generation": "load-792aee00-c219-4ffd-943a-fe75f2d17e90",
+            "revision": 7
+          }
+        }
+      }
+    ]
+  },
+  "integrity": {
+    "graphHash": "sha256:0c9095bdd971c3ecdabc55771851581c07b17cf8151861c4d6399ca173041eec",
+    "sha256": "sha256:f73214a5c99fab3e07380d60109ef54c3484bf98b51874047faa8ddd48d70fce"
+  }
+}

@@ -10,7 +10,7 @@ const source = (await readFile(new URL('../demo/scene/app.js', import.meta.url),
 const pause = () => new Promise(resolve => setImmediate(resolve));
 const deferred = () => { let resolve; const promise = new Promise(done => { resolve = done; }); return { promise, resolve }; };
 
-async function app({ projection = 'perspective', radius = 0.12, holdFirstEdit = false } = {}) {
+async function app({ projection = 'perspective', radius = 0.12, holdFirstEdit = false, initialSuperseded = false } = {}) {
   class Element {
     constructor(id) { this.id = id; this.value = id === 'time' ? '0' : ''; this.clientWidth = 800; this.clientHeight = 600; this.children = []; this.events = new Map(); }
     addEventListener(name, callback) { this.events.set(name, callback); }
@@ -18,12 +18,13 @@ async function app({ projection = 'perspective', radius = 0.12, holdFirstEdit = 
     append(...children) { this.children.push(...children); }
     setAttribute(name, value) { this[name] = value; }
   }
-  const elements = new Map(), windowEvents = new Map(), edits = [], evaluations = [], firstEdit = deferred();
+  const elements = new Map(), windowEvents = new Map(), intervals = new Map(), edits = [], evaluations = [], firstEdit = deferred();
   const element = id => { if (!elements.has(id)) elements.set(id, new Element(id)); return elements.get(id); };
   let server = { identity: { projectId: 'test-scene', generation: 'load-1', revision: 1 }, graph: { nodes: [
     { id: 'camera', data: { parameters: { projection } } }, { id: 'shared-sphere', data: { parameters: { radius } } },
-  ] } };
+  ] }, history: { canUndo: false, canRedo: false } };
   let objectIds = ['source-a', 'source-b'], rendererSelection = null;
+  let superseded = initialSuperseded ? 1 : 0, stateReads = 0, now = 0;
   const adapter = { capabilities: [], resize() {}, render() {}, dispose() {}, setCamera() {}, frameAll() {},
     stats: () => ({ objects: 1, geometries: 1, materials: 1, textures: 0 }) };
   const response = (value, ok = true) => ({ ok, json: async () => structuredClone(value) });
@@ -31,7 +32,10 @@ async function app({ projection = 'perspective', radius = 0.12, holdFirstEdit = 
     document: { getElementById: element, createElement: name => new Element(name), createTextNode: text => ({ textContent: text }) },
     window: { devicePixelRatio: 1, addEventListener: (name, callback) => windowEvents.set(name, callback) },
     ResizeObserver: class { observe() {} disconnect() {} }, requestAnimationFrame() {},
-    setTimeout, clearTimeout, Option: class { constructor(text, value) { this.text = text; this.value = value; } },
+    setTimeout, clearTimeout, crypto: globalThis.crypto,
+    Date: class extends Date { static now() { return now; } },
+    setInterval(callback) { const id = Symbol(); intervals.set(id, callback); return id; }, clearInterval: id => intervals.delete(id),
+    Option: class { constructor(text, value) { this.text = text; this.value = value; } },
     makeAdapter({ onSelect }) {
       adapter.select = selection => { rendererSelection = selection; onSelect(selection); };
       adapter.apply = snapshot => {
@@ -41,7 +45,7 @@ async function app({ projection = 'perspective', radius = 0.12, holdFirstEdit = 
       return adapter;
     },
     async fetch(path, options = {}) {
-      if (path.endsWith('/state')) return response(server);
+      if (path.endsWith('/state')) { if (path === '/api/scene/state') stateReads++; return response(server); }
       const input = JSON.parse(options.body);
       if (path.endsWith('/edit')) {
         edits.push(input);
@@ -51,17 +55,25 @@ async function app({ projection = 'perspective', radius = 0.12, holdFirstEdit = 
         else if (input.action === 'marker-scale' && input.value >= 0.03 && input.value <= 0.3) server.graph.nodes[1].data.parameters.radius = input.value;
         else return response({ code: 'EDIT', message: 'Unsupported test edit.' }, false);
         server.identity.revision++;
+        server.history = { canUndo: true, canRedo: false };
         return response(server);
       }
       assert.ok(path.endsWith('/evaluate'));
       evaluations.push(input);
+      if (superseded) { superseded--; return response({ code: 'SUPERSEDED', message: 'Another view requested a snapshot.' }, false); }
       return response({ results: [], snapshot: { valid: true, identity: server.identity, nodes: [{ id: 'points', kind: 'points', objectIds }], bindings: [] } });
     },
   });
   await new vm.Script(`(async () => { ${source}\n })()`, { filename: 'demo/scene/app.js' }).runInContext(context);
   return { scene: context.sceneLab, adapter, element, edits, evaluations, firstEdit,
+    supersedeNext: () => { superseded++; }, stateReads: () => stateReads, tick: milliseconds => { now += milliseconds; },
     replaceObjectIds: ids => { objectIds = ids; },
-    externalEdit: () => { server.identity.revision++; server.graph.nodes[0].data.parameters.projection = 'orthographic'; },
+    externalEdit: () => {
+      server.identity.revision++; server.graph.nodes[0].data.parameters.projection = 'orthographic';
+      server.history = { canUndo: true, canRedo: false };
+      server.lastChange = { identity: structuredClone(server.identity), summary: { created: [], updated: ['camera'], removed: [] } };
+    },
+    poll: () => Promise.all([...intervals.values()].map(callback => callback())),
     state: () => structuredClone(server), dispose: () => windowEvents.get('pagehide')() };
 }
 
@@ -97,6 +109,7 @@ test('an explicit stale-token rejection reloads current state and retries the qu
   browser.externalEdit();
   await browser.scene.edit('marker-scale', undefined, 0.2);
   assert.deepEqual(browser.edits.map(input => input.identity.revision), [1, 2]);
+  assert.notEqual(browser.edits[0].idempotencyKey, browser.edits[1].idempotencyKey, 'A rebase has a fresh mutation context and key.');
   assert.equal(browser.state().identity.revision, 3);
   assert.equal(browser.element('projection').value, 'orthographic');
   assert.equal(browser.element('marker-size').value, '0.2');
@@ -112,4 +125,48 @@ test('refresh preserves the renderer clearing a selected source ID that disappea
   assert.equal(browser.element('selection-badge').textContent, 'No selection');
   assert.equal(browser.element('objects').value, '');
   assert.equal(browser.element('remove').disabled, true);
+});
+
+test('revision polling applies an external edit with its summary and an enabled Undo control', async t => {
+  const browser = await app(); t.after(browser.dispose);
+  assert.equal(browser.element('undo').disabled, true);
+  browser.externalEdit(); await browser.poll();
+  assert.equal(browser.scene.identity.revision, 2);
+  assert.equal(browser.element('projection').value, 'orthographic');
+  assert.equal(browser.element('undo').disabled, false);
+  assert.match(browser.element('status').textContent, /Updated camera/);
+  assert.equal(browser.edits.length, 0, 'Polling never generates a replacement edit.');
+});
+
+test('revision polling waits while a local edit is in flight and the edit rebases once', async t => {
+  const browser = await app({ holdFirstEdit: true }); t.after(browser.dispose);
+  const local = browser.scene.edit('marker-scale', undefined, 0.2); await pause();
+  browser.externalEdit(); await browser.poll();
+  assert.equal(browser.scene.identity.revision, 1, 'The polling path does not race a pending local transaction.');
+  browser.firstEdit.resolve(); await local;
+  assert.equal(browser.scene.identity.revision, 3);
+  assert.equal(browser.element('projection').value, 'orthographic');
+  assert.equal(browser.element('marker-size').value, '0.2');
+  assert.deepEqual(browser.edits.map(request => request.identity.revision), [1, 2]);
+});
+
+test('polling retries a superseded initial or edited snapshot without another mutation or graph fetch', async t => {
+  const browser = await app({ initialSuperseded: true }); t.after(browser.dispose);
+  assert.equal(browser.scene.snapshot, undefined);
+  await browser.poll();
+  assert.equal(browser.evaluations.length, 1, 'A superseded read waits instead of repeatedly cancelling another view.');
+  browser.tick(2000); await browser.poll();
+  assert.equal(browser.scene.snapshot.identity.revision, 1);
+  browser.supersedeNext();
+  await browser.scene.edit('projection', undefined, 'orthographic');
+  assert.equal(browser.scene.identity.revision, 2);
+  assert.equal(browser.scene.snapshot.identity.revision, 1);
+  assert.equal(browser.element('diagnostics').hidden, true);
+  browser.tick(2000); await browser.poll();
+  assert.equal(browser.scene.snapshot.identity.revision, 2);
+  assert.equal(browser.edits.length, 1);
+  assert.equal(browser.stateReads(), 1, 'A current accepted graph need not be downloaded again.');
+  const evaluations = browser.evaluations.length;
+  await browser.poll();
+  assert.equal(browser.evaluations.length, evaluations, 'A current rendered snapshot does not continuously restart workers.');
 });

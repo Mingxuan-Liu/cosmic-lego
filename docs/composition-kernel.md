@@ -1,14 +1,6 @@
 # Composition kernel authoring
 
-F01 adds a domain-independent data graph in `src/core/index.js`. It can start
-empty and accepts generic geometry/data definitions. The existing browser demo,
-`World` SDK, CLI, and HTTP API still use the exoplanet prototype; they have not
-been migrated to this kernel. No renderer, calculation evaluator, extension
-registry, or agent provider is supplied here.
-
-F02 now supplies [scientific values and synchronous dataflow](scientific-dataflow.md)
-in a separate layer over this kernel. This guide continues to describe the graph
-and transaction boundary.
+The domain-independent graph in `src/core/index.js` handles identity, staged connections, validation, atomic edits, and Undo. Both the astronomy-free timing gate and the default exoplanet workspace use this graph. The composition root installs the scientific models and presentation layers required by each application. Existing v0.2 World graphs enter through an explicit importer. [Scientific dataflow](scientific-dataflow.md) · [Default astronomy application and imports](exoplanet-authoring.md)
 
 Run the working public-interface example from the repository root:
 
@@ -101,10 +93,7 @@ cycles and endpoint arrangements with loops are valid.
 
 `dependsOn` lists distinct node IDs that supply computational inputs. Its graph
 must be acyclic; the kernel reports `DEPENDENCY_CYCLE` for a cycle and any nodes
-blocked by it. A coupled-model/solver facility is not implemented. Calculation
-and presentation nodes currently store definitions only; their `data` does not
-execute or render anything. Scientific ports, equations, and runtime scheduling
-belong to later tasks.
+blocked by it. Calculation and presentation nodes store definitions. The dataflow layer resolves scientific ports, the registered implementations supply equations, and the runtime schedules evaluation. The renderer consumes evaluated scene bindings.
 
 ## Public methods and handles
 
@@ -127,6 +116,16 @@ belong to later tasks.
 | `draft.snapshot()` / `draft.validate()` | Return draft data or `{ valid, errors }`. |
 | `draft.preview()` | Returns `{ project, validation, baseToken }` without committing. |
 | `draft.accept()` / `project.accept(draft)` | Recheck the captured token and all validation before atomic acceptance. |
+
+F07 adds an optional trusted host hook to `draft.accept({beforeCommit})`,
+`project.accept(draft,{beforeCommit})`, and `project.undo/redo(token,{beforeCommit})`.
+The callback receives a deeply frozen detached candidate after validators run,
+inside the kernel's existing mutation guard, before changing content, history or
+revision. It returns undefined to proceed or throws to reject atomically; async,
+generator, Promise-returning, accessor-bearing and malformed guards reject.
+This lets the gateway validate history targets and check turn authorization at
+the final write boundary. It is executable host configuration, never project or
+transport data. Existing calls without options retain their behavior.
 
 Draft `update`, `disconnect`, `remove`, and `dependencies` also accept compatible
 handles in place of IDs. A handle exposes `id`, a detached `value`, and
@@ -243,14 +242,12 @@ reuse of a removed ID also makes existing accepted handles resolve that ID again
 `project.load(data, project.token)` validates replacement graph data before
 changing anything. A successful load creates a fresh generation, advances the
 revision, and clears undo/redo history. It invalidates old handles, drafts, and
-command tokens even when the incoming project ID matches. Future runtime jobs
-must compare all three token fields before returning results. Loading older
+command tokens even when the incoming project ID matches. Runtime jobs
+compare all three token fields before returning results. Loading older
 content never restores its old mutation authority. A failed load preserves the
 current graph, generation, revision, and history.
 
-Snapshots contain graph data, not tokens or history. An in-memory JSON round trip
-is available, but portable packaging, disk persistence, asset handling, schema
-migration, and persisted history are not implemented in F01.
+Kernel snapshots contain graph data. The portable format adds versioned storage, source, asset requirements, provenance, playback settings and optional accepted-command receipts. Opening a portable construction starts a new runtime generation and edit history. [Portable project format](portable-projects.md)
 
 ## Injected validation hooks
 
@@ -275,8 +272,7 @@ asynchronous results fail validation with `VALIDATOR_FAILURE`.
 Hooks participate in acceptance, load, and history restoration as well as explicit
 validation and previews. They cannot authorize a graph that fails core validation.
 Types without a hook receive structural validation only; their acceptance does
-not assert an implementation exists or establish scientific meaning. F03 must
-provide trusted registration and availability checks. The supplied fixture hooks
+not assert an implementation exists or establish scientific meaning. The F03 registry supplies trusted registration and availability checks. The supplied fixture hooks
 check real point coordinates, label text, anchor counts and endpoints, relationship
 endpoint types, and a fixture-specific 128-node limit.
 

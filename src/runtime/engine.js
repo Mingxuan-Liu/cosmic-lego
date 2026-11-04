@@ -40,7 +40,9 @@ export function runComputation({ registry, graph, identity, nodeId, request, cac
     const nodes = new Map(graph.nodes.map(node => [node.id, node]));
     insist(nodes.has(nodeId), 'UNKNOWN_ID', `Unknown producing node ${nodeId}.`);
     const records = new Map(base.computations.map(record => [record.manifest.id, record]));
-    const dependencies = new Map(graph.nodes.map(node => [node.id, base.flow.dependencies(graph, node.id)]));
+    const analysis = base.flow.describe(graph, { includeDependencies: true });
+    insist(analysis.valid, 'INVALID_PROJECT', analysis.errors[0]?.message ?? 'Cannot resolve scientific dependencies for this project.');
+    const dependencies = new Map(Object.entries(analysis.dependencies));
     const pathFor = node => {
       const record = records.get(node.type);
       const preferred = node.id === nodeId ? request.mode : 'auto';

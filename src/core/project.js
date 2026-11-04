@@ -1,4 +1,4 @@
-import { copyData, fail, freshId } from './data.js';
+import { copyData, fail, freshId, freezeData } from './data.js';
 import { createProject, dependencies, edit, findNode, prepareValidators, requireValid, validateProject } from './graph.js';
 
 // State never escapes through public properties, handles, previews or hooks.
@@ -42,9 +42,34 @@ function nextRevision(state) {
   return state.revision + 1;
 }
 
-function commit(state, content) {
+// A trusted host may perform a final synchronous authorization/validation check
+// while the kernel still holds its mutation guard. This is executable host code,
+// never project data, and sees only a detached immutable candidate.
+function beforeCommit(content, options) {
+  if (options === undefined) return;
+  if (!options || typeof options !== 'object' || Array.isArray(options) ||
+      ![Object.prototype, null].includes(Object.getPrototypeOf(options))) {
+    fail('INVALID_COMMIT_GUARD', 'Commit options must contain only an optional trusted beforeCommit function.');
+  }
+  for (const key of Reflect.ownKeys(options)) {
+    if (key !== 'beforeCommit') fail('INVALID_COMMIT_GUARD', 'Only beforeCommit is supported in commit options.');
+  }
+  const field = Object.getOwnPropertyDescriptor(options, 'beforeCommit');
+  if (!field) return;
+  if (!Object.hasOwn(field, 'value') || typeof field.value !== 'function') fail('INVALID_COMMIT_GUARD', 'beforeCommit must be a trusted function without an accessor.');
+  const callback = field.value;
+  if (['AsyncFunction', 'GeneratorFunction', 'AsyncGeneratorFunction'].includes(callback.constructor?.name)) {
+    fail('ASYNC_COMMIT_GUARD', 'beforeCommit must complete synchronously.');
+  }
+  const result = callback(freezeData(copyData(content)));
+  if (result instanceof Promise) { result.catch(() => {}); fail('ASYNC_COMMIT_GUARD', 'beforeCommit must complete synchronously.'); }
+  if (result !== undefined) fail('INVALID_COMMIT_GUARD', 'beforeCommit must return undefined or throw to reject the mutation.');
+}
+
+function commit(state, content, options) {
   requireValid(validateProject(content, state.validators));
   const revision = nextRevision(state);
+  beforeCommit(content, options);
   state.undo.push(state.content);
   state.redo = [];
   state.content = copyData(content);
@@ -52,13 +77,14 @@ function commit(state, content) {
   return copyData(state.content);
 }
 
-function travel(project, from, to, token) {
+function travel(project, from, to, token, options) {
   const state = projects.get(project);
   return checked(state, token, () => {
     if (!state[from].length) fail('EMPTY_HISTORY', `No ${from} state is available.`);
     const content = state[from].at(-1);
     requireValid(validateProject(content, state.validators));
     const revision = nextRevision(state);
+    beforeCommit(content, options);
     state[to].push(state.content);
     state[from].pop();
     state.content = content;
@@ -195,7 +221,7 @@ class Draft {
     checkToken(projects.get(state.project), state.baseToken);
     return { project: this.snapshot(), validation: this.validate(), baseToken: state.baseToken };
   }
-  accept() { return draftState(this).project.accept(this); }
+  accept(options) { return draftState(this).project.accept(this, options); }
 }
 
 export class Project {
@@ -228,21 +254,21 @@ export class Project {
       return { project, validation: validateProject(project, state.validators), baseToken: tokenOf(state) };
     });
   }
-  accept(draft) {
+  accept(draft, options) {
     const candidate = draftState(draft, { writable: true });
     if (candidate.project !== this) fail('FOREIGN_DRAFT', 'This draft belongs to another runtime.');
     const state = projects.get(this);
     return checked(state, candidate.baseToken, () => {
       candidate.busy = true;
       try {
-        const result = commit(state, candidate.content);
+        const result = commit(state, candidate.content, options);
         candidate.closed = true;
         return result;
       } finally { candidate.busy = false; }
     });
   }
-  undo(token) { return travel(this, 'undo', 'redo', token); }
-  redo(token) { return travel(this, 'redo', 'undo', token); }
+  undo(token, options) { return travel(this, 'undo', 'redo', token, options); }
+  redo(token, options) { return travel(this, 'redo', 'undo', token, options); }
   load(input, token) {
     const state = projects.get(this);
     return checked(state, token, () => {

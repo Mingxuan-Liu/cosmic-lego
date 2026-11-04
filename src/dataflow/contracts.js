@@ -2,16 +2,17 @@ import { KernelError } from '../core/index.js';
 import { copyData, freezeData, isRecord } from '../core/data.js';
 
 export const TYPES = Object.freeze({
-  constant: 'dataflow.constant', selection: 'dataflow.selection', field: 'dataflow.field',
+  sample: 'dataflow.sample', constant: 'dataflow.constant', selection: 'dataflow.selection', field: 'dataflow.field',
   arithmetic: 'dataflow.arithmetic', map: 'dataflow.map', reduce: 'dataflow.reduce', adapt: 'dataflow.adapt',
 });
 export const DEFAULT_LIMITS = Object.freeze({ maxNodes: 256, maxValues: 10000, maxWork: 100000, maxDepth: 128 });
 export const diagnostic = (code, message, path = '$', severity = 'error') => ({ code, path, message, severity });
-export function reject(code, message, path = '$') {
-  throw new KernelError(code, message, { path });
+export function reject(code, message, path = '$', details = {}) {
+  throw new KernelError(code, message, { ...details, path });
 }
 export function issue(error, path = '$') {
-  return diagnostic(error?.code ?? 'DATAFLOW_ERROR', error?.message ?? String(error), error?.path ?? path);
+  return { ...diagnostic(error?.code ?? 'DATAFLOW_ERROR', error?.message ?? String(error), error?.path ?? path),
+    ...(typeof error?.category === 'string' ? { category: error.category } : {}) };
 }
 export function insist(condition, code, message, path) {
   if (!condition) reject(code, message, path);

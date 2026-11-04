@@ -105,9 +105,10 @@ test('invalid edits and untrusted execution fields never change the authoritativ
   const execution = await post(app, 'evaluate', { identity: before.identity, time: { value: 0, unit: 's' }, registryModule: 'file:///untrusted.mjs' });
   assert.equal(execution.status, 400);
   const capabilities = await post(app, 'evaluate', { identity: before.identity, time: { value: 0, unit: 's' }, capabilities: [] });
-  assert.equal(capabilities.status, 200);
-  assert.equal(capabilities.body.snapshot.valid, false);
-  assert.ok(capabilities.body.snapshot.diagnostics.some(item => item.code === 'RENDER_CAPABILITY'));
+  assert.equal(capabilities.status, 400);
+  assert.equal(capabilities.body.gateway.ok, false);
+  assert.equal(capabilities.body.code, 'RENDER_CAPABILITY');
+  assert.equal(capabilities.body.category, 'unavailable-capability');
   assert.deepEqual((await state(app)).graph, before.graph);
 });
 
@@ -147,4 +148,15 @@ test('scene host refuses non-loopback configuration before opening a listener', 
   for (const options of [{ host: '0.0.0.0', port: 0 }, { host: 'example.org', port: 0 }, { port: -1 }, { port: 70000 }]) {
     await assert.rejects(startSceneServer(options), { code: 'SERVER_CONFIG' });
   }
+});
+
+test('scene host starts with a clean loaded baseline and Undo restores the first user edit', async t => {
+  const app = await start(t), baseline = await state(app);
+  assert.deepEqual(baseline.history, { canUndo: false, canRedo: false });
+  const changed = await post(app, 'edit', { identity: baseline.identity, action: 'projection', value: 'orthographic', idempotencyKey: 'first-user-edit' });
+  assert.equal(changed.status, 200); assert.equal(changed.body.history.canUndo, true);
+  const restored = await post(app, 'edit', { identity: changed.body.identity, action: 'undo', idempotencyKey: 'undo-first-user-edit' });
+  assert.equal(restored.status, 200); assert.deepEqual(restored.body.graph, baseline.graph);
+  assert.deepEqual(restored.body.history, { canUndo: false, canRedo: true });
+  assert.equal(restored.body.identity.revision, changed.body.identity.revision + 1);
 });

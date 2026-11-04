@@ -1,10 +1,12 @@
-# Physics contract — independent Kepler graph (v0.2)
+# Exoplanet physics contract
 
 This is an idealized **model**, not observed data. A system contains one fixed spherical star and zero or more opaque dark planets. Each planet owns its elliptical orbit, orientation, and orbital phase. Planets share the stellar gravity parameter but do not gravitationally perturb the star or each other. The observer and composite photometry operate on their shared physical state.
 
 This is the **star-dominated independent Kepler approximation**, not an N-body model. The sum of planetary masses may not exceed 1% of the stellar mass; this is a deliberately conservative interface bound, not a proof that mutual interactions are negligible. Resonances, close encounters, or long integrations can invalidate independent orbits even below that bound. Planetary masses are retained as physical metadata and for that guard but do not change trajectories, period, or flux in this approximation. Stellar reflex motion and radial velocity are deliberately absent.
 
 The model omits planet–planet gravity and collisions, limb darkening, stellar activity, planetary emission/reflection, atmospheres, finite exposures, noise, light-time delay, and relativity. Different orbital paths may cross without collision handling. A star/planet radius and mass pair is not checked against a stellar or planetary structure relation. Display scale and illustrative camera movement are never physical inputs.
+
+The default workspace and the compatibility World SDK share `packages/exoplanet/physics.js`. The registered ports expose positions and radii in metres, velocities in m/s, periods in seconds, and flux relative to the named primary’s unobscured brightness. Orbital element inputs retain their declared AU, degrees and epoch days. The shared runtime evaluates at an explicit physical time with units. The older `world.at(t)` API takes days. [Public package recipe](exoplanet-authoring.md) · [Numerical module](../packages/exoplanet/physics.js)
 
 ## Constructing physical systems
 
@@ -32,7 +34,7 @@ Semi-major axis is independent. The period is derived using **only the stellar**
 \mu=GM_\star,\qquad n=\sqrt{\mu/a^3},\qquad P=2\pi/n.
 \]
 
-Changing eccentricity at fixed semi-major axis does not change period. Changing eccentricity at fixed periapsis requires changing `a = q/(1-e)` and therefore changes period. Every orbit has `0 ≤ e < 1`; stellar mass/radius and semi-major axis must be positive. Periapsis must satisfy `a(1-e) > R_star + R_planet`. Planet radius/mass may be zero for limiting cases. IDs must be distinct. All numerical inputs must be finite. The scene layer places additional practical bounds on the supported demo.
+Changing eccentricity at fixed semi-major axis does not change period. Changing eccentricity at fixed periapsis requires changing `a = q/(1-e)` and therefore changes period. Every orbit has `0 ≤ e < 1`; stellar mass/radius and semi-major axis must be positive. Periapsis must satisfy `a(1-e) > R_star + R_planet`. Planet radius/mass may be zero for limiting cases. IDs must be distinct. All numerical inputs must be finite. The registered authoring contract restricts semimajor axes to 0.002–5 AU and eccentricities to 0–0.85. Its atomic shape edit records the chosen invariant.
 
 The returned system is immutable. `system.star` contains canonical properties, `massKg`, `radiusMeters`, and `gravitationalParameterM3S2`. Each entry in `system.planets` contains its canonical properties and `orbit`, plus `massKg`, `radiusMeters`, `semiMajorAxisMeters`, `periapsisMeters`, `apoapsisMeters`, `meanMotionRadPerSecond`, `periodDays`, and the two rotated orbital basis vectors. `planetStarMassRatio` records the approximation guard. Saved scenes must reconstruct models through `createKeplerSystem`, rather than deserialize computed state directly.
 
@@ -100,18 +102,9 @@ Sources: [IAU nominal constants](https://arxiv.org/html/1510.07674v1), [NIST COD
 
 ## Plot sampling
 
-The scene layer augments a uniform time grid with conjunction-guided samples.
-It brackets projected-separation minima in eccentric anomaly, refines external
-contacts, converts the resulting anomaly intervals to physical time, and samples
-each selected transit interval. This prevents the tested narrow-transit case
-from disappearing between coarse plotting samples.
+The registered photometer evaluates the clipped union at each requested instant. The shared analytic sampler builds a series from explicit physical coordinates and evaluates the same accepted scalar at each one. **When shadows overlap** uses 33 points from −7,200 to +7,200 s, including conjunction. Both the correct flux and the naive comparison use that grid. The instantaneous readout can be requested between samples. [Authored study](exoplanet-authoring.md)
 
-The search is numerical and bounded: at most 160 event instances and 8192 points
-per measurement. Longer windows can exceed that budget; metadata and the viewer
-explicitly report omitted events. Very grazing events and fine features from
-mutually overlapping silhouettes are not guaranteed resolved. The instantaneous
-measurement uses the physical state directly, independently of the plot grid;
-the viewer includes that value in its vertical range.
+The v0.2 compatibility sampler additionally locates projected-separation minima in eccentric anomaly, refines external contacts and converts these to physical event times. It budgets 160 event instances and 8,192 points per measurement. The importer begins with 33 uniform times and adds those contact-guided samples separately for each meter. It records any legacy event limit, unresolved contact or reduction needed to fit the 256-coordinate series cap. A later orbital edit can shift transits away from the saved grid. Very grazing events and fine mutual-overlap features can require a narrower or denser schedule. [Import and sampling details](exoplanet-authoring.md#import-a-v02-world)
 
 ## Verification and limitations
 

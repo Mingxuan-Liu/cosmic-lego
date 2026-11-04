@@ -1,9 +1,6 @@
-# Cosmic Lego: architecture decisions
+# Cosmic Lego architecture
 
-Revised 2026-11-03. F01–F05 provide generic composition, scientific dataflow,
-trusted registration, worker computation, and a scene/asset layer alongside the
-existing bounded exoplanet authoring experiment. Implementation and verification status
-belong in [demo-status.md](demo-status.md).
+The default astronomy application installs the exoplanet package into the same construction graph, worker, renderer and floating workspace used by the generic demonstrations. The timing gate exercises that foundation with astronomy absent. Current execution evidence belongs in the implementation record. [Getting started](getting-started.md) · [Verification](demo-status.md)
 
 ## Implemented generic foundation
 
@@ -51,125 +48,76 @@ The browser stage supports navigation, projection changes and stable picking.
 Its loopback host runs the F04 Node workers; there is no browser scientific-worker
 backend. Camera navigation and material appearance remain presentation state.
 The [scene guide](scene-and-assets.md), [public recipe](../examples/scene-and-assets.mjs)
-and [F05 handoff](handoffs/F05.md) describe the contracts and evidence. F06 is next
-for the full application shell. The demonstration host's narrow edits are not
-the F07 command gateway.
+and [F05 handoff](handoffs/F05.md) describe the contracts and evidence.
 
-The exoplanet architecture recorded below is retained until F12. It is not the
-schema or readiness gate for the shared core.
+F06 adds `src/workspace/` and `demo/workspace/`: four registered overlay factories,
+F01 plot-source relationships, a floating-window manager, and a provider-neutral
+conversation UI state boundary. The workspace compiler consumes the same current
+F04 results and returns a scene plus overlays. Plots retain source IDs, units,
+sampling and physical time; they do not invent time-series history. Layout edits,
+duplication, removal and Undo use accepted graph transactions. Selection and
+transient camera/session state remain distinct from science. The existing local
+server's `--workspace` mode hosts this shell without a second evaluator or renderer.
+See [the workspace guide](planetarium-shell.md) and [F06 handoff](handoffs/F06.md).
+Its composer connects only when the F08 companion has an explicitly configured runtime.
 
-## The next architecture is shared across domains
+F07 adds `src/gateway/`, one data-only dispatch boundary shared by the handle SDK,
+JSON CLI, loopback HTTP and host-issued turn tools. Registered schemas generate
+create/update commands; transactions reuse F01 acceptance with F02–F06 validators.
+Complete expected identities prevent stale writes. A bounded memory cache binds
+successful retry keys to request content and authority context. Host-issued turns
+can be revoked independently of scientific validation; current identity and job
+epochs guard asynchronous publication. Existing demo edit routes translate into
+this gateway, and the browser refreshes external edits with summaries and Undo.
+See [the gateway guide](command-gateway.md) and [F07 handoff](handoffs/F07.md).
 
-The [shared architecture roadmap](infrastructure-roadmap.md) supersedes the
-earlier plan to establish infrastructure through an exoplanet-only authoring
-exercise. The new core must construct objects, connect scientific quantities,
-run analytic and stateful models, present results, host conversation and save
-work without importing any astronomy package. Domain models are registered
-extensions; the current star/planet vocabulary below is specific to this prototype.
+F08 adds `src/agent-session/`: a provider-neutral lifecycle bridge, bounded
+structured context and a native Codex app-server adapter. The local companion
+launches an explicitly configured executable in a separate authoring directory,
+verifies its permission controls and exposes one dynamic gateway tool. Opaque
+turn grants are revoked before cooperative interruption; stale callbacks cannot
+commit. The browser keeps drafts and a visible transcript distinct from provider
+thread state. Public text, tools, progress and input/permission requests remain
+correlated with turns. Runtime authentication never travels through browser
+storage or project data. See [the session guide](in-app-agent-sessions.md) and
+[F08 handoff](handoffs/F08.md) for verified capabilities and confinement limits.
 
-The intended application has a central navigable stage with floating, movable,
-foldable plots, inspectors and conversation. Permanent dashboard columns do not
-satisfy that presentation goal. In-app conversation with a compatible external
-agent is required foundation work. The existing sidebar viewer and external
-CLI/HTTP authoring routes do not yet deliver that experience.
+F09 stores one versioned JSON manifest per project. It keeps the accepted graph,
+registry requirements, source and provenance, public sharing choices and replay
+settings. The workspace validates a candidate and samples the requested outputs in
+an isolated runtime before it changes the active generation. A switch revokes old
+turns and installs a disconnected public transcript. A named save compares both
+the accepted revision and the last observed file version before atomic publication.
+See the [project-file guide](portable-projects.md) and [F09 handoff](handoffs/F09.md).
 
-Beyond the F01–F05 interfaces above, these are planned capabilities. Continue with
-F06–F11 for the application and its independent readiness exercise;
-F12 migrates this prototype into an optional domain package afterward.
+F10 samples presentation tracks at requested seconds. A physical-time track
+selects the F04 request. Camera, visibility, annotations and panel emphasis act
+on detached presentation data. The F07 command catalogue and F01 validators
+build isolated configuration graphs at labeled boundaries. F09 pins those
+graphs and all required implementation builds, including ones introduced only
+by later events. The interactive player and PNG exporter both request a frame
+from the same evaluator and draw it through the same F05 adapter. See the
+[timeline guide](authored-timelines.md) and [F10 handoff](handoffs/F10.md).
 
-## Correcting the first prototype
+## The optional exoplanet application
 
-The first prototype chose the wrong abstraction. It packaged an entire star–planet pair as a unit and let users edit parameters or replace a JSON scene. That demonstrated synchronized views, but it did not demonstrate the user's intended ability to construct and revise physical scenes from reusable objects. This was an implementation decision by the assistant, not a limitation imposed by the user's idea.
+`apps/exoplanet.mjs` composes the shared server with the recipe and trusted `packages/exoplanet/registry.js`. The worker receives its registry from that trusted entry point. The application registers primary, orbit, observer, projection, photometry and silhouette factories, together with the common scene and workspace factories. The generic host can still construct, save and play the independent timing gate with no astronomy installed. [Registered studies](exoplanet-authoring.md) · [Generic gate](domain-independent-readiness.md)
 
-The rebuild makes scene structure authorable: create bodies, attach orbits, place observers, define measurements, and arrange interactive visualizations and narration. The test is whether an external agent can construct an unanticipated case and make structural changes through the public interface without editing the engine. Changing one preset's sliders is not sufficient evidence.
+A fixed primary supplies GM and radius to each independent orbit. The package graph guard checks primary ownership, stellar clearance and the 1% summed-mass limit across the accepted construction. The photometer pairs selected position and radius rows by object ID before combining their foreground silhouettes. Its observable is the uncovered fraction of a uniformly bright spherical star. Individual depths are separately available for comparing a deliberately naive sum. One numerical module serves the registered models and the old `World` import path. [Model contracts](../packages/exoplanet/models.js) · [Physics and reference cases](physics.md)
 
-## Authoring vocabulary and boundaries
+The primary-facing camera and the physical observer are different objects. The projection model emits sky-plane coordinates and signed line-of-sight distance in metres. A package asset factory constructs sphere geometry from the current physical radius. Positions and radii share a display scale, and an orthographic view along the observer’s sightline shows the projected size ratios. Rotating the camera leaves the observer’s normalized flux unchanged. Current flux and either sampled curve read the same accepted scientific graph.
 
-| Concept | Responsibility |
-| --- | --- |
-| Scene / world | Owns objects and their relationships; evaluates them at a shared physical time. |
-| Body | Holds physical properties and identity; a planet is not a prepackaged experiment. |
-| Orbit | Connects a planet to the central star and specifies the supported Keplerian motion. |
-| Observer | Defines a physical viewing direction, independently of the illustrative camera. |
-| Measurement | Connects a target and observer to a supported calculation, such as combined transit flux. |
-| View | Presents existing state or measurement results; does not invent a second physical evolution. |
-| Narration | Carries explanatory text and presentation intent; does not modify physics or imply a speech-generation service. |
+F12 exercised shared capabilities that also apply to other subjects. A registered graph-level check can validate cross-component constraints at acceptance. An analytic scalar can be sampled at explicit physical coordinates through F02. Series plots carry the abscissa’s actual values and unit through the workspace and player. The workspace, player and exporter take their registry and original recipe context from a trusted host composition. A packaged player carries its declared runtime modules. Astronomy selects the law, observing schedule and installed package. Scientific graph definitions remain portable data.
 
-Stable handles let an author retain a planet or orbit reference, add another planet, revise one orbit, change an observer, or attach another measurement. The public JavaScript `World` SDK is the primary programmatic authoring route. JSON is its serialization and transport format, not a vocabulary the user must manually speak. Exact signatures and tool operations are documented in [agent-interface.md](agent-interface.md).
+## Authoring and compatibility
 
-An operation batch is applied to a draft, validated, and committed atomically. A failed edit must leave the prior scene intact. References must resolve; deleting an object with dependents must reject the change or use a documented explicit cascade. The SDK and semantic tools must share validation rather than creating a more permissive authoring path.
+Agents discover installed components at the F07 gateway and commit reversible graph edits with a full identity token and idempotency key. F08 connects a configured local Codex process through revocable turn permissions. The renderer, workers and offline player can run without that process. [Agent surface](agent-interface.md) · [Conversation](in-app-agent-sessions.md)
 
-```text
-User's own agent / author script
-          ↓
-World SDK or semantic operations
-          ↓
-Validated objects and relationships
-          ↓
-Physical state at time t → observer measurement → presentation
-```
+The first pair-based prototype and the subsequent v0.2 `World` experiment preceded these interfaces. The legacy SDK still constructs, evaluates and samples existing World programs. The explicit importer validates the old schema, preserves supplied source as inert text, and constructs new components, curves and presentation tracks. It reports camera, marker-scale, sample-budget and other translation limits with the archive. [Importer](exoplanet-authoring.md#import-a-v02-world)
 
-Validation checks the declared contract: supported fields, finite quantities, bounds, references, and known physical constraints. It does not establish arbitrary scientific truth. A prompt asking a model to obey physics is not a constraint mechanism. New physical behavior requires an implemented model, stated assumptions, and independent checks.
+## What the checks establish
 
-## Keep the physics separate from presentation
-
-Use small JavaScript ES modules and a numerical core independent of the DOM, canvas, model provider, and wall-clock time. The local Node server and CLI expose the same composition/evaluation capabilities. The browser is an interactive application whose main surface is an immersive scene, with the source and object inspector as secondary tools.
-
-The illustrative camera and drawing scales are presentation choices. Observer orientation is a physical input. Magnified icons, colors, zoom, playback speed, and labels must not feed into measured flux. A single physical time drives every object and measurement; a curve may sample an interval but its current-time marker must refer to the same state as the scene. Editing orbital elements creates a new model configuration, not a conservation-respecting impulse during a real orbit.
-
-Manim remains a plausible later presentation adapter because it offers useful animation, camera, text, and equation facilities. The initial implementation does not depend on it: the central experiment is semantic composition and browser interaction. Revisit video export after a useful authoring case works, without duplicating the physics. This is a provisional choice, not a claim that Manim cannot support interactive workflows.
-
-## The deliberately limited physical model
-
-The selected model is a fixed central star with multiple independently moving Keplerian test-particle planets. Each orbit has its own eccentricity, orientation, and phase: eccentricity, inclination, ascending node, argument of periapsis, and mean anomaly at an epoch. Orbit size and stellar mass determine the period. The exact conventions and numerical implementation belong in [physics.md](physics.md).
-
-Planet masses are metadata and are neglected in the dynamics. A summed planetary-to-stellar mass-ratio limit of 1% is an interface guard for this approximation; it is not an accuracy bound or a stability guarantee. Planet–planet forces, stellar reflex motion, resonances, transit-timing variations, and gravitational encounters are absent. **Radial velocity is removed from this approximation**, rather than displaying a stellar signal inconsistent with the fixed-star model.
-
-A spherical, uniformly bright star and opaque, dark spherical planets supply the transit model. Project each foreground planet into the observer's sky plane, form the union of its blocked area with all other foreground planets, clip that union to the stellar disk, and calculate the normalized remaining flux. Overlapping planet silhouettes block the shared area only once. The same physical positions must drive the rendered silhouettes and measurement.
-
-Projected overlap is not a physical collision. Planets separated along the line of sight can overlap in the image. Conversely, this noninteracting model can prescribe intersecting trajectories without modeling impacts or gravitational deflections. Star intersection must be checked using periapsis and physical radii; any displayed or flagged planet collision is a geometric condition, not collision dynamics.
-
-Limb darkening, spectra, emitted/reflected planetary light, atmosphere, finite exposures, instrumental noise, and light-travel delays remain outside scope. New body/orbit combinations are supported only within the stated model, not by a promise of universal composability.
-
-## Eccentricity edits must say what stays fixed
-
-With fixed stellar mass, the chosen approximation has
-
-\[
-P = 2\pi\sqrt{a^3/(GM_\star)}, \qquad q=a(1-e).
-\]
-
-Changing eccentricity at fixed semimajor axis changes the orbit's shape and speed distribution, but not its period. Changing eccentricity at fixed periapsis changes the semimajor axis to `a = q/(1-e)` and therefore changes the period. For example, starting at `e = 0`, an edit to `e = 0.6` at fixed periapsis multiplies the period by about 3.952847; at fixed semimajor axis the multiplier is 1.
-
-The authoring operation must express that choice explicitly. The UI should show the resulting orbit size and period so that the learner can inspect the dependency. The agent must not quietly choose a different quantity to preserve to make a requested conclusion appear true.
-
-## Current external authoring and planned in-app conversation
-
-Authors can use their own agents through the SDK, documented CLI, and local HTTP semantic operations. No embedded model or API key is needed for playback or evaluation. Author scripts run in the agent's own process. The web server accepts data and supported operations; it does not execute arbitrary submitted JavaScript. A serialized scene does not carry executable code or remote dependencies.
-
-MCP is not implemented. Do not describe the HTTP service as an MCP server.
-The next design adds a provider-neutral session bridge so the user can converse
-with a compatible agent inside Cosmic Lego. The agent process may remain external
-while the app hosts its messages, progress and supported actions. Conversation
-and construction tools are separate interfaces; see the roadmap's researched
-ACP/MCP options and F08. Compatibility must be tested before claiming it.
-
-Start with a browser and a local companion that connects the configured agent;
-public hosting and desktop packaging remain separate choices. Routine commands
-use checked transactions, while adding new executable model code follows a
-distinct development workflow. Independent agent filesystem access is not
-constrained merely because the application offers validated tools.
-
-## Evidence required from this rebuild
-
-Check both structural authoring and scientific behavior. A useful demonstration should add or remove bodies and measurements, revise an orbit's constraints, and preserve unaffected objects. Numerical checks should cover Keplerian limits, the two eccentricity-edit modes, foreground ordering, and union photometry under disjoint, contained, coincident, grazing, and partially overlapping silhouettes.
-
-Render and inspect the resulting scenes as well as checking data: camera framing, scale labels, occlusion, timing, graph markers, and explanatory text can mislead even when numerical values are correct. Passing tests, a plausible screenshot, schema acceptance, or an LLM review alone does not establish correctness or educational value. An independently authored case provides limited evidence of composability; it does not establish arbitrary-case reliability.
-
-The older prototype remains in Git history. Preserve the current model's checks
-through migration, but use the domain-independent F11 exercise to assess shared
-architecture readiness. Exoplanet behavior becomes a separate F12 regression
-exercise rather than the definition of the reusable core.
+The generic acceptance exercise covers constructing an unfamiliar graph, a real in-app structural edit, saving, reopening, and delivering a timeline. The astronomy checks additionally exercise Kepler motion, both eccentricity-hold conventions, foreground ordering, overlapping disks, matched live memberships and source-preserving migration. Numerical agreement describes the stated model. A teaching claim would require separate evidence from learners. [Independent timing gate](domain-independent-readiness.md) · [Current validation record](demo-status.md)
 
 ## Working name
 

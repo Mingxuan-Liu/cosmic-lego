@@ -547,11 +547,17 @@ test('a model cannot return a timestamp inconsistent with the requested physical
 test('timed constants are valid only for requests at the same physical time', () => {
   const { flow, project, draft, author } = setup();
   author.constant(scalar(3, { time: { value: 2, unit: 's' } }), { id: 'snapshot' });
+  author.constant(scalar(3, { time: { value: 0, unit: 's' } }), { id: 'epoch' });
+  author.constant(scalar(3), { id: 'timeless' });
   draft.accept();
   assert.equal(valid(flow, project, 'snapshot', { time: { value: 2, unit: 's' } }).value.data, 3);
   assert.equal(valid(flow, project, 'snapshot', { time: { value: 1 / 30, unit: 'min' } }).value.data, 3);
   const mismatch = invalid(flow, project, 'snapshot', { time: { value: 3, unit: 's' } });
   assert.ok(mismatch.diagnostics.some(item => item.code === 'TIME_MISMATCH'));
+  const nearEpoch = invalid(flow, project, 'epoch', { time: { value: 1e-20, unit: 's' } });
+  assert.ok(nearEpoch.diagnostics.some(item => item.code === 'TIME_MISMATCH'));
+  const overflow = invalid(flow, project, 'timeless', { time: { value: 1e308, unit: 'h' } });
+  assert.ok(overflow.diagnostics.some(item => item.code === 'INVALID_TIME'));
 });
 
 test('effective live-selection cycles are rejected while ordinary relationship cycles work', () => {

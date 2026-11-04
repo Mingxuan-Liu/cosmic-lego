@@ -1,7 +1,188 @@
-# Implementation status — F01–F05 and v0.2 demo
+# Implementation status — F01–F12 and v0.2 compatibility
 
 Updated 2026-11-03. This is a rough local authoring experiment, not a release-ready
 educational application.
+
+## F12 optional exoplanet package — 2026-11-03
+
+The shared workspace now opens a synthetic transit study. At conjunction a real in-app agent added a fourth orbit and a separate plot of the excess deficit in the naive depth sum. The physical union gives **0.965785051** of the unobscured stellar flux. The naive calculation gives **0.938328610**. Two Undos and two Redos restored the expected graphs. Provider-free reopening, seeking, 33 exported frames and a clean offline player were verified. All 485 tests passed with browser capture enabled. The package-free F11 deployment also reopened and exported its original 17 frames. [Open or author the study](exoplanet-authoring.md) · [Four-planet project](evidence/F12-shared-shadow.json) · [Handoff, evidence and limitations](handoffs/F12.md)
+
+## F11 independent readiness — 2026-11-03
+
+An independently authored timing bench passed the generic workflow in an isolated deployment with no astronomy packages. An actual in-app Codex edit added a fourth moving point, changing the mean distance at 2 s from ⅔ m to 1 m. Undo, Stop, agent-free reopen and a 17-frame export were verified. All 466 repository tests passed. The original and edited graphs retain separate source associations. [Evidence and reproducible commands](domain-independent-readiness.md) · [Handoff](handoffs/F11.md)
+
+## F10 authored timelines and local delivery — 2026-11-03
+
+An eight-second comparison groups nine moving points, changes playback speed,
+holds the scientific clock while moving the camera, switches configurations
+and seeks backward. At physical time 4 s the original configuration gives a
+mean distance of 2.613344 m and the alternative gives 2.288084 m. The same
+evaluator serves the workspace player, packaged player and scheduled PNG export.
+All 458 tests passed. Two complete 960 × 540 exports reproduced all 65 PNG hashes
+on the tested renderer. A clean extracted player opened offline in Chrome.
+See the [guide](authored-timelines.md), [example](../examples/authored-timeline.mjs)
+and [F10 handoff](handoffs/F10.md) for the inspected output and verification.
+
+Earlier milestones record the capabilities available at the time.
+
+## F09 portable projects — 2026-11-03
+
+The Project menu supports named local saves, reopening after a companion restart,
+and portable JSON download and import. A fresh runtime reproduced both fixture
+fields, eight scene assets and five overlay layouts. With a 0.25 s step, the
+seeded fixture reproduced its value and complete generator state at 1 s and
+again at 2 s. The browser can play and inspect a file with its agent disconnected.
+Conversation sharing is opt-in. All 444 offline tests and five F09 Chrome checks passed.
+The [guide](portable-projects.md),
+[example](../examples/portable-project.mjs) and [handoff](handoffs/F09.md) cover
+the format, compatibility checks, recovery and verification evidence.
+
+## F08 in-app agent sessions — 2026-11-03
+
+The floating Conversation window now connects a configured local Codex runtime.
+The provider-neutral bridge supplies bounded selection/time/project context and
+one validated F07 construction tool. Stop revokes the turn before cooperative
+native interruption. Undo preserves control over accepted changes. Browser
+drafts and visible transcript are distinct from the ephemeral provider thread.
+
+The [real browser acceptance](../scripts/verify-agent-browser.mjs) passed six
+groups using existing runtime authentication and **Codex 0.166.0-alpha.5.1**.
+The agent discovered commands and created three moving points, a collection,
+magnitude map and mean reduction, visible scene binding and plot. At 0 s the
+worker and mean plot agreed at **2 m**. The agent created an independently bound
+second plot and removed it; browser Undo restored it. Keyboard Send, real Stop
+and disconnected playback passed. There were 24 gateway calls and three
+accepted transactions; two superseded render reads retried successfully.
+There were no unexpected browser errors or dialogs.
+
+An additional real two-tab check verified that closing an observer leaves the
+turn running, Stop targets the originating turn, and reload recovers the public
+transcript after disconnect. Reordered Send/Stop and reconnect races are covered
+by deterministic bridge, browser and HTTP checks.
+
+The offline suite passes **419 tests**, zero failures/skips. A separate mock
+browser run passes four groups covering streaming, input/permissions, cancellation,
+late writes, drafts and failed auth. F06/F07 browser regressions also pass.
+The native adapter verifies read-only mode, no shell/native network tools and
+disabled inherited connectors; its dynamic dispatcher stays enabled. Read-only
+mode does not confine all filesystem reads. No credentials enter browser storage.
+See the [setup guide](in-app-agent-sessions.md) and [F08 handoff](handoffs/F08.md)
+for real versus mock evidence, exact versions, screenshots and remaining limits.
+
+## F07 command gateway — 2026-11-03
+
+Implemented one discoverable data-only command boundary shared by the handle
+SDK, JSON CLI, loopback HTTP and future scoped agent tools. Registered manifests
+generate create/update schemas; the command catalog stages F01 handles and the
+gateway validates F02–F06 contracts before atomic acceptance. Existing scene and
+workspace edit routes now translate into that boundary. Discovery also exposes
+capabilities, defaults, examples, scientific contracts, limits and result schemas.
+
+Complete project/load/revision tokens guard writes, previews and computations.
+Content/context-bound retry keys return original successful outcomes without
+repeating effects. A changed request with a retained key fails. Cache retention
+is bounded to at most 10 minutes, 256 successes and 8 MiB, with no restart
+durability. Host-issued sessions/turns can narrow permissions and revoke future
+writes/replays. Cancellation, load/switch and supersession invalidate pending
+results; committed effects remain until a separate Undo. Failures report stable
+codes, categories, affected IDs/paths and supported repairs.
+
+The [public recipe](../examples/command-gateway.mjs) discovers and constructs
+three moving points, a collection, magnitude/mean calculation, shared scene
+assets, camera, visual binding and plot. Its checked mean at 2 s is
+**5.699889623513833 m**. A real child CLI, HTTP client and local SDK agree on
+discovery, mutations, atomic validation failures and worker Values.
+
+The [F07 browser harness](../scripts/verify-gateway-browser.mjs) passes **four
+interaction groups** with **zero dialogs, console errors or page errors**.
+An external SDK batch adds a scene instance and linked plot; the workspace
+refreshes automatically with a summary and Undo. One Undo restores content at a
+fresh revision. Exact retries have no extra effects, changed-key requests fail,
+and browser edits reach the same accepted graph. Inspected screenshots are
+`.local/f07-qa/external-edit.png` and `undo-restored.png`; `report.json` records
+Chrome **156.0.8078.80**, Playwright **1.62.1**, headless WebGL2/SwiftShader,
+1440×1000. This does not certify hardware GPU performance or an agent connection.
+
+The existing F06 browser harness also passes all **eight groups** after gateway
+integration, keeping the desktop tab open throughout narrow-screen/touch checks.
+Its `.local/f06-qa/report.json` records 20 expected cancelled reads (16
+`SUPERSEDED`, 4 `STALE_RESULT`) and 20 matching network-console messages, with
+zero unexpected console/page errors. Both viewers recover through bounded read
+backoff without repeating writes. Desktop/narrow layout, source selection,
+scientific values, Undo/Redo and touch orbit/pinch remain working.
+
+Gateway/catalog/SDK/CLI/HTTP tests cover derived contracts, finite data transport,
+origin/body bounds, preview/history, retries/eviction, turn revocation during
+final validation/worker/compile, project loads and supersession. The full suite
+passes **361 tests**, zero failures/skips, on **Node 24.22.1**: 298 prior checks
+plus 63 new checks. Results are saved in `.local/f07-qa/test-results.txt`.
+F01's optional trusted synchronous `beforeCommit` hook lets the gateway validate
+actual history targets and recheck authorization after the last validator,
+before accepted content/history/revision changes. Bounded HTTP and CLI byte
+decoding also preserves Chinese labels across arbitrary UTF-8 chunk boundaries.
+
+The approved logo, BSD-3-Clause notices, dependencies and existing astronomy
+implementation remain unchanged. Work is local; F08 must connect a real session
+and scope its tools to host-issued turns. Native process HTTP/filesystem access
+is separate from gateway authorization. Persistence/recovery remains F09.
+See the [gateway guide](command-gateway.md) and [F07 handoff](handoffs/F07.md).
+F08 integration is recorded above.
+
+## F06 planetarium workspace — 2026-11-03
+
+Implemented a full-viewport workspace using the F05 Three adapter, with movable,
+resizable, foldable and restorable inspector, plot, model/provenance and
+conversation windows. Scene-only mode has a persistent restore button and
+V/Escape keyboard routes. Hidden windows are inert and do not intercept pointers.
+Window geometry stays within the viewport; focus, drafts, metadata expansion and
+scroll positions survive ordinary layout/result updates. Reduced motion disables
+navigation damping. Narrow layouts use overlapping windows with Views restoration.
+
+Public F01 handles create, bind, duplicate, rearrange and remove overlay
+instances. Four F03 factories produce layout data; explicit plot-source
+relationships retain exact F02 contracts. The workspace compiles supplied F04
+snapshots through the shared scientific-result validation gate. Plots, inspector,
+selected source IDs and renderer share the same physical sample time. Undo/Redo
+uses accepted project history. The [public example](../examples/workspace.mjs)
+checks independent field plots and the real derived mean position magnitude:
+**2.8817425997262003 m at 2 s**. No astronomy package is imported by the shell.
+
+`bash scripts/node.sh --test --test-reporter=spec` passed **298 tests**, zero
+failures/skips, on bundled **Node 24.22.1**: all 261 prior checks plus 37 F06
+checks. Tests include view contracts/history, state/port/time validation, bounds,
+pointer/keyboard/focus behavior, conversation lifecycle and server request
+boundaries. An isolated child copies only shared layers and compiles scalar and
+vector-field plots with no astronomy files, examples or node_modules present.
+The public recipe, source syntax, documentation links and diff checks pass.
+
+The [browser harness](../scripts/verify-workspace-browser.mjs) passed **eight
+interaction groups** in **Chrome 156.0.8078.80**, Playwright **1.62.1**, headless
+**WebGL2/SwiftShader**, with no console/page errors. Real mouse/keyboard and
+CDP-delivered touch exercised offscreen drag/resize clamping, fold/hide/restore,
+scene-only recovery, stable sample selection, direct non-default output ports,
+independent plot creation/removal with Undo/Redo, and touch orbit/pinch at
+390×844 with reduced motion. Desktop checks used 1440×1000. A final visual pass
+made panels opaque, enlarged plot labels and moved copying to the Views menu;
+that menu operation and the final desktop/narrow states were rechecked.
+
+Inspected evidence is in ignored `.local/f06-qa/`: `report.json`,
+`test-results.txt`, `final-desktop.png`, `final-narrow-plot.png`,
+`desktop-linked-selection.png`, `narrow-restored-conversation.png`,
+`narrow-restored-plot.png`, `narrow-touch-scene.png`, and other harness states.
+This does not certify every browser, screen reader, physical touch device, or
+hardware-GPU performance.
+
+Conversation defaults to **disconnected**. Drafts survive hiding/folding within
+the current page. Messages/progress/errors/Stop were checked through explicitly
+labeled **TEST ONLY** event injection; no real agent or credentials were used.
+F08 must connect an actual session and bind cancellation to jobs and write
+authority. Draft/transcript persistence, portable archives and timelines remain
+future work; removing a composer releases its local draft.
+
+Run `bash scripts/node.sh scripts/scene-server.mjs --workspace --port 4326`.
+The approved logo, BSD-3-Clause notices, dependencies and original astronomy
+implementation are unchanged. See the [workspace guide](planetarium-shell.md)
+and [F06 handoff](handoffs/F06.md). F07 integration is recorded above.
 
 ## F05 scene and assets — 2026-11-03
 
@@ -46,11 +227,12 @@ covered by regression; scaled-parent camera projection was also corrected.
 Evidence is in ignored `.local/f05-qa/report.json` and PNGs. This is real browser
 rendering with software graphics, not a hardware performance benchmark,
 cross-browser certification, full-motion review or touch-device test. The local
-server hosts Node workers and a narrow checked demo edit API; it is not F07.
+server hosts Node workers. Its narrow edit syntax now translates into F07.
 
-Next is **F06 planetarium shell**. Floating-window layout, in-app agent sessions,
-the command gateway, portable archives, timelines/export and domain migration
-remain planned. See [F05 handoff](handoffs/F05.md) for interfaces and limits.
+F06 now supplies the floating-window workspace above these interfaces. In-app
+agent sessions, portable archives, timelines/export and
+domain migration remain planned. See [F05 handoff](handoffs/F05.md) for the scene
+interfaces and limits.
 
 ## F04 computation runtime — 2026-11-03
 
@@ -85,7 +267,8 @@ do not promise browser frame rate or hard real-time latency. The runtime uses on
 disposable worker per job; workers are trusted execution, not an OS sandbox.
 
 F05 now supplies browser rendering through a local Node runtime host. Worker
-pooling, command gateway, agent sessions and portable archives remain unimplemented. See
+pooling, agent sessions and portable archives remain unimplemented. F07 now supplies
+the shared command gateway. See
 the [runtime guide](computation-runtime.md) and [F04 handoff](handoffs/F04.md) for
 actual signatures, time/checkpoint semantics, limits and integration requirements.
 
@@ -115,8 +298,8 @@ logo, BSD-3-Clause license, dependencies and existing astronomy/UI are unchanged
 
 F04 now supplies worker computation and a stateful lifecycle above the registry.
 Direct registry callbacks remain trusted synchronous code. Visual artifacts are data;
-F05 now supplies browser rendering and resource disposal. The command gateway, agent session
-and portable package remain planned. See the [registry guide](extension-registry.md)
+F05 supplies browser rendering and resource disposal; F07 supplies the command gateway.
+The agent session and portable package remain planned. See the [registry guide](extension-registry.md)
 and [F03 handoff](handoffs/F03.md) for interfaces, evidence and boundaries.
 
 ## F02 scientific dataflow — 2026-11-03
@@ -151,7 +334,7 @@ budget. Generic fixture success does not establish astronomical validity.
 F03 now supplies manifest/registry/discovery using the actual contracts in the
 [dataflow guide](scientific-dataflow.md) and [F02 handoff](handoffs/F02.md). F04 adds
 worker scheduling and stateful execution; F05 supplies a generic browser viewer.
-The command gateway, agent session and portable package remain unimplemented. Direct synchronous
+F07 supplies the command gateway; agent sessions and portable packages remain unimplemented. Direct synchronous
 callbacks are not sandboxed or preempted by the graph work counter. The old
 UI/CLI/HTTP demo remains separate.
 

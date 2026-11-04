@@ -37,10 +37,11 @@ node --test
 bash scripts/node.sh --test
 ```
 
-The loopback server is an F05 demonstration host. Its state, evaluation, and
-limited edit endpoints are not the future F07 command gateway. It accepts data
-and checked demo edits, not source code, module paths, or uploaded factories.
-F06 will supply the full application shell.
+The loopback server now routes state evaluation and edits through the
+[F07 command gateway](command-gateway.md). Existing narrow edit endpoints are
+compatibility translations into that authority. It accepts data and checked
+commands, with no source execution, module paths, or uploaded factories.
+F06 supplies the [planetarium workspace](planetarium-shell.md).
 
 ## Author through ordinary project handles
 
@@ -333,9 +334,10 @@ permanent architecture commitment. See [third-party notices](third-party-notices
 for the full notice and documentation links. Browser evidence and current known
 limitations belong to the [F05 handoff](handoffs/F05.md).
 
-F06 should consume these scene snapshots and adapter callbacks. F09 should retain
-graph definitions, asset provenance/content identities, bindings, and explicit
-view state rather than serializing live Three objects. F10 should schedule physical
+F06 consumes these scene snapshots and adapter callbacks. F09 preserves graph
+definitions, asset provenance, bindings and explicit view state. Reopening
+regenerates asset content IDs through F05. See the [project-file guide](portable-projects.md).
+F10 should schedule physical
 samples through F04 and render those results at its chosen presentation cadence.
 F05 does not provide the final floating-panel shell, portable archive, authored
 timeline/export scheduler, general asset catalogue, or physical emission renderer.

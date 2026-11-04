@@ -1,0 +1,2550 @@
+{
+  "format": "cosmic-lego.project",
+  "version": 1,
+  "savedFrom": {
+    "projectId": "gate-bench",
+    "generation": "load-c38b3d37-6c68-4e55-a312-8f5ea10cbe58",
+    "revision": 3
+  },
+  "graph": {
+    "schemaVersion": 1,
+    "id": "gate-bench",
+    "title": "Timing gate · three scan lanes",
+    "nodes": [
+      {
+        "id": "puck-low",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "r0": [
+              -2,
+              -1,
+              0
+            ],
+            "v": [
+              1,
+              0,
+              0
+            ],
+            "unit": "m",
+            "frame": "lab"
+          },
+          "inputs": {},
+          "extension": {
+            "id": "fixture.moving-point",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "fixture.moving-point.implementation",
+              "version": "1.0.0",
+              "build": "fixture-build-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "fixture.moving-point"
+      },
+      {
+        "id": "puck-mid",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "r0": [
+              -2,
+              0,
+              0
+            ],
+            "v": [
+              1,
+              0,
+              0
+            ],
+            "unit": "m",
+            "frame": "lab"
+          },
+          "inputs": {},
+          "extension": {
+            "id": "fixture.moving-point",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "fixture.moving-point.implementation",
+              "version": "1.0.0",
+              "build": "fixture-build-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "fixture.moving-point"
+      },
+      {
+        "id": "puck-high",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "r0": [
+              -2,
+              1,
+              0
+            ],
+            "v": [
+              1,
+              0,
+              0
+            ],
+            "unit": "m",
+            "frame": "lab"
+          },
+          "inputs": {},
+          "extension": {
+            "id": "fixture.moving-point",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "fixture.moving-point.implementation",
+              "version": "1.0.0",
+              "build": "fixture-build-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "fixture.moving-point"
+      },
+      {
+        "id": "scan-pucks",
+        "kind": "calculation",
+        "data": {
+          "mode": "live",
+          "element": {
+            "kind": "vector",
+            "shape": [
+              3
+            ],
+            "unit": {
+              "symbol": "m",
+              "dimensions": {
+                "length": 1
+              },
+              "scale": 1
+            },
+            "meaning": "position",
+            "reference": null,
+            "frame": {
+              "id": "lab",
+              "kind": "position"
+            },
+            "normalization": null
+          },
+          "query": {
+            "type": "fixture.moving-point",
+            "port": "position"
+          },
+          "inputs": {}
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "dataflow.selection"
+      },
+      {
+        "id": "puck-radii",
+        "kind": "calculation",
+        "data": {
+          "op": "magnitude",
+          "inputs": {
+            "source": {
+              "port": "value"
+            }
+          }
+        },
+        "references": {
+          "input.source": "scan-pucks"
+        },
+        "dependsOn": [
+          "scan-pucks"
+        ],
+        "type": "dataflow.map"
+      },
+      {
+        "id": "mean-gate-radius",
+        "kind": "calculation",
+        "data": {
+          "op": "mean",
+          "inputs": {
+            "source": {
+              "port": "value"
+            }
+          }
+        },
+        "references": {
+          "input.source": "puck-radii"
+        },
+        "dependsOn": [
+          "puck-radii"
+        ],
+        "type": "dataflow.reduce"
+      },
+      {
+        "id": "lane-gap",
+        "kind": "calculation",
+        "data": {
+          "op": "subtract",
+          "comparison": {
+            "meaning": "lane-separation",
+            "reference": "high-minus-mid"
+          },
+          "inputs": {
+            "left": {
+              "port": "position"
+            },
+            "right": {
+              "port": "position"
+            }
+          }
+        },
+        "references": {
+          "input.left": "puck-high",
+          "input.right": "puck-mid"
+        },
+        "dependsOn": [
+          "puck-high",
+          "puck-mid"
+        ],
+        "type": "dataflow.arithmetic"
+      },
+      {
+        "id": "reference-radius",
+        "kind": "calculation",
+        "data": {
+          "op": "magnitude",
+          "inputs": {
+            "source": {
+              "port": "value"
+            }
+          }
+        },
+        "references": {
+          "input.source": "lane-gap"
+        },
+        "dependsOn": [
+          "lane-gap"
+        ],
+        "type": "dataflow.map"
+      },
+      {
+        "id": "radius-margin",
+        "kind": "calculation",
+        "data": {
+          "op": "subtract",
+          "comparison": {
+            "meaning": "signed-radius-margin",
+            "reference": "one-metre-reference"
+          },
+          "inputs": {
+            "left": {
+              "port": "value"
+            },
+            "right": {
+              "port": "value"
+            }
+          }
+        },
+        "references": {
+          "input.left": "mean-gate-radius",
+          "input.right": "reference-radius"
+        },
+        "dependsOn": [
+          "mean-gate-radius",
+          "reference-radius"
+        ],
+        "type": "dataflow.arithmetic"
+      },
+      {
+        "id": "timing-dither",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "initial": 1.5
+          },
+          "inputs": {},
+          "extension": {
+            "id": "fixture.seeded-accumulator",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "fixture.seeded-accumulator.implementation",
+              "version": "1.0.0",
+              "build": "runtime-fixture-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "fixture.seeded-accumulator"
+      },
+      {
+        "id": "arrival-field",
+        "kind": "calculation",
+        "data": {
+          "value": {
+            "kind": "field",
+            "shape": [
+              15
+            ],
+            "data": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              0,
+              1,
+              2,
+              3,
+              4,
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "unit": {
+              "symbol": "s",
+              "dimensions": {
+                "time": 1
+              },
+              "scale": 1
+            },
+            "meaning": "nominal-arrival-time",
+            "reference": null,
+            "frame": null,
+            "normalization": null,
+            "coordinates": {
+              "kind": "space",
+              "unit": {
+                "symbol": "m",
+                "dimensions": {
+                  "length": 1
+                },
+                "scale": 1
+              },
+              "frame": {
+                "id": "lab",
+                "kind": "position"
+              },
+              "values": [
+                [
+                  -2,
+                  -1,
+                  0
+                ],
+                [
+                  -1,
+                  -1,
+                  0
+                ],
+                [
+                  0,
+                  -1,
+                  0
+                ],
+                [
+                  1,
+                  -1,
+                  0
+                ],
+                [
+                  2,
+                  -1,
+                  0
+                ],
+                [
+                  -2,
+                  0,
+                  0
+                ],
+                [
+                  -1,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  0,
+                  0
+                ],
+                [
+                  -2,
+                  1,
+                  0
+                ],
+                [
+                  -1,
+                  1,
+                  0
+                ],
+                [
+                  0,
+                  1,
+                  0
+                ],
+                [
+                  1,
+                  1,
+                  0
+                ],
+                [
+                  2,
+                  1,
+                  0
+                ]
+              ]
+            },
+            "objectIds": null,
+            "time": null,
+            "metadata": {
+              "warnings": [],
+              "approximation": []
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "dataflow.constant"
+      },
+      {
+        "id": "velocity-field",
+        "kind": "calculation",
+        "data": {
+          "value": {
+            "kind": "field",
+            "shape": [
+              3,
+              3
+            ],
+            "data": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0
+              ]
+            ],
+            "unit": {
+              "symbol": "m/s",
+              "dimensions": {
+                "length": 1,
+                "time": -1
+              },
+              "scale": 1
+            },
+            "meaning": "nominal-scan-velocity",
+            "reference": null,
+            "frame": {
+              "id": "lab",
+              "kind": "direction"
+            },
+            "normalization": null,
+            "coordinates": {
+              "kind": "space",
+              "unit": {
+                "symbol": "m",
+                "dimensions": {
+                  "length": 1
+                },
+                "scale": 1
+              },
+              "frame": {
+                "id": "lab",
+                "kind": "position"
+              },
+              "values": [
+                [
+                  -2.75,
+                  -1,
+                  0
+                ],
+                [
+                  -2.75,
+                  0,
+                  0
+                ],
+                [
+                  -2.75,
+                  1,
+                  0
+                ]
+              ]
+            },
+            "objectIds": null,
+            "time": null,
+            "metadata": {
+              "warnings": [],
+              "approximation": []
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "dataflow.constant"
+      },
+      {
+        "id": "rail-paint",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "color": "#50728A",
+            "unlit": true,
+            "opacity": 1,
+            "source": "Cosmic Lego original local presentation asset",
+            "license": "BSD-3-Clause"
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.material",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.material.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "scene.material"
+      },
+      {
+        "id": "gate-paint",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "color": "#4FD6CE",
+            "unlit": true,
+            "opacity": 1,
+            "source": "Cosmic Lego original local presentation asset",
+            "license": "BSD-3-Clause"
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.material",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.material.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "scene.material"
+      },
+      {
+        "id": "puck-paint",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "color": "#FF9D75",
+            "unlit": true,
+            "opacity": 1,
+            "source": "Cosmic Lego original local presentation asset",
+            "license": "BSD-3-Clause"
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.material",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.material.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "scene.material"
+      },
+      {
+        "id": "sample-paint",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "color": "#FFFFFF",
+            "unlit": true,
+            "opacity": 1,
+            "source": "Cosmic Lego original local presentation asset",
+            "license": "BSD-3-Clause"
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.material",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.material.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "scene.material"
+      },
+      {
+        "id": "puck-shape",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "primitive": "sphere",
+            "radius": 0.13,
+            "width": 1,
+            "height": 1,
+            "depth": 1,
+            "segments": 16,
+            "positions": [],
+            "indices": [],
+            "source": "Cosmic Lego original local presentation asset",
+            "license": "BSD-3-Clause"
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.geometry",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.geometry.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "scene.geometry"
+      },
+      {
+        "id": "timing-tile",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "primitive": "box",
+            "width": 0.2,
+            "height": 0.12,
+            "depth": 0.025,
+            "radius": 0.1,
+            "segments": 16,
+            "positions": [],
+            "indices": [],
+            "source": "Cosmic Lego original local presentation asset",
+            "license": "BSD-3-Clause"
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.geometry",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.geometry.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "scene.geometry"
+      },
+      {
+        "id": "scene-root",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.root",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.root.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "scene.root"
+      },
+      {
+        "id": "pucks-stage",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true,
+            "positions": [],
+            "objectIds": [],
+            "colors": []
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.points",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.points.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.geometry": "puck-shape",
+          "asset.material": "puck-paint",
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "puck-shape",
+          "puck-paint",
+          "scene-root"
+        ],
+        "type": "scene.points"
+      },
+      {
+        "id": "puck-positions",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "sourceId": "scan-pucks",
+            "port": "value",
+            "unit": "m",
+            "quantity": "position",
+            "displayUnit": "m",
+            "displayFrame": "lab",
+            "frame": "lab",
+            "positionUnit": "m",
+            "rotation": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ],
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "translationUnit": "m",
+            "scale": 1,
+            "colorRange": [
+              0,
+              1
+            ],
+            "palette": "blue-gold"
+          },
+          "inputs": {
+            "source": {
+              "port": "value"
+            }
+          },
+          "extension": {
+            "id": "scene.bind-positions",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "cosmic-lego.scene.bindings",
+              "version": "1.0.0",
+              "build": "f05-1"
+            }
+          }
+        },
+        "references": {
+          "input.source": "scan-pucks",
+          "asset.target": "pucks-stage"
+        },
+        "dependsOn": [
+          "scan-pucks",
+          "pucks-stage"
+        ],
+        "type": "scene.bind-positions"
+      },
+      {
+        "id": "arrival-tiles",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true,
+            "positions": [],
+            "objectIds": [],
+            "colors": []
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.points",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.points.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.geometry": "timing-tile",
+          "asset.material": "sample-paint",
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "timing-tile",
+          "sample-paint",
+          "scene-root"
+        ],
+        "type": "scene.points"
+      },
+      {
+        "id": "arrival-colors",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "sourceId": "arrival-field",
+            "port": "value",
+            "unit": "s",
+            "quantity": "nominal-arrival-time",
+            "displayUnit": "s",
+            "displayFrame": "lab",
+            "positionUnit": "m",
+            "frame": "lab",
+            "colorRange": [
+              0,
+              4
+            ],
+            "palette": "blue-gold",
+            "rotation": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ],
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "translationUnit": "m",
+            "scale": 1
+          },
+          "inputs": {
+            "source": {
+              "port": "value"
+            }
+          },
+          "extension": {
+            "id": "scene.bind-scalar-field",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "cosmic-lego.scene.bindings",
+              "version": "1.0.0",
+              "build": "f05-1"
+            }
+          }
+        },
+        "references": {
+          "input.source": "arrival-field",
+          "asset.target": "arrival-tiles"
+        },
+        "dependsOn": [
+          "arrival-field",
+          "arrival-tiles"
+        ],
+        "type": "scene.bind-scalar-field"
+      },
+      {
+        "id": "velocity-glyphs",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "vectorScale": 0.45,
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true,
+            "origins": [],
+            "directions": [],
+            "objectIds": [],
+            "colors": []
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.vectors",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.vectors.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.material": "gate-paint",
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "gate-paint",
+          "scene-root"
+        ],
+        "type": "scene.vectors"
+      },
+      {
+        "id": "nominal-arrows",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "sourceId": "velocity-field",
+            "port": "value",
+            "unit": "m/s",
+            "quantity": "nominal-scan-velocity",
+            "displayUnit": "m/s",
+            "displayFrame": "lab",
+            "positionUnit": "m",
+            "frame": "lab",
+            "rotation": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ],
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "translationUnit": "m",
+            "scale": 1,
+            "colorRange": [
+              0,
+              1
+            ],
+            "palette": "blue-gold"
+          },
+          "inputs": {
+            "source": {
+              "port": "value"
+            }
+          },
+          "extension": {
+            "id": "scene.bind-vectors",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "cosmic-lego.scene.bindings",
+              "version": "1.0.0",
+              "build": "f05-1"
+            }
+          }
+        },
+        "references": {
+          "input.source": "velocity-field",
+          "asset.target": "velocity-glyphs"
+        },
+        "dependsOn": [
+          "velocity-field",
+          "velocity-glyphs"
+        ],
+        "type": "scene.bind-vectors"
+      },
+      {
+        "id": "rail-low",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "positions": [
+              [
+                -2.8,
+                -1,
+                -0.04
+              ],
+              [
+                2.4,
+                -1,
+                -0.04
+              ]
+            ],
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.polyline",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.polyline.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.material": "rail-paint",
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "rail-paint",
+          "scene-root"
+        ],
+        "type": "scene.polyline"
+      },
+      {
+        "id": "rail-mid",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "positions": [
+              [
+                -2.8,
+                0,
+                -0.04
+              ],
+              [
+                2.4,
+                0,
+                -0.04
+              ]
+            ],
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.polyline",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.polyline.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.material": "rail-paint",
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "rail-paint",
+          "scene-root"
+        ],
+        "type": "scene.polyline"
+      },
+      {
+        "id": "rail-high",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "positions": [
+              [
+                -2.8,
+                1,
+                -0.04
+              ],
+              [
+                2.4,
+                1,
+                -0.04
+              ]
+            ],
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.polyline",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.polyline.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.material": "rail-paint",
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "rail-paint",
+          "scene-root"
+        ],
+        "type": "scene.polyline"
+      },
+      {
+        "id": "gate-line",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "positions": [
+              [
+                0,
+                -1.45,
+                -0.035
+              ],
+              [
+                0,
+                1.45,
+                -0.035
+              ]
+            ],
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.polyline",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.polyline.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.material": "gate-paint",
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "gate-paint",
+          "scene-root"
+        ],
+        "type": "scene.polyline"
+      },
+      {
+        "id": "gate-caption",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "text": "TIMING GATE",
+            "position": [
+              0,
+              1.68,
+              0
+            ],
+            "size": 0.2,
+            "color": "#A8F5EC",
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.label",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.label.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "scene-root"
+        ],
+        "type": "scene.label"
+      },
+      {
+        "id": "arrival-key",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "text": "Reference arrival   /   seconds",
+            "position": [
+              0,
+              -1.96,
+              0
+            ],
+            "size": 0.16,
+            "color": "#BFCCD8",
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.label",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.label.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "scene-root"
+        ],
+        "type": "scene.label"
+      },
+      {
+        "id": "tick-0",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "text": "0",
+            "position": [
+              -2,
+              -1.47,
+              0
+            ],
+            "size": 0.14,
+            "color": "#E3EAF1",
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.label",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.label.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "scene-root"
+        ],
+        "type": "scene.label"
+      },
+      {
+        "id": "tick-1",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "text": "1",
+            "position": [
+              -1,
+              -1.47,
+              0
+            ],
+            "size": 0.14,
+            "color": "#E3EAF1",
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.label",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.label.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "scene-root"
+        ],
+        "type": "scene.label"
+      },
+      {
+        "id": "tick-2",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "text": "2",
+            "position": [
+              0,
+              -1.47,
+              0
+            ],
+            "size": 0.14,
+            "color": "#E3EAF1",
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.label",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.label.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "scene-root"
+        ],
+        "type": "scene.label"
+      },
+      {
+        "id": "tick-3",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "text": "3",
+            "position": [
+              1,
+              -1.47,
+              0
+            ],
+            "size": 0.14,
+            "color": "#E3EAF1",
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.label",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.label.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "scene-root"
+        ],
+        "type": "scene.label"
+      },
+      {
+        "id": "tick-4",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "text": "4",
+            "position": [
+              2,
+              -1.47,
+              0
+            ],
+            "size": 0.14,
+            "color": "#E3EAF1",
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.label",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.label.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "scene-root"
+        ],
+        "type": "scene.label"
+      },
+      {
+        "id": "gate-camera",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "projection": "orthographic",
+            "position": [
+              0,
+              0,
+              10
+            ],
+            "target": [
+              0,
+              -0.05,
+              0
+            ],
+            "span": 6.2,
+            "near": 0.1,
+            "far": 100,
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "visible": true,
+            "fov": 45
+          },
+          "inputs": {},
+          "extension": {
+            "id": "scene.camera",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "scene.camera.implementation",
+              "version": "1.0.0",
+              "build": "scene-1"
+            }
+          }
+        },
+        "references": {
+          "asset.parent": "scene-root"
+        },
+        "dependsOn": [
+          "scene-root"
+        ],
+        "type": "scene.camera"
+      },
+      {
+        "id": "gate-radius-report",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "title": "Mean distance from gate center · m",
+            "x": 16,
+            "y": 82,
+            "width": 278,
+            "height": 170,
+            "folded": false,
+            "hidden": false,
+            "component": -1
+          },
+          "inputs": {},
+          "extension": {
+            "id": "workspace.plot",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "workspace.plot.implementation",
+              "version": "1.0.0",
+              "build": "workspace-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "workspace.plot"
+      },
+      {
+        "id": "source-gate-radius-report",
+        "kind": "relationship",
+        "data": {
+          "port": "value",
+          "contract": {
+            "kind": "scalar",
+            "shape": [],
+            "unit": {
+              "symbol": "m",
+              "dimensions": {
+                "length": 1
+              },
+              "scale": 1
+            },
+            "meaning": "mean(magnitude(position))",
+            "reference": null,
+            "frame": null,
+            "normalization": null
+          }
+        },
+        "references": {
+          "source": "mean-gate-radius",
+          "target": "gate-radius-report"
+        },
+        "dependsOn": [
+          "mean-gate-radius",
+          "gate-radius-report"
+        ],
+        "type": "workspace.plot-source"
+      },
+      {
+        "id": "lane-readout",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "title": "Puck x · select a sample",
+            "component": 0,
+            "x": 16,
+            "y": 264,
+            "width": 278,
+            "height": 180,
+            "folded": false,
+            "hidden": false
+          },
+          "inputs": {},
+          "extension": {
+            "id": "workspace.plot",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "workspace.plot.implementation",
+              "version": "1.0.0",
+              "build": "workspace-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "workspace.plot"
+      },
+      {
+        "id": "source-lane-readout",
+        "kind": "relationship",
+        "data": {
+          "port": "value",
+          "contract": {
+            "kind": "collection",
+            "shape": [
+              null,
+              3
+            ],
+            "unit": {
+              "symbol": "m",
+              "dimensions": {
+                "length": 1
+              },
+              "scale": 1
+            },
+            "meaning": "position",
+            "reference": null,
+            "frame": {
+              "id": "lab",
+              "kind": "position"
+            },
+            "normalization": null
+          }
+        },
+        "references": {
+          "source": "scan-pucks",
+          "target": "lane-readout"
+        },
+        "dependsOn": [
+          "scan-pucks",
+          "lane-readout"
+        ],
+        "type": "workspace.plot-source"
+      },
+      {
+        "id": "probe-inspector",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "title": "Selected sample",
+            "x": 16,
+            "y": 456,
+            "width": 278,
+            "height": 200,
+            "folded": true,
+            "hidden": false
+          },
+          "inputs": {},
+          "extension": {
+            "id": "workspace.inspector",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "workspace.inspector.implementation",
+              "version": "1.0.0",
+              "build": "workspace-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "workspace.inspector"
+      },
+      {
+        "id": "bench-chat",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "title": "Bench conversation",
+            "x": 1030,
+            "y": 82,
+            "width": 320,
+            "height": 310,
+            "folded": false,
+            "hidden": false
+          },
+          "inputs": {},
+          "extension": {
+            "id": "workspace.conversation",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "workspace.conversation.implementation",
+              "version": "1.0.0",
+              "build": "workspace-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "workspace.conversation"
+      },
+      {
+        "id": "margin-report",
+        "kind": "presentation",
+        "data": {
+          "parameters": {
+            "title": "Mean radius minus 1 m",
+            "x": 16,
+            "y": 460,
+            "width": 278,
+            "height": 170,
+            "hidden": true,
+            "folded": false,
+            "component": -1
+          },
+          "inputs": {},
+          "extension": {
+            "id": "workspace.plot",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "workspace.plot.implementation",
+              "version": "1.0.0",
+              "build": "workspace-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "workspace.plot"
+      },
+      {
+        "id": "source-margin-report",
+        "kind": "relationship",
+        "data": {
+          "port": "value",
+          "contract": {
+            "kind": "scalar",
+            "shape": [],
+            "unit": {
+              "symbol": "m",
+              "dimensions": {
+                "length": 1
+              },
+              "scale": 1
+            },
+            "meaning": "signed-radius-margin",
+            "reference": "one-metre-reference",
+            "frame": null,
+            "normalization": null
+          }
+        },
+        "references": {
+          "source": "radius-margin",
+          "target": "margin-report"
+        },
+        "dependsOn": [
+          "radius-margin",
+          "margin-report"
+        ],
+        "type": "workspace.plot-source"
+      },
+      {
+        "id": "inspection-pair",
+        "kind": "relationship",
+        "data": {},
+        "references": {
+          "source": "puck-low",
+          "target": "puck-high"
+        },
+        "dependsOn": [],
+        "type": "bench.inspection-pair"
+      },
+      {
+        "id": "late-puck",
+        "kind": "component",
+        "data": {
+          "parameters": {
+            "r0": [
+              -3,
+              0,
+              0
+            ],
+            "v": [
+              0.5,
+              0,
+              0
+            ],
+            "unit": "m",
+            "frame": "lab"
+          },
+          "inputs": {},
+          "extension": {
+            "id": "fixture.moving-point",
+            "version": "1.0.0",
+            "implementation": {
+              "id": "fixture.moving-point.implementation",
+              "version": "1.0.0",
+              "build": "fixture-build-1"
+            }
+          }
+        },
+        "references": {},
+        "dependsOn": [],
+        "type": "fixture.moving-point"
+      }
+    ]
+  },
+  "requirements": [
+    {
+      "id": "fixture.moving-point",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "fixture.moving-point.implementation",
+        "version": "1.0.0",
+        "build": "fixture-build-1"
+      },
+      "kind": "model",
+      "capabilities": [
+        "dataflow.sync"
+      ],
+      "nodeIds": [
+        "late-puck",
+        "puck-high",
+        "puck-low",
+        "puck-mid"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "fixture.seeded-accumulator",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "fixture.seeded-accumulator.implementation",
+        "version": "1.0.0",
+        "build": "runtime-fixture-1"
+      },
+      "kind": "model",
+      "capabilities": [
+        "runtime.stateful"
+      ],
+      "nodeIds": [
+        "timing-dither"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.material",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "scene.material.implementation",
+        "version": "1.0.0",
+        "build": "scene-1"
+      },
+      "kind": "asset-factory",
+      "capabilities": [],
+      "nodeIds": [
+        "gate-paint",
+        "puck-paint",
+        "rail-paint",
+        "sample-paint"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.geometry",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "scene.geometry.implementation",
+        "version": "1.0.0",
+        "build": "scene-1"
+      },
+      "kind": "asset-factory",
+      "capabilities": [],
+      "nodeIds": [
+        "puck-shape",
+        "timing-tile"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.root",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "scene.root.implementation",
+        "version": "1.0.0",
+        "build": "scene-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "scene-root"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.points",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "scene.points.implementation",
+        "version": "1.0.0",
+        "build": "scene-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "arrival-tiles",
+        "pucks-stage"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.bind-positions",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "cosmic-lego.scene.bindings",
+        "version": "1.0.0",
+        "build": "f05-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [
+        "scene.data"
+      ],
+      "nodeIds": [
+        "puck-positions"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.bind-scalar-field",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "cosmic-lego.scene.bindings",
+        "version": "1.0.0",
+        "build": "f05-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [
+        "scene.data"
+      ],
+      "nodeIds": [
+        "arrival-colors"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.vectors",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "scene.vectors.implementation",
+        "version": "1.0.0",
+        "build": "scene-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "velocity-glyphs"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.bind-vectors",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "cosmic-lego.scene.bindings",
+        "version": "1.0.0",
+        "build": "f05-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [
+        "scene.data"
+      ],
+      "nodeIds": [
+        "nominal-arrows"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.polyline",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "scene.polyline.implementation",
+        "version": "1.0.0",
+        "build": "scene-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "gate-line",
+        "rail-high",
+        "rail-low",
+        "rail-mid"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.label",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "scene.label.implementation",
+        "version": "1.0.0",
+        "build": "scene-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "arrival-key",
+        "gate-caption",
+        "tick-0",
+        "tick-1",
+        "tick-2",
+        "tick-3",
+        "tick-4"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "scene.camera",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "scene.camera.implementation",
+        "version": "1.0.0",
+        "build": "scene-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "gate-camera"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "workspace.plot",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "workspace.plot.implementation",
+        "version": "1.0.0",
+        "build": "workspace-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "gate-radius-report",
+        "lane-readout",
+        "margin-report"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "workspace.inspector",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "workspace.inspector.implementation",
+        "version": "1.0.0",
+        "build": "workspace-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "probe-inspector"
+      ],
+      "dependencyOf": []
+    },
+    {
+      "id": "workspace.conversation",
+      "version": "1.0.0",
+      "implementation": {
+        "id": "workspace.conversation.implementation",
+        "version": "1.0.0",
+        "build": "workspace-1"
+      },
+      "kind": "view-adapter",
+      "capabilities": [],
+      "nodeIds": [
+        "bench-chat"
+      ],
+      "dependencyOf": []
+    }
+  ],
+  "assets": [
+    {
+      "nodeId": "rail-paint",
+      "extension": "scene.material",
+      "kind": "material",
+      "format": "cosmic.material.v1",
+      "definitionHash": "sha256:71fbf478ba7bc1e5d11a3e906344403c7622d3e8a7cc3ab6ce550936f626b35c",
+      "source": "Cosmic Lego original local presentation asset",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego original local presentation asset",
+        "license": "BSD-3-Clause"
+      }
+    },
+    {
+      "nodeId": "gate-paint",
+      "extension": "scene.material",
+      "kind": "material",
+      "format": "cosmic.material.v1",
+      "definitionHash": "sha256:9c70d26868270dab82691fa885dded4092313df8250711bfa0a50387d3661e49",
+      "source": "Cosmic Lego original local presentation asset",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego original local presentation asset",
+        "license": "BSD-3-Clause"
+      }
+    },
+    {
+      "nodeId": "puck-paint",
+      "extension": "scene.material",
+      "kind": "material",
+      "format": "cosmic.material.v1",
+      "definitionHash": "sha256:f328b640adc4cccc01afada196528a82eeac83833f8c9b7dbddfa38a088242ec",
+      "source": "Cosmic Lego original local presentation asset",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego original local presentation asset",
+        "license": "BSD-3-Clause"
+      }
+    },
+    {
+      "nodeId": "sample-paint",
+      "extension": "scene.material",
+      "kind": "material",
+      "format": "cosmic.material.v1",
+      "definitionHash": "sha256:b629f2fe6c23bed3eb685cd1acaa54a984152e00fd7a85021349d39ab5189713",
+      "source": "Cosmic Lego original local presentation asset",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego original local presentation asset",
+        "license": "BSD-3-Clause"
+      }
+    },
+    {
+      "nodeId": "puck-shape",
+      "extension": "scene.geometry",
+      "kind": "geometry",
+      "format": "cosmic.geometry.v1",
+      "definitionHash": "sha256:a9d40bcaa50760a210bbec4a3611a4e2fabcd944d3d13d8670233b5320169bc4",
+      "source": "Cosmic Lego original local presentation asset",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego original local presentation asset",
+        "license": "BSD-3-Clause"
+      }
+    },
+    {
+      "nodeId": "timing-tile",
+      "extension": "scene.geometry",
+      "kind": "geometry",
+      "format": "cosmic.geometry.v1",
+      "definitionHash": "sha256:e7ec3f4012e787efaf4521ae7c214c1759917b8a892560569b6b99f76f10855c",
+      "source": "Cosmic Lego original local presentation asset",
+      "license": "BSD-3-Clause",
+      "declaredProvenance": {
+        "source": "Cosmic Lego original local presentation asset",
+        "license": "BSD-3-Clause"
+      }
+    }
+  ],
+  "source": {
+    "original": {
+      "path": "experiments/f11-author.mjs",
+      "language": "javascript",
+      "sha256": "sha256:7431b3c92df741b9a8c56331d91632ffd9a520fd113927eee1ee3eab7f2d9ccb",
+      "files": [],
+      "producedGraphPath": "_portable/original-construction.json",
+      "producedGraphHash": "sha256:5c70f450612c5c68fab757c10c66013ce956cf4ac88da1a6725e152e025d15d4"
+    },
+    "reconstruction": {
+      "path": "_portable/reconstruction.mjs",
+      "language": "javascript",
+      "sha256": "sha256:400beb22fc604f42752a9ec50189d51ab69319ba98a4c48b62f4c50c296e9102",
+      "producedGraphHash": "sha256:c5c3014c496f643b72280511d26d635674da5f984d8f65a1dbbe0d60a2720584"
+    }
+  },
+  "resources": [
+    {
+      "path": "experiments/f11-author.mjs",
+      "mediaType": "text/plain",
+      "content": "// An independent public-interface authoring exercise. Run in the author's process.\nimport { readFile } from 'node:fs/promises';\nimport { createRegistry } from '../examples/fixtures/workspace-registry.js';\nimport { Project } from '../src/core/index.js';\nimport { value } from '../src/dataflow/index.js';\nimport { createPortableManifest } from '../src/portable/format.js';\nimport { createTimeline } from '../src/timeline/definition.js';\nimport { createWorkspaceLayer } from '../src/workspace/index.js';\n\nconst lanes = [{ name: 'low', y: -1 }, { name: 'mid', y: 0 }, { name: 'high', y: 1 }];\nconst positionFrame = { id: 'lab', kind: 'position' };\n\nfunction makeScience(draft, binding) {\n  const author = binding.author(draft);\n  for (const { name, y } of lanes) {\n    author.instantiate('fixture.moving-point', {\n      id: 'puck-' + name, parameters: { r0: [-2, y, 0], v: [1, 0, 0] },\n    });\n  }\n  const pucks = author.select(\n    { mode: 'live', type: 'fixture.moving-point', port: 'position' }, { id: 'scan-pucks' },\n  );\n  const radii = author.map('magnitude', pucks, { id: 'puck-radii' });\n  const mean = author.reduce('mean', radii, { id: 'mean-gate-radius' });\n  const gap = author.arithmetic('subtract', { node: 'puck-high', port: 'position' },\n    { node: 'puck-mid', port: 'position' }, {\n      id: 'lane-gap', comparison: { meaning: 'lane-separation', reference: 'high-minus-mid' },\n    });\n  const limit = author.map('magnitude', gap, { id: 'reference-radius' });\n  author.arithmetic('subtract', mean, limit, {\n    id: 'radius-margin', comparison: { meaning: 'signed-radius-margin', reference: 'one-metre-reference' },\n  });\n  author.instantiate('fixture.seeded-accumulator', { id: 'timing-dither', parameters: { initial: 1.5 } });\n\n  const samples = lanes.flatMap(({ y }) => [-2, -1, 0, 1, 2].map(x => [x, y, 0]));\n  const space = values => ({ kind: 'space', unit: 'm', frame: positionFrame, values });\n  author.constant(value({\n    kind: 'field', unit: 's', meaning: 'nominal-arrival-time', data: samples.map(([x]) => x + 2),\n    coordinates: space(samples),\n  }), { id: 'arrival-field' });\n  author.constant(value({\n    kind: 'field', unit: 'm/s', meaning: 'nominal-scan-velocity', frame: { id: 'lab', kind: 'direction' },\n    data: lanes.map(() => [1, 0, 0]), coordinates: space(lanes.map(({ y }) => [-2.75, y, 0])),\n  }), { id: 'velocity-field' });\n}\n\nfunction makeStage(draft, layer) {\n  const scene = layer.scene.author(draft);\n  const paint = (id, color) => scene.material({ id, color, unlit: true });\n  const railPaint = paint('rail-paint', '#50728A');\n  const gatePaint = paint('gate-paint', '#4FD6CE');\n  const puckPaint = paint('puck-paint', '#FF9D75');\n  const samplePaint = paint('sample-paint', '#FFFFFF');\n  const shape = scene.geometry({ id: 'puck-shape', primitive: 'sphere', radius: 0.13 });\n  const tile = scene.geometry({\n    id: 'timing-tile', primitive: 'box', width: 0.20, height: 0.12, depth: 0.025,\n  });\n  const pucks = scene.points({ id: 'pucks-stage', geometry: shape, material: puckPaint });\n  scene.bind(pucks, 'scan-pucks', {\n    id: 'puck-positions', property: 'positions', unit: 'm', frame: 'lab', displayUnit: 'm',\n  });\n  const tiles = scene.points({ id: 'arrival-tiles', geometry: tile, material: samplePaint });\n  scene.bind(tiles, 'arrival-field', {\n    id: 'arrival-colors', property: 'scalar-field', quantity: 'nominal-arrival-time',\n    unit: 's', displayUnit: 's', positionUnit: 'm', frame: 'lab', colorRange: [0, 4], palette: 'blue-gold',\n  });\n  const arrows = scene.vectors({ id: 'velocity-glyphs', material: gatePaint, vectorScale: 0.45 });\n  scene.bind(arrows, 'velocity-field', {\n    id: 'nominal-arrows', property: 'vectors', quantity: 'nominal-scan-velocity',\n    unit: 'm/s', displayUnit: 'm/s', positionUnit: 'm', frame: 'lab',\n  });\n  for (const { name, y } of lanes) {\n    scene.polyline({\n      id: 'rail-' + name, material: railPaint, positions: [[-2.8, y, -0.04], [2.4, y, -0.04]],\n    });\n  }\n  scene.polyline({\n    id: 'gate-line', material: gatePaint, positions: [[0, -1.45, -0.035], [0, 1.45, -0.035]],\n  });\n  const label = (id, text, position, size, color) => scene.label({ id, text, position, size, color });\n  label('gate-caption', 'TIMING GATE', [0, 1.68, 0], 0.20, '#A8F5EC');\n  label('arrival-key', 'Reference arrival   /   seconds', [0, -1.96, 0], 0.16, '#BFCCD8');\n  for (const x of [-2, -1, 0, 1, 2]) {\n    label('tick-' + (x + 2), String(x + 2), [x, -1.47, 0], 0.14, '#E3EAF1');\n  }\n  scene.camera({\n    id: 'gate-camera', projection: 'orthographic', position: [0, 0, 10],\n    target: [0, -0.05, 0], span: 6.2, near: 0.1, far: 100,\n  });\n}\n\nfunction makeControls(draft, layer) {\n  const views = layer.author(draft);\n  function bindPlot(overlay, source, options) {\n    views.bind(overlay, source, options);\n    // The overlay helper assigns an anonymous relationship ID. Preserve its inferred\n    // port contract, giving the relationship a stable ID for repeatable graph hashes.\n    const link = draft.snapshot().nodes.find(n =>\n      n.type === 'workspace.plot-source' && n.references.target === overlay.id);\n    draft.disconnect(link.id);\n    draft.create({ ...link, id: 'source-' + overlay.id });\n  }\n  const mean = views.plot({\n    id: 'gate-radius-report', title: 'Mean distance from gate center · m',\n    x: 16, y: 82, width: 278, height: 170,\n  });\n  bindPlot(mean, 'mean-gate-radius');\n  const positions = views.plot({\n    id: 'lane-readout', title: 'Puck x · select a sample',\n    component: 0, x: 16, y: 264, width: 278, height: 180,\n  });\n  bindPlot(positions, 'scan-pucks', { component: 0 });\n  views.inspector({\n    id: 'probe-inspector', title: 'Selected sample', x: 16, y: 456, width: 278, height: 200, folded: true,\n  });\n  views.conversation({\n    id: 'bench-chat', title: 'Bench conversation', x: 1030, y: 82, width: 320, height: 310,\n  });\n  const margin = views.plot({\n    id: 'margin-report', title: 'Mean radius minus 1 m', x: 16, y: 460, width: 278, height: 170, hidden: true,\n  });\n  bindPlot(margin, 'radius-margin');\n}\n\nfunction makeSequence() {\n  const timeline = createTimeline({ id: 'gate-pass', title: 'Pass through the timing gate', duration: 4 });\n  timeline.track({ id: 'gate-clock', kind: 'physical-time', keys: [\n    { at: 0, value: 0 }, { at: 1.5, value: 2 }, { at: 2.5, value: 2 }, { at: 4, value: 4 },\n  ] });\n  timeline.track({ id: 'gate-instructions', kind: 'annotation', keys: [\n    { at: 0, value: 'Follow the coral pucks. Each colored tile marks a nominal arrival time.' },\n    { at: 1.5, value: 'Clock held at 2 s. Read the mean distance from the center of the gate.' },\n    { at: 2.5, value: 'The clock resumes. Compare the pucks with the reference arrival scale.' },\n  ] });\n  timeline.track({ id: 'read-mean', kind: 'emphasis', target: 'gate-radius-report', keys: [\n    { at: 0, value: false }, { at: 1.5, value: true }, { at: 2.5, value: false },\n  ] });\n  return timeline.snapshot();\n}\n\nexport async function buildReadinessManifest() {\n  const registry = createRegistry();\n  const binding = registry.bind();\n  const layer = createWorkspaceLayer(binding);\n  const project = new Project({ id: 'gate-bench', title: 'Timing gate · three scan lanes', validators: layer.validators });\n  const draft = project.begin();\n  makeScience(draft, binding);\n  makeStage(draft, layer);\n  makeControls(draft, layer);\n  // This relationship is a human inspection cue. Timing comes from the point models.\n  draft.connect('bench.inspection-pair', 'puck-low', 'puck-mid', { id: 'inspection-pair' });\n  draft.accept();\n\n  // Revise the comparison to the two outer rails. Retire a trial view in an accepted edit.\n  const trial = project.begin();\n  const trialViews = layer.author(trial);\n  const scratch = trialViews.plot({ id: 'trial-meter', title: 'Trial single puck reading', hidden: true });\n  trialViews.bind(scratch, 'puck-mid', { port: 'position', component: 0 });\n  trial.accept();\n  const revision = project.begin();\n  revision.get('inspection-pair').set({ references: { source: 'puck-low', target: 'puck-high' } });\n  layer.author(revision).remove('trial-meter');\n  revision.accept();\n\n  const playback = {\n    time: { value: 2, unit: 's' }, mode: 'auto',\n    settings: { 'timing-dither': { seed: 20261103, step: 0.25, tolerance: 1e-12 } },\n    targets: ['mean-gate-radius', 'radius-margin', 'timing-dither'].map(nodeId => ({ nodeId, port: 'value' })),\n  };\n  return createPortableManifest({\n    registry, binding, layer, project, timeline: makeSequence(), playback,\n    dataSources: [\n      { nodeId: 'arrival-field', source: 'Original synthetic grid: T = (x + 2 m)/(1 m/s); experiments/f11-author.mjs', license: 'BSD-3-Clause' },\n      { nodeId: 'velocity-field', source: 'Original synthetic reference velocity: (1, 0, 0) m/s; experiments/f11-author.mjs', license: 'BSD-3-Clause' },\n    ],\n    source: {\n      path: 'experiments/f11-author.mjs', language: 'javascript',\n      text: await readFile(new URL(import.meta.url), 'utf8'), producedGraph: project.snapshot(),\n    },\n  });\n}\n",
+      "sha256": "sha256:7431b3c92df741b9a8c56331d91632ffd9a520fd113927eee1ee3eab7f2d9ccb"
+    },
+    {
+      "path": "_portable/original-construction.json",
+      "mediaType": "application/json",
+      "content": "{\"id\":\"gate-bench\",\"nodes\":[{\"data\":{\"extension\":{\"id\":\"fixture.moving-point\",\"implementation\":{\"build\":\"fixture-build-1\",\"id\":\"fixture.moving-point.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"frame\":\"lab\",\"r0\":[-2,-1,0],\"unit\":\"m\",\"v\":[1,0,0]}},\"dependsOn\":[],\"id\":\"puck-low\",\"kind\":\"component\",\"references\":{},\"type\":\"fixture.moving-point\"},{\"data\":{\"extension\":{\"id\":\"fixture.moving-point\",\"implementation\":{\"build\":\"fixture-build-1\",\"id\":\"fixture.moving-point.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"frame\":\"lab\",\"r0\":[-2,0,0],\"unit\":\"m\",\"v\":[1,0,0]}},\"dependsOn\":[],\"id\":\"puck-mid\",\"kind\":\"component\",\"references\":{},\"type\":\"fixture.moving-point\"},{\"data\":{\"extension\":{\"id\":\"fixture.moving-point\",\"implementation\":{\"build\":\"fixture-build-1\",\"id\":\"fixture.moving-point.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"frame\":\"lab\",\"r0\":[-2,1,0],\"unit\":\"m\",\"v\":[1,0,0]}},\"dependsOn\":[],\"id\":\"puck-high\",\"kind\":\"component\",\"references\":{},\"type\":\"fixture.moving-point\"},{\"data\":{\"element\":{\"frame\":{\"id\":\"lab\",\"kind\":\"position\"},\"kind\":\"vector\",\"meaning\":\"position\",\"normalization\":null,\"reference\":null,\"shape\":[3],\"unit\":{\"dimensions\":{\"length\":1},\"scale\":1,\"symbol\":\"m\"}},\"inputs\":{},\"mode\":\"live\",\"query\":{\"port\":\"position\",\"type\":\"fixture.moving-point\"}},\"dependsOn\":[],\"id\":\"scan-pucks\",\"kind\":\"calculation\",\"references\":{},\"type\":\"dataflow.selection\"},{\"data\":{\"inputs\":{\"source\":{\"port\":\"value\"}},\"op\":\"magnitude\"},\"dependsOn\":[\"scan-pucks\"],\"id\":\"puck-radii\",\"kind\":\"calculation\",\"references\":{\"input.source\":\"scan-pucks\"},\"type\":\"dataflow.map\"},{\"data\":{\"inputs\":{\"source\":{\"port\":\"value\"}},\"op\":\"mean\"},\"dependsOn\":[\"puck-radii\"],\"id\":\"mean-gate-radius\",\"kind\":\"calculation\",\"references\":{\"input.source\":\"puck-radii\"},\"type\":\"dataflow.reduce\"},{\"data\":{\"comparison\":{\"meaning\":\"lane-separation\",\"reference\":\"high-minus-mid\"},\"inputs\":{\"left\":{\"port\":\"position\"},\"right\":{\"port\":\"position\"}},\"op\":\"subtract\"},\"dependsOn\":[\"puck-high\",\"puck-mid\"],\"id\":\"lane-gap\",\"kind\":\"calculation\",\"references\":{\"input.left\":\"puck-high\",\"input.right\":\"puck-mid\"},\"type\":\"dataflow.arithmetic\"},{\"data\":{\"inputs\":{\"source\":{\"port\":\"value\"}},\"op\":\"magnitude\"},\"dependsOn\":[\"lane-gap\"],\"id\":\"reference-radius\",\"kind\":\"calculation\",\"references\":{\"input.source\":\"lane-gap\"},\"type\":\"dataflow.map\"},{\"data\":{\"comparison\":{\"meaning\":\"signed-radius-margin\",\"reference\":\"one-metre-reference\"},\"inputs\":{\"left\":{\"port\":\"value\"},\"right\":{\"port\":\"value\"}},\"op\":\"subtract\"},\"dependsOn\":[\"mean-gate-radius\",\"reference-radius\"],\"id\":\"radius-margin\",\"kind\":\"calculation\",\"references\":{\"input.left\":\"mean-gate-radius\",\"input.right\":\"reference-radius\"},\"type\":\"dataflow.arithmetic\"},{\"data\":{\"extension\":{\"id\":\"fixture.seeded-accumulator\",\"implementation\":{\"build\":\"runtime-fixture-1\",\"id\":\"fixture.seeded-accumulator.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"initial\":1.5}},\"dependsOn\":[],\"id\":\"timing-dither\",\"kind\":\"component\",\"references\":{},\"type\":\"fixture.seeded-accumulator\"},{\"data\":{\"value\":{\"coordinates\":{\"frame\":{\"id\":\"lab\",\"kind\":\"position\"},\"kind\":\"space\",\"unit\":{\"dimensions\":{\"length\":1},\"scale\":1,\"symbol\":\"m\"},\"values\":[[-2,-1,0],[-1,-1,0],[0,-1,0],[1,-1,0],[2,-1,0],[-2,0,0],[-1,0,0],[0,0,0],[1,0,0],[2,0,0],[-2,1,0],[-1,1,0],[0,1,0],[1,1,0],[2,1,0]]},\"data\":[0,1,2,3,4,0,1,2,3,4,0,1,2,3,4],\"frame\":null,\"kind\":\"field\",\"meaning\":\"nominal-arrival-time\",\"metadata\":{\"approximation\":[],\"warnings\":[]},\"normalization\":null,\"objectIds\":null,\"reference\":null,\"shape\":[15],\"time\":null,\"unit\":{\"dimensions\":{\"time\":1},\"scale\":1,\"symbol\":\"s\"}}},\"dependsOn\":[],\"id\":\"arrival-field\",\"kind\":\"calculation\",\"references\":{},\"type\":\"dataflow.constant\"},{\"data\":{\"value\":{\"coordinates\":{\"frame\":{\"id\":\"lab\",\"kind\":\"position\"},\"kind\":\"space\",\"unit\":{\"dimensions\":{\"length\":1},\"scale\":1,\"symbol\":\"m\"},\"values\":[[-2.75,-1,0],[-2.75,0,0],[-2.75,1,0]]},\"data\":[[1,0,0],[1,0,0],[1,0,0]],\"frame\":{\"id\":\"lab\",\"kind\":\"direction\"},\"kind\":\"field\",\"meaning\":\"nominal-scan-velocity\",\"metadata\":{\"approximation\":[],\"warnings\":[]},\"normalization\":null,\"objectIds\":null,\"reference\":null,\"shape\":[3,3],\"time\":null,\"unit\":{\"dimensions\":{\"length\":1,\"time\":-1},\"scale\":1,\"symbol\":\"m/s\"}}},\"dependsOn\":[],\"id\":\"velocity-field\",\"kind\":\"calculation\",\"references\":{},\"type\":\"dataflow.constant\"},{\"data\":{\"extension\":{\"id\":\"scene.material\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.material.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#50728A\",\"license\":\"BSD-3-Clause\",\"opacity\":1,\"source\":\"Cosmic Lego original local presentation asset\",\"unlit\":true}},\"dependsOn\":[],\"id\":\"rail-paint\",\"kind\":\"presentation\",\"references\":{},\"type\":\"scene.material\"},{\"data\":{\"extension\":{\"id\":\"scene.material\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.material.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#4FD6CE\",\"license\":\"BSD-3-Clause\",\"opacity\":1,\"source\":\"Cosmic Lego original local presentation asset\",\"unlit\":true}},\"dependsOn\":[],\"id\":\"gate-paint\",\"kind\":\"presentation\",\"references\":{},\"type\":\"scene.material\"},{\"data\":{\"extension\":{\"id\":\"scene.material\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.material.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#FF9D75\",\"license\":\"BSD-3-Clause\",\"opacity\":1,\"source\":\"Cosmic Lego original local presentation asset\",\"unlit\":true}},\"dependsOn\":[],\"id\":\"puck-paint\",\"kind\":\"presentation\",\"references\":{},\"type\":\"scene.material\"},{\"data\":{\"extension\":{\"id\":\"scene.material\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.material.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#FFFFFF\",\"license\":\"BSD-3-Clause\",\"opacity\":1,\"source\":\"Cosmic Lego original local presentation asset\",\"unlit\":true}},\"dependsOn\":[],\"id\":\"sample-paint\",\"kind\":\"presentation\",\"references\":{},\"type\":\"scene.material\"},{\"data\":{\"extension\":{\"id\":\"scene.geometry\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.geometry.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"depth\":1,\"height\":1,\"indices\":[],\"license\":\"BSD-3-Clause\",\"positions\":[],\"primitive\":\"sphere\",\"radius\":0.13,\"segments\":16,\"source\":\"Cosmic Lego original local presentation asset\",\"width\":1}},\"dependsOn\":[],\"id\":\"puck-shape\",\"kind\":\"presentation\",\"references\":{},\"type\":\"scene.geometry\"},{\"data\":{\"extension\":{\"id\":\"scene.geometry\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.geometry.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"depth\":0.025,\"height\":0.12,\"indices\":[],\"license\":\"BSD-3-Clause\",\"positions\":[],\"primitive\":\"box\",\"radius\":0.1,\"segments\":16,\"source\":\"Cosmic Lego original local presentation asset\",\"width\":0.2}},\"dependsOn\":[],\"id\":\"timing-tile\",\"kind\":\"presentation\",\"references\":{},\"type\":\"scene.geometry\"},{\"data\":{\"extension\":{\"id\":\"scene.root\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.root.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"position\":[0,0,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"visible\":true}},\"dependsOn\":[],\"id\":\"scene-root\",\"kind\":\"presentation\",\"references\":{},\"type\":\"scene.root\"},{\"data\":{\"extension\":{\"id\":\"scene.points\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.points.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"colors\":[],\"objectIds\":[],\"position\":[0,0,0],\"positions\":[],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"visible\":true}},\"dependsOn\":[\"puck-shape\",\"puck-paint\",\"scene-root\"],\"id\":\"pucks-stage\",\"kind\":\"presentation\",\"references\":{\"asset.geometry\":\"puck-shape\",\"asset.material\":\"puck-paint\",\"asset.parent\":\"scene-root\"},\"type\":\"scene.points\"},{\"data\":{\"extension\":{\"id\":\"scene.bind-positions\",\"implementation\":{\"build\":\"f05-1\",\"id\":\"cosmic-lego.scene.bindings\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"source\":{\"port\":\"value\"}},\"parameters\":{\"colorRange\":[0,1],\"displayFrame\":\"lab\",\"displayUnit\":\"m\",\"frame\":\"lab\",\"palette\":\"blue-gold\",\"port\":\"value\",\"positionUnit\":\"m\",\"quantity\":\"position\",\"rotation\":[[1,0,0],[0,1,0],[0,0,1]],\"scale\":1,\"sourceId\":\"scan-pucks\",\"translation\":[0,0,0],\"translationUnit\":\"m\",\"unit\":\"m\"}},\"dependsOn\":[\"scan-pucks\",\"pucks-stage\"],\"id\":\"puck-positions\",\"kind\":\"presentation\",\"references\":{\"asset.target\":\"pucks-stage\",\"input.source\":\"scan-pucks\"},\"type\":\"scene.bind-positions\"},{\"data\":{\"extension\":{\"id\":\"scene.points\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.points.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"colors\":[],\"objectIds\":[],\"position\":[0,0,0],\"positions\":[],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"visible\":true}},\"dependsOn\":[\"timing-tile\",\"sample-paint\",\"scene-root\"],\"id\":\"arrival-tiles\",\"kind\":\"presentation\",\"references\":{\"asset.geometry\":\"timing-tile\",\"asset.material\":\"sample-paint\",\"asset.parent\":\"scene-root\"},\"type\":\"scene.points\"},{\"data\":{\"extension\":{\"id\":\"scene.bind-scalar-field\",\"implementation\":{\"build\":\"f05-1\",\"id\":\"cosmic-lego.scene.bindings\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"source\":{\"port\":\"value\"}},\"parameters\":{\"colorRange\":[0,4],\"displayFrame\":\"lab\",\"displayUnit\":\"s\",\"frame\":\"lab\",\"palette\":\"blue-gold\",\"port\":\"value\",\"positionUnit\":\"m\",\"quantity\":\"nominal-arrival-time\",\"rotation\":[[1,0,0],[0,1,0],[0,0,1]],\"scale\":1,\"sourceId\":\"arrival-field\",\"translation\":[0,0,0],\"translationUnit\":\"m\",\"unit\":\"s\"}},\"dependsOn\":[\"arrival-field\",\"arrival-tiles\"],\"id\":\"arrival-colors\",\"kind\":\"presentation\",\"references\":{\"asset.target\":\"arrival-tiles\",\"input.source\":\"arrival-field\"},\"type\":\"scene.bind-scalar-field\"},{\"data\":{\"extension\":{\"id\":\"scene.vectors\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.vectors.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"colors\":[],\"directions\":[],\"objectIds\":[],\"origins\":[],\"position\":[0,0,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"vectorScale\":0.45,\"visible\":true}},\"dependsOn\":[\"gate-paint\",\"scene-root\"],\"id\":\"velocity-glyphs\",\"kind\":\"presentation\",\"references\":{\"asset.material\":\"gate-paint\",\"asset.parent\":\"scene-root\"},\"type\":\"scene.vectors\"},{\"data\":{\"extension\":{\"id\":\"scene.bind-vectors\",\"implementation\":{\"build\":\"f05-1\",\"id\":\"cosmic-lego.scene.bindings\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{\"source\":{\"port\":\"value\"}},\"parameters\":{\"colorRange\":[0,1],\"displayFrame\":\"lab\",\"displayUnit\":\"m/s\",\"frame\":\"lab\",\"palette\":\"blue-gold\",\"port\":\"value\",\"positionUnit\":\"m\",\"quantity\":\"nominal-scan-velocity\",\"rotation\":[[1,0,0],[0,1,0],[0,0,1]],\"scale\":1,\"sourceId\":\"velocity-field\",\"translation\":[0,0,0],\"translationUnit\":\"m\",\"unit\":\"m/s\"}},\"dependsOn\":[\"velocity-field\",\"velocity-glyphs\"],\"id\":\"nominal-arrows\",\"kind\":\"presentation\",\"references\":{\"asset.target\":\"velocity-glyphs\",\"input.source\":\"velocity-field\"},\"type\":\"scene.bind-vectors\"},{\"data\":{\"extension\":{\"id\":\"scene.polyline\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.polyline.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"position\":[0,0,0],\"positions\":[[-2.8,-1,-0.04],[2.4,-1,-0.04]],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"visible\":true}},\"dependsOn\":[\"rail-paint\",\"scene-root\"],\"id\":\"rail-low\",\"kind\":\"presentation\",\"references\":{\"asset.material\":\"rail-paint\",\"asset.parent\":\"scene-root\"},\"type\":\"scene.polyline\"},{\"data\":{\"extension\":{\"id\":\"scene.polyline\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.polyline.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"position\":[0,0,0],\"positions\":[[-2.8,0,-0.04],[2.4,0,-0.04]],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"visible\":true}},\"dependsOn\":[\"rail-paint\",\"scene-root\"],\"id\":\"rail-mid\",\"kind\":\"presentation\",\"references\":{\"asset.material\":\"rail-paint\",\"asset.parent\":\"scene-root\"},\"type\":\"scene.polyline\"},{\"data\":{\"extension\":{\"id\":\"scene.polyline\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.polyline.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"position\":[0,0,0],\"positions\":[[-2.8,1,-0.04],[2.4,1,-0.04]],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"visible\":true}},\"dependsOn\":[\"rail-paint\",\"scene-root\"],\"id\":\"rail-high\",\"kind\":\"presentation\",\"references\":{\"asset.material\":\"rail-paint\",\"asset.parent\":\"scene-root\"},\"type\":\"scene.polyline\"},{\"data\":{\"extension\":{\"id\":\"scene.polyline\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.polyline.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"position\":[0,0,0],\"positions\":[[0,-1.45,-0.035],[0,1.45,-0.035]],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"visible\":true}},\"dependsOn\":[\"gate-paint\",\"scene-root\"],\"id\":\"gate-line\",\"kind\":\"presentation\",\"references\":{\"asset.material\":\"gate-paint\",\"asset.parent\":\"scene-root\"},\"type\":\"scene.polyline\"},{\"data\":{\"extension\":{\"id\":\"scene.label\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.label.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#A8F5EC\",\"position\":[0,1.68,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"size\":0.2,\"text\":\"TIMING GATE\",\"visible\":true}},\"dependsOn\":[\"scene-root\"],\"id\":\"gate-caption\",\"kind\":\"presentation\",\"references\":{\"asset.parent\":\"scene-root\"},\"type\":\"scene.label\"},{\"data\":{\"extension\":{\"id\":\"scene.label\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.label.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#BFCCD8\",\"position\":[0,-1.96,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"size\":0.16,\"text\":\"Reference arrival   /   seconds\",\"visible\":true}},\"dependsOn\":[\"scene-root\"],\"id\":\"arrival-key\",\"kind\":\"presentation\",\"references\":{\"asset.parent\":\"scene-root\"},\"type\":\"scene.label\"},{\"data\":{\"extension\":{\"id\":\"scene.label\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.label.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#E3EAF1\",\"position\":[-2,-1.47,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"size\":0.14,\"text\":\"0\",\"visible\":true}},\"dependsOn\":[\"scene-root\"],\"id\":\"tick-0\",\"kind\":\"presentation\",\"references\":{\"asset.parent\":\"scene-root\"},\"type\":\"scene.label\"},{\"data\":{\"extension\":{\"id\":\"scene.label\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.label.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#E3EAF1\",\"position\":[-1,-1.47,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"size\":0.14,\"text\":\"1\",\"visible\":true}},\"dependsOn\":[\"scene-root\"],\"id\":\"tick-1\",\"kind\":\"presentation\",\"references\":{\"asset.parent\":\"scene-root\"},\"type\":\"scene.label\"},{\"data\":{\"extension\":{\"id\":\"scene.label\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.label.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#E3EAF1\",\"position\":[0,-1.47,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"size\":0.14,\"text\":\"2\",\"visible\":true}},\"dependsOn\":[\"scene-root\"],\"id\":\"tick-2\",\"kind\":\"presentation\",\"references\":{\"asset.parent\":\"scene-root\"},\"type\":\"scene.label\"},{\"data\":{\"extension\":{\"id\":\"scene.label\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.label.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#E3EAF1\",\"position\":[1,-1.47,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"size\":0.14,\"text\":\"3\",\"visible\":true}},\"dependsOn\":[\"scene-root\"],\"id\":\"tick-3\",\"kind\":\"presentation\",\"references\":{\"asset.parent\":\"scene-root\"},\"type\":\"scene.label\"},{\"data\":{\"extension\":{\"id\":\"scene.label\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.label.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"color\":\"#E3EAF1\",\"position\":[2,-1.47,0],\"rotation\":[0,0,0],\"scale\":[1,1,1],\"size\":0.14,\"text\":\"4\",\"visible\":true}},\"dependsOn\":[\"scene-root\"],\"id\":\"tick-4\",\"kind\":\"presentation\",\"references\":{\"asset.parent\":\"scene-root\"},\"type\":\"scene.label\"},{\"data\":{\"extension\":{\"id\":\"scene.camera\",\"implementation\":{\"build\":\"scene-1\",\"id\":\"scene.camera.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"far\":100,\"fov\":45,\"near\":0.1,\"position\":[0,0,10],\"projection\":\"orthographic\",\"rotation\":[0,0,0],\"scale\":[1,1,1],\"span\":6.2,\"target\":[0,-0.05,0],\"visible\":true}},\"dependsOn\":[\"scene-root\"],\"id\":\"gate-camera\",\"kind\":\"presentation\",\"references\":{\"asset.parent\":\"scene-root\"},\"type\":\"scene.camera\"},{\"data\":{\"extension\":{\"id\":\"workspace.plot\",\"implementation\":{\"build\":\"workspace-1\",\"id\":\"workspace.plot.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"component\":-1,\"folded\":false,\"height\":170,\"hidden\":false,\"title\":\"Mean distance from gate center · m\",\"width\":278,\"x\":16,\"y\":82}},\"dependsOn\":[],\"id\":\"gate-radius-report\",\"kind\":\"presentation\",\"references\":{},\"type\":\"workspace.plot\"},{\"data\":{\"contract\":{\"frame\":null,\"kind\":\"scalar\",\"meaning\":\"mean(magnitude(position))\",\"normalization\":null,\"reference\":null,\"shape\":[],\"unit\":{\"dimensions\":{\"length\":1},\"scale\":1,\"symbol\":\"m\"}},\"port\":\"value\"},\"dependsOn\":[\"mean-gate-radius\",\"gate-radius-report\"],\"id\":\"source-gate-radius-report\",\"kind\":\"relationship\",\"references\":{\"source\":\"mean-gate-radius\",\"target\":\"gate-radius-report\"},\"type\":\"workspace.plot-source\"},{\"data\":{\"extension\":{\"id\":\"workspace.plot\",\"implementation\":{\"build\":\"workspace-1\",\"id\":\"workspace.plot.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"component\":0,\"folded\":false,\"height\":180,\"hidden\":false,\"title\":\"Puck x · select a sample\",\"width\":278,\"x\":16,\"y\":264}},\"dependsOn\":[],\"id\":\"lane-readout\",\"kind\":\"presentation\",\"references\":{},\"type\":\"workspace.plot\"},{\"data\":{\"contract\":{\"frame\":{\"id\":\"lab\",\"kind\":\"position\"},\"kind\":\"collection\",\"meaning\":\"position\",\"normalization\":null,\"reference\":null,\"shape\":[null,3],\"unit\":{\"dimensions\":{\"length\":1},\"scale\":1,\"symbol\":\"m\"}},\"port\":\"value\"},\"dependsOn\":[\"scan-pucks\",\"lane-readout\"],\"id\":\"source-lane-readout\",\"kind\":\"relationship\",\"references\":{\"source\":\"scan-pucks\",\"target\":\"lane-readout\"},\"type\":\"workspace.plot-source\"},{\"data\":{\"extension\":{\"id\":\"workspace.inspector\",\"implementation\":{\"build\":\"workspace-1\",\"id\":\"workspace.inspector.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"folded\":true,\"height\":200,\"hidden\":false,\"title\":\"Selected sample\",\"width\":278,\"x\":16,\"y\":456}},\"dependsOn\":[],\"id\":\"probe-inspector\",\"kind\":\"presentation\",\"references\":{},\"type\":\"workspace.inspector\"},{\"data\":{\"extension\":{\"id\":\"workspace.conversation\",\"implementation\":{\"build\":\"workspace-1\",\"id\":\"workspace.conversation.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"folded\":false,\"height\":310,\"hidden\":false,\"title\":\"Bench conversation\",\"width\":320,\"x\":1030,\"y\":82}},\"dependsOn\":[],\"id\":\"bench-chat\",\"kind\":\"presentation\",\"references\":{},\"type\":\"workspace.conversation\"},{\"data\":{\"extension\":{\"id\":\"workspace.plot\",\"implementation\":{\"build\":\"workspace-1\",\"id\":\"workspace.plot.implementation\",\"version\":\"1.0.0\"},\"version\":\"1.0.0\"},\"inputs\":{},\"parameters\":{\"component\":-1,\"folded\":false,\"height\":170,\"hidden\":true,\"title\":\"Mean radius minus 1 m\",\"width\":278,\"x\":16,\"y\":460}},\"dependsOn\":[],\"id\":\"margin-report\",\"kind\":\"presentation\",\"references\":{},\"type\":\"workspace.plot\"},{\"data\":{\"contract\":{\"frame\":null,\"kind\":\"scalar\",\"meaning\":\"signed-radius-margin\",\"normalization\":null,\"reference\":\"one-metre-reference\",\"shape\":[],\"unit\":{\"dimensions\":{\"length\":1},\"scale\":1,\"symbol\":\"m\"}},\"port\":\"value\"},\"dependsOn\":[\"radius-margin\",\"margin-report\"],\"id\":\"source-margin-report\",\"kind\":\"relationship\",\"references\":{\"source\":\"radius-margin\",\"target\":\"margin-report\"},\"type\":\"workspace.plot-source\"},{\"data\":{},\"dependsOn\":[],\"id\":\"inspection-pair\",\"kind\":\"relationship\",\"references\":{\"source\":\"puck-low\",\"target\":\"puck-high\"},\"type\":\"bench.inspection-pair\"}],\"schemaVersion\":1,\"title\":\"Timing gate · three scan lanes\"}",
+      "sha256": "sha256:5c70f450612c5c68fab757c10c66013ce956cf4ac88da1a6725e152e025d15d4"
+    },
+    {
+      "path": "_portable/reconstruction.mjs",
+      "mediaType": "text/plain",
+      "content": "// Generated reconstruction of the accepted graph. Supply the installed validators.\nexport function reconstruct(Project, validators) {\n  const graph = JSON.parse(\"{\\\"id\\\":\\\"gate-bench\\\",\\\"nodes\\\":[{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"fixture.moving-point\\\",\\\"implementation\\\":{\\\"build\\\":\\\"fixture-build-1\\\",\\\"id\\\":\\\"fixture.moving-point.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"frame\\\":\\\"lab\\\",\\\"r0\\\":[-2,-1,0],\\\"unit\\\":\\\"m\\\",\\\"v\\\":[1,0,0]}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"puck-low\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{},\\\"type\\\":\\\"fixture.moving-point\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"fixture.moving-point\\\",\\\"implementation\\\":{\\\"build\\\":\\\"fixture-build-1\\\",\\\"id\\\":\\\"fixture.moving-point.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"frame\\\":\\\"lab\\\",\\\"r0\\\":[-2,0,0],\\\"unit\\\":\\\"m\\\",\\\"v\\\":[1,0,0]}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"puck-mid\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{},\\\"type\\\":\\\"fixture.moving-point\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"fixture.moving-point\\\",\\\"implementation\\\":{\\\"build\\\":\\\"fixture-build-1\\\",\\\"id\\\":\\\"fixture.moving-point.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"frame\\\":\\\"lab\\\",\\\"r0\\\":[-2,1,0],\\\"unit\\\":\\\"m\\\",\\\"v\\\":[1,0,0]}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"puck-high\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{},\\\"type\\\":\\\"fixture.moving-point\\\"},{\\\"data\\\":{\\\"element\\\":{\\\"frame\\\":{\\\"id\\\":\\\"lab\\\",\\\"kind\\\":\\\"position\\\"},\\\"kind\\\":\\\"vector\\\",\\\"meaning\\\":\\\"position\\\",\\\"normalization\\\":null,\\\"reference\\\":null,\\\"shape\\\":[3],\\\"unit\\\":{\\\"dimensions\\\":{\\\"length\\\":1},\\\"scale\\\":1,\\\"symbol\\\":\\\"m\\\"}},\\\"inputs\\\":{},\\\"mode\\\":\\\"live\\\",\\\"query\\\":{\\\"port\\\":\\\"position\\\",\\\"type\\\":\\\"fixture.moving-point\\\"}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"scan-pucks\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{},\\\"type\\\":\\\"dataflow.selection\\\"},{\\\"data\\\":{\\\"inputs\\\":{\\\"source\\\":{\\\"port\\\":\\\"value\\\"}},\\\"op\\\":\\\"magnitude\\\"},\\\"dependsOn\\\":[\\\"scan-pucks\\\"],\\\"id\\\":\\\"puck-radii\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{\\\"input.source\\\":\\\"scan-pucks\\\"},\\\"type\\\":\\\"dataflow.map\\\"},{\\\"data\\\":{\\\"inputs\\\":{\\\"source\\\":{\\\"port\\\":\\\"value\\\"}},\\\"op\\\":\\\"mean\\\"},\\\"dependsOn\\\":[\\\"puck-radii\\\"],\\\"id\\\":\\\"mean-gate-radius\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{\\\"input.source\\\":\\\"puck-radii\\\"},\\\"type\\\":\\\"dataflow.reduce\\\"},{\\\"data\\\":{\\\"comparison\\\":{\\\"meaning\\\":\\\"lane-separation\\\",\\\"reference\\\":\\\"high-minus-mid\\\"},\\\"inputs\\\":{\\\"left\\\":{\\\"port\\\":\\\"position\\\"},\\\"right\\\":{\\\"port\\\":\\\"position\\\"}},\\\"op\\\":\\\"subtract\\\"},\\\"dependsOn\\\":[\\\"puck-high\\\",\\\"puck-mid\\\"],\\\"id\\\":\\\"lane-gap\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{\\\"input.left\\\":\\\"puck-high\\\",\\\"input.right\\\":\\\"puck-mid\\\"},\\\"type\\\":\\\"dataflow.arithmetic\\\"},{\\\"data\\\":{\\\"inputs\\\":{\\\"source\\\":{\\\"port\\\":\\\"value\\\"}},\\\"op\\\":\\\"magnitude\\\"},\\\"dependsOn\\\":[\\\"lane-gap\\\"],\\\"id\\\":\\\"reference-radius\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{\\\"input.source\\\":\\\"lane-gap\\\"},\\\"type\\\":\\\"dataflow.map\\\"},{\\\"data\\\":{\\\"comparison\\\":{\\\"meaning\\\":\\\"signed-radius-margin\\\",\\\"reference\\\":\\\"one-metre-reference\\\"},\\\"inputs\\\":{\\\"left\\\":{\\\"port\\\":\\\"value\\\"},\\\"right\\\":{\\\"port\\\":\\\"value\\\"}},\\\"op\\\":\\\"subtract\\\"},\\\"dependsOn\\\":[\\\"mean-gate-radius\\\",\\\"reference-radius\\\"],\\\"id\\\":\\\"radius-margin\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{\\\"input.left\\\":\\\"mean-gate-radius\\\",\\\"input.right\\\":\\\"reference-radius\\\"},\\\"type\\\":\\\"dataflow.arithmetic\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"fixture.seeded-accumulator\\\",\\\"implementation\\\":{\\\"build\\\":\\\"runtime-fixture-1\\\",\\\"id\\\":\\\"fixture.seeded-accumulator.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"initial\\\":1.5}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"timing-dither\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{},\\\"type\\\":\\\"fixture.seeded-accumulator\\\"},{\\\"data\\\":{\\\"value\\\":{\\\"coordinates\\\":{\\\"frame\\\":{\\\"id\\\":\\\"lab\\\",\\\"kind\\\":\\\"position\\\"},\\\"kind\\\":\\\"space\\\",\\\"unit\\\":{\\\"dimensions\\\":{\\\"length\\\":1},\\\"scale\\\":1,\\\"symbol\\\":\\\"m\\\"},\\\"values\\\":[[-2,-1,0],[-1,-1,0],[0,-1,0],[1,-1,0],[2,-1,0],[-2,0,0],[-1,0,0],[0,0,0],[1,0,0],[2,0,0],[-2,1,0],[-1,1,0],[0,1,0],[1,1,0],[2,1,0]]},\\\"data\\\":[0,1,2,3,4,0,1,2,3,4,0,1,2,3,4],\\\"frame\\\":null,\\\"kind\\\":\\\"field\\\",\\\"meaning\\\":\\\"nominal-arrival-time\\\",\\\"metadata\\\":{\\\"approximation\\\":[],\\\"warnings\\\":[]},\\\"normalization\\\":null,\\\"objectIds\\\":null,\\\"reference\\\":null,\\\"shape\\\":[15],\\\"time\\\":null,\\\"unit\\\":{\\\"dimensions\\\":{\\\"time\\\":1},\\\"scale\\\":1,\\\"symbol\\\":\\\"s\\\"}}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"arrival-field\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{},\\\"type\\\":\\\"dataflow.constant\\\"},{\\\"data\\\":{\\\"value\\\":{\\\"coordinates\\\":{\\\"frame\\\":{\\\"id\\\":\\\"lab\\\",\\\"kind\\\":\\\"position\\\"},\\\"kind\\\":\\\"space\\\",\\\"unit\\\":{\\\"dimensions\\\":{\\\"length\\\":1},\\\"scale\\\":1,\\\"symbol\\\":\\\"m\\\"},\\\"values\\\":[[-2.75,-1,0],[-2.75,0,0],[-2.75,1,0]]},\\\"data\\\":[[1,0,0],[1,0,0],[1,0,0]],\\\"frame\\\":{\\\"id\\\":\\\"lab\\\",\\\"kind\\\":\\\"direction\\\"},\\\"kind\\\":\\\"field\\\",\\\"meaning\\\":\\\"nominal-scan-velocity\\\",\\\"metadata\\\":{\\\"approximation\\\":[],\\\"warnings\\\":[]},\\\"normalization\\\":null,\\\"objectIds\\\":null,\\\"reference\\\":null,\\\"shape\\\":[3,3],\\\"time\\\":null,\\\"unit\\\":{\\\"dimensions\\\":{\\\"length\\\":1,\\\"time\\\":-1},\\\"scale\\\":1,\\\"symbol\\\":\\\"m/s\\\"}}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"velocity-field\\\",\\\"kind\\\":\\\"calculation\\\",\\\"references\\\":{},\\\"type\\\":\\\"dataflow.constant\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.material\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.material.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#50728A\\\",\\\"license\\\":\\\"BSD-3-Clause\\\",\\\"opacity\\\":1,\\\"source\\\":\\\"Cosmic Lego original local presentation asset\\\",\\\"unlit\\\":true}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"rail-paint\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"scene.material\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.material\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.material.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#4FD6CE\\\",\\\"license\\\":\\\"BSD-3-Clause\\\",\\\"opacity\\\":1,\\\"source\\\":\\\"Cosmic Lego original local presentation asset\\\",\\\"unlit\\\":true}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"gate-paint\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"scene.material\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.material\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.material.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#FF9D75\\\",\\\"license\\\":\\\"BSD-3-Clause\\\",\\\"opacity\\\":1,\\\"source\\\":\\\"Cosmic Lego original local presentation asset\\\",\\\"unlit\\\":true}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"puck-paint\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"scene.material\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.material\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.material.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#FFFFFF\\\",\\\"license\\\":\\\"BSD-3-Clause\\\",\\\"opacity\\\":1,\\\"source\\\":\\\"Cosmic Lego original local presentation asset\\\",\\\"unlit\\\":true}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"sample-paint\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"scene.material\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.geometry\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.geometry.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"depth\\\":1,\\\"height\\\":1,\\\"indices\\\":[],\\\"license\\\":\\\"BSD-3-Clause\\\",\\\"positions\\\":[],\\\"primitive\\\":\\\"sphere\\\",\\\"radius\\\":0.13,\\\"segments\\\":16,\\\"source\\\":\\\"Cosmic Lego original local presentation asset\\\",\\\"width\\\":1}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"puck-shape\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"scene.geometry\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.geometry\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.geometry.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"depth\\\":0.025,\\\"height\\\":0.12,\\\"indices\\\":[],\\\"license\\\":\\\"BSD-3-Clause\\\",\\\"positions\\\":[],\\\"primitive\\\":\\\"box\\\",\\\"radius\\\":0.1,\\\"segments\\\":16,\\\"source\\\":\\\"Cosmic Lego original local presentation asset\\\",\\\"width\\\":0.2}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"timing-tile\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"scene.geometry\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.root\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.root.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"position\\\":[0,0,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"visible\\\":true}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"scene-root\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"scene.root\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.points\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.points.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"colors\\\":[],\\\"objectIds\\\":[],\\\"position\\\":[0,0,0],\\\"positions\\\":[],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"puck-shape\\\",\\\"puck-paint\\\",\\\"scene-root\\\"],\\\"id\\\":\\\"pucks-stage\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.geometry\\\":\\\"puck-shape\\\",\\\"asset.material\\\":\\\"puck-paint\\\",\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.points\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.bind-positions\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f05-1\\\",\\\"id\\\":\\\"cosmic-lego.scene.bindings\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"source\\\":{\\\"port\\\":\\\"value\\\"}},\\\"parameters\\\":{\\\"colorRange\\\":[0,1],\\\"displayFrame\\\":\\\"lab\\\",\\\"displayUnit\\\":\\\"m\\\",\\\"frame\\\":\\\"lab\\\",\\\"palette\\\":\\\"blue-gold\\\",\\\"port\\\":\\\"value\\\",\\\"positionUnit\\\":\\\"m\\\",\\\"quantity\\\":\\\"position\\\",\\\"rotation\\\":[[1,0,0],[0,1,0],[0,0,1]],\\\"scale\\\":1,\\\"sourceId\\\":\\\"scan-pucks\\\",\\\"translation\\\":[0,0,0],\\\"translationUnit\\\":\\\"m\\\",\\\"unit\\\":\\\"m\\\"}},\\\"dependsOn\\\":[\\\"scan-pucks\\\",\\\"pucks-stage\\\"],\\\"id\\\":\\\"puck-positions\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.target\\\":\\\"pucks-stage\\\",\\\"input.source\\\":\\\"scan-pucks\\\"},\\\"type\\\":\\\"scene.bind-positions\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.points\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.points.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"colors\\\":[],\\\"objectIds\\\":[],\\\"position\\\":[0,0,0],\\\"positions\\\":[],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"timing-tile\\\",\\\"sample-paint\\\",\\\"scene-root\\\"],\\\"id\\\":\\\"arrival-tiles\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.geometry\\\":\\\"timing-tile\\\",\\\"asset.material\\\":\\\"sample-paint\\\",\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.points\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.bind-scalar-field\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f05-1\\\",\\\"id\\\":\\\"cosmic-lego.scene.bindings\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"source\\\":{\\\"port\\\":\\\"value\\\"}},\\\"parameters\\\":{\\\"colorRange\\\":[0,4],\\\"displayFrame\\\":\\\"lab\\\",\\\"displayUnit\\\":\\\"s\\\",\\\"frame\\\":\\\"lab\\\",\\\"palette\\\":\\\"blue-gold\\\",\\\"port\\\":\\\"value\\\",\\\"positionUnit\\\":\\\"m\\\",\\\"quantity\\\":\\\"nominal-arrival-time\\\",\\\"rotation\\\":[[1,0,0],[0,1,0],[0,0,1]],\\\"scale\\\":1,\\\"sourceId\\\":\\\"arrival-field\\\",\\\"translation\\\":[0,0,0],\\\"translationUnit\\\":\\\"m\\\",\\\"unit\\\":\\\"s\\\"}},\\\"dependsOn\\\":[\\\"arrival-field\\\",\\\"arrival-tiles\\\"],\\\"id\\\":\\\"arrival-colors\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.target\\\":\\\"arrival-tiles\\\",\\\"input.source\\\":\\\"arrival-field\\\"},\\\"type\\\":\\\"scene.bind-scalar-field\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.vectors\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.vectors.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"colors\\\":[],\\\"directions\\\":[],\\\"objectIds\\\":[],\\\"origins\\\":[],\\\"position\\\":[0,0,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"vectorScale\\\":0.45,\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"gate-paint\\\",\\\"scene-root\\\"],\\\"id\\\":\\\"velocity-glyphs\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.material\\\":\\\"gate-paint\\\",\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.vectors\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.bind-vectors\\\",\\\"implementation\\\":{\\\"build\\\":\\\"f05-1\\\",\\\"id\\\":\\\"cosmic-lego.scene.bindings\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{\\\"source\\\":{\\\"port\\\":\\\"value\\\"}},\\\"parameters\\\":{\\\"colorRange\\\":[0,1],\\\"displayFrame\\\":\\\"lab\\\",\\\"displayUnit\\\":\\\"m/s\\\",\\\"frame\\\":\\\"lab\\\",\\\"palette\\\":\\\"blue-gold\\\",\\\"port\\\":\\\"value\\\",\\\"positionUnit\\\":\\\"m\\\",\\\"quantity\\\":\\\"nominal-scan-velocity\\\",\\\"rotation\\\":[[1,0,0],[0,1,0],[0,0,1]],\\\"scale\\\":1,\\\"sourceId\\\":\\\"velocity-field\\\",\\\"translation\\\":[0,0,0],\\\"translationUnit\\\":\\\"m\\\",\\\"unit\\\":\\\"m/s\\\"}},\\\"dependsOn\\\":[\\\"velocity-field\\\",\\\"velocity-glyphs\\\"],\\\"id\\\":\\\"nominal-arrows\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.target\\\":\\\"velocity-glyphs\\\",\\\"input.source\\\":\\\"velocity-field\\\"},\\\"type\\\":\\\"scene.bind-vectors\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.polyline\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.polyline.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"position\\\":[0,0,0],\\\"positions\\\":[[-2.8,-1,-0.04],[2.4,-1,-0.04]],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"rail-paint\\\",\\\"scene-root\\\"],\\\"id\\\":\\\"rail-low\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.material\\\":\\\"rail-paint\\\",\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.polyline\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.polyline\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.polyline.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"position\\\":[0,0,0],\\\"positions\\\":[[-2.8,0,-0.04],[2.4,0,-0.04]],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"rail-paint\\\",\\\"scene-root\\\"],\\\"id\\\":\\\"rail-mid\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.material\\\":\\\"rail-paint\\\",\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.polyline\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.polyline\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.polyline.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"position\\\":[0,0,0],\\\"positions\\\":[[-2.8,1,-0.04],[2.4,1,-0.04]],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"rail-paint\\\",\\\"scene-root\\\"],\\\"id\\\":\\\"rail-high\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.material\\\":\\\"rail-paint\\\",\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.polyline\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.polyline\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.polyline.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"position\\\":[0,0,0],\\\"positions\\\":[[0,-1.45,-0.035],[0,1.45,-0.035]],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"gate-paint\\\",\\\"scene-root\\\"],\\\"id\\\":\\\"gate-line\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.material\\\":\\\"gate-paint\\\",\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.polyline\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.label\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.label.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#A8F5EC\\\",\\\"position\\\":[0,1.68,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"size\\\":0.2,\\\"text\\\":\\\"TIMING GATE\\\",\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"scene-root\\\"],\\\"id\\\":\\\"gate-caption\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.label\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.label\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.label.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#BFCCD8\\\",\\\"position\\\":[0,-1.96,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"size\\\":0.16,\\\"text\\\":\\\"Reference arrival   /   seconds\\\",\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"scene-root\\\"],\\\"id\\\":\\\"arrival-key\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.label\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.label\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.label.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#E3EAF1\\\",\\\"position\\\":[-2,-1.47,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"size\\\":0.14,\\\"text\\\":\\\"0\\\",\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"scene-root\\\"],\\\"id\\\":\\\"tick-0\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.label\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.label\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.label.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#E3EAF1\\\",\\\"position\\\":[-1,-1.47,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"size\\\":0.14,\\\"text\\\":\\\"1\\\",\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"scene-root\\\"],\\\"id\\\":\\\"tick-1\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.label\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.label\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.label.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#E3EAF1\\\",\\\"position\\\":[0,-1.47,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"size\\\":0.14,\\\"text\\\":\\\"2\\\",\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"scene-root\\\"],\\\"id\\\":\\\"tick-2\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.label\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.label\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.label.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#E3EAF1\\\",\\\"position\\\":[1,-1.47,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"size\\\":0.14,\\\"text\\\":\\\"3\\\",\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"scene-root\\\"],\\\"id\\\":\\\"tick-3\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.label\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.label\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.label.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"color\\\":\\\"#E3EAF1\\\",\\\"position\\\":[2,-1.47,0],\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"size\\\":0.14,\\\"text\\\":\\\"4\\\",\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"scene-root\\\"],\\\"id\\\":\\\"tick-4\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.label\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"scene.camera\\\",\\\"implementation\\\":{\\\"build\\\":\\\"scene-1\\\",\\\"id\\\":\\\"scene.camera.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"far\\\":100,\\\"fov\\\":45,\\\"near\\\":0.1,\\\"position\\\":[0,0,10],\\\"projection\\\":\\\"orthographic\\\",\\\"rotation\\\":[0,0,0],\\\"scale\\\":[1,1,1],\\\"span\\\":6.2,\\\"target\\\":[0,-0.05,0],\\\"visible\\\":true}},\\\"dependsOn\\\":[\\\"scene-root\\\"],\\\"id\\\":\\\"gate-camera\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{\\\"asset.parent\\\":\\\"scene-root\\\"},\\\"type\\\":\\\"scene.camera\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"workspace.plot\\\",\\\"implementation\\\":{\\\"build\\\":\\\"workspace-1\\\",\\\"id\\\":\\\"workspace.plot.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"component\\\":-1,\\\"folded\\\":false,\\\"height\\\":170,\\\"hidden\\\":false,\\\"title\\\":\\\"Mean distance from gate center · m\\\",\\\"width\\\":278,\\\"x\\\":16,\\\"y\\\":82}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"gate-radius-report\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"workspace.plot\\\"},{\\\"data\\\":{\\\"contract\\\":{\\\"frame\\\":null,\\\"kind\\\":\\\"scalar\\\",\\\"meaning\\\":\\\"mean(magnitude(position))\\\",\\\"normalization\\\":null,\\\"reference\\\":null,\\\"shape\\\":[],\\\"unit\\\":{\\\"dimensions\\\":{\\\"length\\\":1},\\\"scale\\\":1,\\\"symbol\\\":\\\"m\\\"}},\\\"port\\\":\\\"value\\\"},\\\"dependsOn\\\":[\\\"mean-gate-radius\\\",\\\"gate-radius-report\\\"],\\\"id\\\":\\\"source-gate-radius-report\\\",\\\"kind\\\":\\\"relationship\\\",\\\"references\\\":{\\\"source\\\":\\\"mean-gate-radius\\\",\\\"target\\\":\\\"gate-radius-report\\\"},\\\"type\\\":\\\"workspace.plot-source\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"workspace.plot\\\",\\\"implementation\\\":{\\\"build\\\":\\\"workspace-1\\\",\\\"id\\\":\\\"workspace.plot.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"component\\\":0,\\\"folded\\\":false,\\\"height\\\":180,\\\"hidden\\\":false,\\\"title\\\":\\\"Puck x · select a sample\\\",\\\"width\\\":278,\\\"x\\\":16,\\\"y\\\":264}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"lane-readout\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"workspace.plot\\\"},{\\\"data\\\":{\\\"contract\\\":{\\\"frame\\\":{\\\"id\\\":\\\"lab\\\",\\\"kind\\\":\\\"position\\\"},\\\"kind\\\":\\\"collection\\\",\\\"meaning\\\":\\\"position\\\",\\\"normalization\\\":null,\\\"reference\\\":null,\\\"shape\\\":[null,3],\\\"unit\\\":{\\\"dimensions\\\":{\\\"length\\\":1},\\\"scale\\\":1,\\\"symbol\\\":\\\"m\\\"}},\\\"port\\\":\\\"value\\\"},\\\"dependsOn\\\":[\\\"scan-pucks\\\",\\\"lane-readout\\\"],\\\"id\\\":\\\"source-lane-readout\\\",\\\"kind\\\":\\\"relationship\\\",\\\"references\\\":{\\\"source\\\":\\\"scan-pucks\\\",\\\"target\\\":\\\"lane-readout\\\"},\\\"type\\\":\\\"workspace.plot-source\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"workspace.inspector\\\",\\\"implementation\\\":{\\\"build\\\":\\\"workspace-1\\\",\\\"id\\\":\\\"workspace.inspector.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"folded\\\":true,\\\"height\\\":200,\\\"hidden\\\":false,\\\"title\\\":\\\"Selected sample\\\",\\\"width\\\":278,\\\"x\\\":16,\\\"y\\\":456}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"probe-inspector\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"workspace.inspector\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"workspace.conversation\\\",\\\"implementation\\\":{\\\"build\\\":\\\"workspace-1\\\",\\\"id\\\":\\\"workspace.conversation.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"folded\\\":false,\\\"height\\\":310,\\\"hidden\\\":false,\\\"title\\\":\\\"Bench conversation\\\",\\\"width\\\":320,\\\"x\\\":1030,\\\"y\\\":82}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"bench-chat\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"workspace.conversation\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"workspace.plot\\\",\\\"implementation\\\":{\\\"build\\\":\\\"workspace-1\\\",\\\"id\\\":\\\"workspace.plot.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"component\\\":-1,\\\"folded\\\":false,\\\"height\\\":170,\\\"hidden\\\":true,\\\"title\\\":\\\"Mean radius minus 1 m\\\",\\\"width\\\":278,\\\"x\\\":16,\\\"y\\\":460}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"margin-report\\\",\\\"kind\\\":\\\"presentation\\\",\\\"references\\\":{},\\\"type\\\":\\\"workspace.plot\\\"},{\\\"data\\\":{\\\"contract\\\":{\\\"frame\\\":null,\\\"kind\\\":\\\"scalar\\\",\\\"meaning\\\":\\\"signed-radius-margin\\\",\\\"normalization\\\":null,\\\"reference\\\":\\\"one-metre-reference\\\",\\\"shape\\\":[],\\\"unit\\\":{\\\"dimensions\\\":{\\\"length\\\":1},\\\"scale\\\":1,\\\"symbol\\\":\\\"m\\\"}},\\\"port\\\":\\\"value\\\"},\\\"dependsOn\\\":[\\\"radius-margin\\\",\\\"margin-report\\\"],\\\"id\\\":\\\"source-margin-report\\\",\\\"kind\\\":\\\"relationship\\\",\\\"references\\\":{\\\"source\\\":\\\"radius-margin\\\",\\\"target\\\":\\\"margin-report\\\"},\\\"type\\\":\\\"workspace.plot-source\\\"},{\\\"data\\\":{},\\\"dependsOn\\\":[],\\\"id\\\":\\\"inspection-pair\\\",\\\"kind\\\":\\\"relationship\\\",\\\"references\\\":{\\\"source\\\":\\\"puck-low\\\",\\\"target\\\":\\\"puck-high\\\"},\\\"type\\\":\\\"bench.inspection-pair\\\"},{\\\"data\\\":{\\\"extension\\\":{\\\"id\\\":\\\"fixture.moving-point\\\",\\\"implementation\\\":{\\\"build\\\":\\\"fixture-build-1\\\",\\\"id\\\":\\\"fixture.moving-point.implementation\\\",\\\"version\\\":\\\"1.0.0\\\"},\\\"version\\\":\\\"1.0.0\\\"},\\\"inputs\\\":{},\\\"parameters\\\":{\\\"frame\\\":\\\"lab\\\",\\\"r0\\\":[-3,0,0],\\\"unit\\\":\\\"m\\\",\\\"v\\\":[0.5,0,0]}},\\\"dependsOn\\\":[],\\\"id\\\":\\\"late-puck\\\",\\\"kind\\\":\\\"component\\\",\\\"references\\\":{},\\\"type\\\":\\\"fixture.moving-point\\\"}],\\\"schemaVersion\\\":1,\\\"title\\\":\\\"Timing gate · three scan lanes\\\"}\");\n  return Project.from(graph, { validators });\n}\n",
+      "sha256": "sha256:400beb22fc604f42752a9ec50189d51ab69319ba98a4c48b62f4c50c296e9102"
+    }
+  ],
+  "playback": {
+    "policy": "replay-from-initial",
+    "time": {
+      "value": 2,
+      "unit": {
+        "symbol": "s",
+        "dimensions": {
+          "time": 1
+        },
+        "scale": 1
+      }
+    },
+    "mode": "auto",
+    "settings": {
+      "timing-dither": {
+        "seed": 20261103,
+        "step": 0.25,
+        "tolerance": 1e-12
+      }
+    },
+    "targets": [
+      {
+        "nodeId": "mean-gate-radius",
+        "port": "value"
+      },
+      {
+        "nodeId": "radius-margin",
+        "port": "value"
+      },
+      {
+        "nodeId": "timing-dither",
+        "port": "value"
+      },
+      {
+        "nodeId": "scan-pucks",
+        "port": "value"
+      },
+      {
+        "nodeId": "arrival-field",
+        "port": "value"
+      },
+      {
+        "nodeId": "velocity-field",
+        "port": "value"
+      }
+    ]
+  },
+  "dataSources": [
+    {
+      "nodeId": "arrival-field",
+      "source": "Original synthetic grid: T = (x + 2 m)/(1 m/s); experiments/f11-author.mjs",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "nodeId": "velocity-field",
+      "source": "Original synthetic reference velocity: (1, 0, 0) m/s; experiments/f11-author.mjs",
+      "license": "BSD-3-Clause"
+    }
+  ],
+  "timeline": {
+    "version": 1,
+    "data": {
+      "id": "gate-pass",
+      "title": "Pass through the timing gate",
+      "duration": 4,
+      "tracks": [
+        {
+          "id": "gate-clock",
+          "kind": "physical-time",
+          "keys": [
+            {
+              "at": 0,
+              "value": 0
+            },
+            {
+              "at": 1.5,
+              "value": 2
+            },
+            {
+              "at": 2.5,
+              "value": 2
+            },
+            {
+              "at": 4,
+              "value": 4
+            }
+          ]
+        },
+        {
+          "id": "gate-instructions",
+          "kind": "annotation",
+          "keys": [
+            {
+              "at": 0,
+              "value": "Follow the coral pucks. Each colored tile marks a nominal arrival time."
+            },
+            {
+              "at": 1.5,
+              "value": "Clock held at 2 s. Read the mean distance from the center of the gate."
+            },
+            {
+              "at": 2.5,
+              "value": "The clock resumes. Compare the pucks with the reference arrival scale."
+            }
+          ]
+        },
+        {
+          "id": "read-mean",
+          "kind": "emphasis",
+          "target": "gate-radius-report",
+          "keys": [
+            {
+              "at": 0,
+              "value": false
+            },
+            {
+              "at": 1.5,
+              "value": true
+            },
+            {
+              "at": 2.5,
+              "value": false
+            }
+          ]
+        }
+      ],
+      "boundaries": []
+    },
+    "configurations": []
+  },
+  "sharing": {
+    "transcriptIncluded": false,
+    "receiptsIncluded": true,
+    "transcript": [],
+    "receipts": [
+      {
+        "command": "transaction.commit",
+        "identity": {
+          "projectId": "gate-bench",
+          "generation": "load-c38b3d37-6c68-4e55-a312-8f5ea10cbe58",
+          "revision": 1
+        },
+        "summary": {
+          "action": "transaction.commit",
+          "created": [
+            "late-puck"
+          ],
+          "updated": [],
+          "removed": [],
+          "counts": {
+            "created": 1,
+            "updated": 0,
+            "removed": 0
+          },
+          "truncated": false,
+          "before": {
+            "projectId": "gate-bench",
+            "generation": "load-c38b3d37-6c68-4e55-a312-8f5ea10cbe58",
+            "revision": 0
+          },
+          "after": {
+            "projectId": "gate-bench",
+            "generation": "load-c38b3d37-6c68-4e55-a312-8f5ea10cbe58",
+            "revision": 1
+          }
+        }
+      },
+      {
+        "command": "history.undo",
+        "identity": {
+          "projectId": "gate-bench",
+          "generation": "load-c38b3d37-6c68-4e55-a312-8f5ea10cbe58",
+          "revision": 2
+        },
+        "summary": {
+          "action": "history.undo",
+          "created": [],
+          "updated": [],
+          "removed": [
+            "late-puck"
+          ],
+          "counts": {
+            "created": 0,
+            "updated": 0,
+            "removed": 1
+          },
+          "truncated": false,
+          "before": {
+            "projectId": "gate-bench",
+            "generation": "load-c38b3d37-6c68-4e55-a312-8f5ea10cbe58",
+            "revision": 1
+          },
+          "after": {
+            "projectId": "gate-bench",
+            "generation": "load-c38b3d37-6c68-4e55-a312-8f5ea10cbe58",
+            "revision": 2
+          }
+        }
+      },
+      {
+        "command": "history.redo",
+        "identity": {
+          "projectId": "gate-bench",
+          "generation": "load-c38b3d37-6c68-4e55-a312-8f5ea10cbe58",
+          "revision": 3
+        },
+        "summary": {
+          "action": "history.redo",
+          "created": [
+            "late-puck"
+          ],
+          "updated": [],
+          "removed": [],
+          "counts": {
+            "created": 1,
+            "updated": 0,
+            "removed": 0
+          },
+          "truncated": false,
+          "before": {
+            "projectId": "gate-bench",
+            "generation": "load-c38b3d37-6c68-4e55-a312-8f5ea10cbe58",
+            "revision": 2
+          },
+          "after": {
+            "projectId": "gate-bench",
+            "generation": "load-c38b3d37-6c68-4e55-a312-8f5ea10cbe58",
+            "revision": 3
+          }
+        }
+      }
+    ]
+  },
+  "integrity": {
+    "graphHash": "sha256:c5c3014c496f643b72280511d26d635674da5f984d8f65a1dbbe0d60a2720584",
+    "sha256": "sha256:0385e7b726338a6947f3364a869362a36311a1cf4ca9a6abc0b7e7aef748752a"
+  }
+}

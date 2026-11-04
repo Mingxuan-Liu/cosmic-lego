@@ -4,6 +4,7 @@ import { createDataflow, checkPort, unit, value } from '../dataflow/index.js';
 import { applyDefaults, validateData } from './schema.js';
 import { resolvePorts } from './manifest.js';
 import { inspectRequirements } from './requirements.js';
+import { validateSuppliedResult } from './results.js';
 import { SCIENTIFIC, artifactSize, diagnostic, diagnostics, identityEqual, invoke, issue, keys, reject, requireThat, tokenEqual } from './contracts.js';
 
 const nodeKind = kind => kind === 'model' ? 'component' : kind === 'operator' ? 'calculation' : 'presentation';
@@ -21,7 +22,7 @@ function validateRecord(record, node) {
     if (errors.length) return errors;
     resolvePorts(manifest, node);
     if (implementation.validate) errors.push(...diagnostics(invoke(implementation.validate, node)));
-    for (const guard of Object.values(implementation.guards)) errors.push(...diagnostics(invoke(guard, node)));
+    for (const guard of Object.values(implementation.guards)) errors.push(...diagnostics(invoke(guard, node)).map(item => ({ ...item, category: 'applicability' })));
   } catch (error) { errors.push(issue(error, node.id)); }
   return errors;
 }
@@ -77,11 +78,12 @@ function visualErrors(record, node, graph, outputDescriptions, records) {
   return errors;
 }
 
-export function bindRegistry(records, capabilities, registryLimits, limits = {}, execute) {
+export function bindRegistry(records, capabilities, registryLimits, limits = {}, execute, graphValidators = []) {
   const models = Object.create(null);
   for (const [id, record] of records) if (SCIENTIFIC.has(record.manifest.kind)) {
     models[id] = {
       implementation: record.manifest.implementation,
+      analytic: record.manifest.runtime.paths.includes('analytic'),
       inputs: node => resolvePorts(record.manifest, node).inputs,
       outputs: node => resolvePorts(record.manifest, node).outputs,
       validate: node => validateRecord(record, node),
@@ -108,6 +110,7 @@ export function bindRegistry(records, capabilities, registryLimits, limits = {},
         const record = records.get(node.type);
         if (record && !SCIENTIFIC.has(record.manifest.kind)) errors.push(...visualErrors(record, node, graph, described.outputs, records));
       }
+      if (!errors.length) for (const validate of graphValidators) errors.push(...diagnostics(invoke(validate, graph)));
       return { valid: !errors.length, errors };
     } catch (error) { return { valid: false, errors: [issue(error)] }; }
   };
@@ -182,35 +185,24 @@ export function bindRegistry(records, capabilities, registryLimits, limits = {},
           const expected = resolvePorts(record.manifest, current).inputs;
           for (const [slot, declaration] of Object.entries(current.data.inputs)) {
             const sourceId = current.references[`input.${slot}`];
-            const evaluated = options.results === undefined
+            let evaluated = options.results === undefined
               ? flow.evaluate(project, sourceId, { ...request, port: declaration.port })
               : supplied.get(JSON.stringify([sourceId, declaration.port]));
             requireThat(evaluated, 'RESULT_REQUIRED', `A checked snapshot for ${sourceId}.${declaration.port} is required; visual production does not recompute missing snapshots.`);
-            if (evaluated.valid !== true) {
+            if (options.results === undefined && evaluated.valid !== true) {
               const error = evaluated.diagnostics.find(item => item.severity !== 'warning') ?? evaluated.diagnostics[0];
               reject(error.code, error.message, error.path);
             }
-            requireThat(tokenEqual(identity, evaluated.identity) && tokenEqual(identity, project.token), 'STALE_RESULT', 'Artifact input belongs to a different project snapshot.');
-            const normalizedValue = value(evaluated.value);
+            requireThat(tokenEqual(identity, project.token) && (options.results !== undefined || tokenEqual(identity, evaluated.identity)), 'STALE_RESULT', 'Artifact input belongs to a different project snapshot.');
             if (options.results !== undefined) {
               const source = graph.nodes.find(item => item.id === sourceId);
               const installed = records.get(source.type)?.manifest.implementation ?? { id: 'cosmic-lego.dataflow', version: '1' };
-              const implementation = evaluated.producer.implementation;
-              requireThat(isRecord(implementation) && ['id', 'version', 'build'].every(key => implementation[key] === installed[key]), 'IMPLEMENTATION_MISMATCH', 'Scientific result implementation differs from its installed producer.');
               const sourceDescription = flow.describe(graph).outputs[sourceId]?.[declaration.port];
               requireThat(sourceDescription, 'OUTPUT_PORT', 'A supplied result must name an installed scientific output.');
-              const sourceErrors = checkPort(normalizedValue, sourceDescription);
-              if (sourceErrors.length) reject(sourceErrors[0].code, sourceErrors[0].message, sourceErrors[0].path);
-              const actualTime = evaluated.metadata?.runtime?.achievedTime ?? evaluated.value?.time ?? evaluated.request?.time;
-              requireThat(isRecord(actualTime), 'TIME_MISMATCH', 'A supplied result must retain its physical sampling time.');
-              const actualUnit = unit(actualTime.unit), actualSeconds = actualTime.value * actualUnit.scale, wantedSeconds = request.time.value * request.time.unit.scale;
-              requireThat(Number.isFinite(actualSeconds) && JSON.stringify(actualUnit.dimensions) === JSON.stringify(unit('s').dimensions) &&
-                Math.abs(actualSeconds - wantedSeconds) <= 16 * Number.EPSILON * Math.max(1, Math.abs(actualSeconds), Math.abs(wantedSeconds)), 'TIME_MISMATCH', 'Supplied scientific result describes another physical time.');
-              if (evaluated.value?.time) {
-                const valueSeconds = evaluated.value.time.value * unit(evaluated.value.time.unit).scale;
-                requireThat(Number.isFinite(valueSeconds) && Math.abs(valueSeconds - wantedSeconds) <= 16 * Number.EPSILON * Math.max(1, Math.abs(valueSeconds), Math.abs(wantedSeconds)), 'TIME_MISMATCH', 'Scientific Value timestamp differs from the scene snapshot.');
-              }
+              evaluated = validateSuppliedResult(evaluated, { identity, nodeId: sourceId, port: declaration.port,
+                implementation: installed, descriptor: sourceDescription, time: request.time });
             }
+            const normalizedValue = value(evaluated.value);
             const errors = checkPort(normalizedValue, expected[slot]);
             if (errors.length) reject(errors[0].code, errors[0].message, errors[0].path);
             result.diagnostics.push(...evaluated.diagnostics);

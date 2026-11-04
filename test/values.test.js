@@ -210,3 +210,34 @@ test('frame adapters reject reflection, scaling, wrong sources, and display prom
   fails('FRAME_MISMATCH', () => transformValue(vector([1, 2, 3]), { from: 'unknown', to: 'new', rotation }));
   fails('FRAME_MISMATCH', () => transformValue(vector([1, 2, 3], { frame: { id: 'screen', kind: 'display' } }), { from: 'screen', to: 'physical', rotation }));
 });
+
+test('series compare finite physical instants across extreme clock units and distinguish tiny times from zero', () => {
+  function clock(data, values, scale) {
+    return series(data, [], { coordinates: { kind: 'time', values,
+      unit: { symbol: 'clock', dimensions: { time: 1 }, scale } } });
+  }
+  const a = clock([1, 2], [1e-200, 2e-200], 1e200);  // [1, 2] seconds
+  const equivalent = clock([2, 3], [1e200, 2e200], 1e-200);
+  const disjoint = clock([3, 4], [3e200, 4e200], 1e-200);
+  assert.deepEqual(binaryValue('add', a, equivalent).data, [3, 5]);
+  fails('SAMPLE_ALIGNMENT', () => binaryValue('subtract', a, disjoint));
+  fails('SAMPLE_ALIGNMENT', () => binaryValue('subtract', disjoint, a));
+  fails('SAMPLE_ALIGNMENT', () => binaryValue('add', series([1], [0]), series([1], [1e-20])));
+  const tiny = series([1, 2], [1e-20, 2e-20]);
+  const rounded = series([3, 4], [1e-20 * (1 + Number.EPSILON), 2e-20]);
+  assert.deepEqual(binaryValue('add', tiny, rounded).data, [4, 6]);
+  const alignment = { policy: 'linear', target: 'left' };
+  assert.deepEqual(binaryValue('add', a, clock([0, 4], [0, 4e200], 1e-200), { alignment }).data, [2, 4]);
+  fails('SAMPLE_ALIGNMENT', () => binaryValue('add', a, disjoint, { alignment }));
+  fails('INVALID_COORDINATES', () => clock([0], [1e308], 3600));
+  fails('INVALID_COORDINATES', () => clock([0], [Number.MIN_VALUE], 0.5));
+  fails('INVALID_TIME', () => scalar(1, { time: { value: 1e308, unit: 'h' } }));
+});
+
+test('interpolation across signed extreme time and value endpoints remains finite', () => {
+  const alignment = { policy: 'linear', target: 'left' };
+  const target = series([0, 0, 0], [-5e307, 0, 5e307]);
+  const source = series([-1e308, 1e308], [-1e308, 1e308]);
+  const output = binaryValue('add', target, source, { alignment });
+  assert.deepEqual(output.data, [-5e307, 0, 5e307]);
+});
