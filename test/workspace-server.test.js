@@ -153,3 +153,13 @@ test('a newer workspace time request supersedes the previous worker sequence', a
   assert.equal(current.body.time.value, 3);
   assert.ok(current.body.results.every(result => result.metadata.runtime.achievedTime.value === 3));
 });
+
+test('separate browser views complete concurrent scientific reads at their own requested times', async t => {
+  const app = await start(t), initial = await state(app);
+  const reads = [1, 3].map(time => post(app, 'evaluate', { identity: initial.identity, time: { value: time, unit: 's' } },
+    { 'X-Workspace-View': crypto.randomUUID() }));
+  const responses = await Promise.all(reads);
+  assert.deepEqual(responses.map(r => r.status), [200, 200]);
+  assert.deepEqual(responses.map(r => r.body.snapshot.time.value), [1, 3]);
+  for (const { body } of responses) assert.deepEqual(body.identity, initial.identity);
+});

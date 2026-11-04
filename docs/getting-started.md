@@ -1,19 +1,27 @@
 # Get started with Cosmic Lego
 
-## Open the astronomy workspace
+## Open the astronomy roadmap
 
-From the repository root, use Node.js 20 or later, the pinned dependencies, and a WebGL2-capable browser. Install dependencies once if needed:
+From the repository root, install the pinned dependencies once and launch the local application with Node.js 20 or later.
 
 ```sh
 pnpm install --frozen-lockfile --ignore-scripts
 bash scripts/node.sh apps/exoplanet.mjs
 ```
 
-Open [the local planetarium](http://127.0.0.1:4317/workspace/). `npm start` launches the same application. On the original workstation, `scripts/node.sh` finds the bundled Node runtime. Use `--port 0` to request an available port and open the URL printed by the launcher.
+Open the printed address. The usual port is 4317. On macOS, double-click **Start Cosmic Lego.command** to reuse a running roadmap or launch one on an available port. `npm start` launches the same product. [Open on the default port](http://127.0.0.1:4317/)
+
+The map opens in **3D cluster** with all domains in view. Drag to orbit, Shift-drag to pan, or use two fingers to pan and zoom. Follow a dashed line to explore the diagram two topics share. Switch to **2D overview** for a flat map you can pan and zoom. **Fit** resets the current view. Type a topic name to light up its star. Other stars stay visible in the background. Switch to **Table** for a sorted list of matches. Filters and selection carry across views.
+
+Choose a domain to see its phenomena, then select one for its question, explanation and ideas to explore next. Follow a line to see how the same diagram can help explain both topics. **Available now** finds implemented studies. Under **Exoplanets → Planetary transits**, the study link opens a dedicated player with playback and scrubbing controls. Select **Roadmap** to return to that phenomenon. Other planned phenomena already have short explanatory entries. Larger stars mark ideas that help explain more of the map. Open **Why this star is this size** for specific examples. [Learning paths and ranking](atlas-sources.md)
+
+## Open the editing workspace
+
+Choose **Open workspace** in the header. This opens the editable current project. Click the Cosmic Lego brand to return to the roadmap. [Direct workspace link](http://127.0.0.1:4317/workspace/)
 
 **When shadows overlap** puts three independently orbiting planets around a uniformly bright star. At physical time **0 s**, the two foreground disks overlap and the third planet is behind the star. The correct light curve reads **0.979302**. The deliberately naive sum of depths gives **0.972544**. Drag the stage to examine depth, then use **Reset** to restore the physical observer’s sky view. Open **Views** to inspect the comparison curve. The timeline holds the conjunction between presentation seconds 3 and 5. [Build or modify this study](exoplanet-authoring.md)
 
-**Project → Save locally** creates a named slot. The default astronomy store is `.local/exoplanet-projects/`. Resume a named save with `bash scripts/node.sh apps/exoplanet.mjs --open SLOT`, replacing `SLOT` with its displayed name. **Download** produces an F09 JSON file for import or delivery. The camera, floating plots, timeline and physical clock work locally without an agent. To connect a compatible Codex installation, start the same application with `--codex /absolute/path/to/codex --agent-workspace /absolute/path/to/separate-workspace` and use **Connect** in Conversation. [Project files](portable-projects.md) · [Session setup](in-app-agent-sessions.md)
+**Project → Save locally** creates a named slot. The default astronomy store is `.local/exoplanet-projects/`. Resume a named save with `bash scripts/node.sh apps/exoplanet.mjs --open SLOT`, replacing `SLOT` with its displayed name. **Download** produces an F09 JSON file for import or delivery. The camera, instrument rail, timeline and physical clock work locally without an agent. To connect a compatible Codex installation, start the same application with `--codex /absolute/path/to/codex --agent-workspace /absolute/path/to/separate-workspace` and use **Connect** in Conversation. [Project files](portable-projects.md) · [Session setup](in-app-agent-sessions.md)
 
 ## Try the independent timing gate
 
@@ -113,19 +121,19 @@ the optional [F08 companion](in-app-agent-sessions.md) connects in-app agent ses
 
 ## Open the astronomy-free planetarium workspace
 
-F06 adds movable, resizable, foldable inspector/plot/provenance/conversation views
-above the same stage. With dependencies installed as above:
+The same fixed HUD also opens with the generic fixture registry. With dependencies installed as above:
 
 ```sh
 node examples/workspace.mjs
 node scripts/scene-server.mjs --workspace --port 4326
 ```
 
-Open **http://127.0.0.1:4326/workspace/**. Drag window headers, fold/hide them,
-restore them through Views, or press `V` for scene-only mode. `F` fits the scene;
-Escape restores the workspace or returns focus to the stage. Focused headers
-support arrow-key movement and Shift+arrow resizing. Views can create another
-plot bound to a real installed output, and edits have Undo/Redo.
+Open [the generic workspace](http://127.0.0.1:4326/workspace/). **Instruments**
+opens the plots on the left. **Inspection** opens the inspector, model notes and
+conversation on the right. Scroll a side, fold individual panels or restore
+hidden ones through **Views**. Press **V** for scene-only mode, **F** to fit,
+and **Escape** to return to the stage. Views can add independently bound plots,
+and project edits have Undo and Redo.
 
 The collection plot and inspector use current physical-time samples and stable
 source IDs. Restore the initially hidden mean-position-magnitude plot to inspect

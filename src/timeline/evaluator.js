@@ -51,7 +51,7 @@ export async function createTimelineEvaluator({ manifest: input, registry, bindi
     stage.settings = Object.fromEntries(Object.entries(manifest.playback.settings).filter(([nodeId]) =>
       nodes.has(nodeId) && producer(nodes.get(nodeId)) === producer(baseNodes.get(nodeId))));
   }
-  let disposed = false, epoch = 0, active = null, stopping = Promise.resolve();
+  let disposed = false, epoch = 0, active = null, idleAnalytic = null, stopping = Promise.resolve();
   function stopActive() {
     if (active) { stopping = active.dispose(); active = null; }
     return stopping;
@@ -69,12 +69,14 @@ export async function createTimelineEvaluator({ manifest: input, registry, bindi
     const owner = stage.project;
     // A previous frame's off-grid checkpoint could change the integrator's
     // step partition and random draws. Start an F04 replay for each sample.
-    const runtime = createRuntime({ registryModule: runtimeModule });
+    const analytic = manifest.playback.mode === 'analytic';
+    const runtime = idleAnalytic?.runtime ?? createRuntime({ registryModule: runtimeModule });
+    const gateway = idleAnalytic?.owner === owner ? idleAnalytic.gateway : createCommandGateway({ project: owner, registry, binding, layer, runtime });
+    idleAnalytic = null;
     active = runtime;
-    let expired = false;
+    let expired = false, completed = false;
     const timer = setTimeout(() => { expired = true; void runtime.dispose(); }, 30000);
     try {
-      const gateway = createCommandGateway({ project: owner, registry, binding, layer, runtime });
       const options = { time: physicalTime, mode: manifest.playback.mode, settings: stage.settings };
       async function run(command, args) {
         current();
@@ -121,11 +123,15 @@ export async function createTimelineEvaluator({ manifest: input, registry, bindi
       const frame = { timeline: { id, title, duration }, identity: manifest.savedFrom, presentationTime: seconds, physicalTime,
         configuration: { graphHash: stage.hash, boundaries: stage.boundaries }, cameraId, annotations, snapshot, results, warnings: [...warnings.values()] };
       present(bytes(frame) <= frameByteLimit, 'RESULT_BUDGET', 'Compiled timeline frame exceeds 8 MiB.');
-      current(); return freezeData(frame);
+      current(); completed = true; return freezeData(frame);
     } finally {
       clearTimeout(timer);
-      if (active === runtime) await stopActive();
+      if (active === runtime) {
+        if (completed && analytic) {
+          active = null; idleAnalytic = { runtime, owner, gateway };
+        } else await stopActive();
+      }
     }
   }
-  return Object.freeze({ definition, evaluate, async dispose() { disposed = true; ++epoch; await stopActive(); } });
+  return Object.freeze({ definition, evaluate, async dispose() { disposed = true; ++epoch; await Promise.all([stopActive(), idleAnalytic?.runtime.dispose()]); idleAnalytic = null; } });
 }

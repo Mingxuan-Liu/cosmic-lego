@@ -1,11 +1,11 @@
 :root {
   color-scheme: dark;
-  --bg: #101423;
-  --ink: #eff0fa;
-  --muted: #aab9ce;
-  --gold: #f2c063;
-  --teal: #77d1c5;
-  --line: #39445e;
+  --bg: #050506;
+  --ink: #eeeae2;
+  --muted: #b0ada6;
+  --gold: #edc381;
+  --teal: #c3bba9;
+  --line: #403d36;
   font: 14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   color: var(--ink);
   background: var(--bg);
@@ -60,7 +60,7 @@ body {
   align-items: center;
   gap: 10px;
   max-width: 59%;
-  text-shadow: 0 2px 10px #101423;
+  text-shadow: 0 2px 10px #050506;
 }
 
 #brand {
@@ -102,9 +102,9 @@ h1 {
   align-items: center;
   gap: 14px;
   padding: 6px 12px;
-  border: 1px solid #3c455978;
+  border: 1px solid #a39b882e;
   border-radius: 5px;
-  background: #111727e8;
+  background: #121210eb;
 }
 
 #clocks>div {
@@ -129,22 +129,27 @@ h1 {
   width: clamp(150px,20%,282px);
   display: grid;
   align-content: start;
-  gap: 7px;
+  gap: 0;
   overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  scrollbar-width: thin;
+  background: #131311df;
 }
 
 .readout {
   padding: 10px 13px;
-  border: 1px solid #47546d;
-  border-radius: 6px;
-  background: #151d30f5;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
   overflow-wrap: anywhere;
 }
 
+.readout:last-child { border-bottom: 0; }
+
 .readout[data-emphasized=true] {
-  border-color: var(--gold);
   box-shadow: inset 3px 0 var(--gold);
-  background: #202236f7;
+  background: #27231ced;
 }
 
 .readout-key {
@@ -165,8 +170,10 @@ h1 {
 
 .readout .measurement {
   font-size: clamp(16px,2vw,27px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-variant-numeric: tabular-nums;
-  color: #ffdeb0;
+  letter-spacing: -.065em;
+  color: #f1d1a0;
   line-height: 1.25;
 }
 
@@ -194,7 +201,7 @@ h1 {
   max-width: min(75%,810px);
   border-left: 2px solid var(--gold);
   padding: 6px 15px;
-  background: linear-gradient(90deg,#121625f4 0%,#121625df 75%,#12162500 100%);
+  background: linear-gradient(90deg,#141411f4 0%,#141411df 75%,#14141100 100%);
 }
 
 #configuration {
@@ -217,7 +224,7 @@ h1 {
   max-height: 48%;
   overflow: auto;
   border: 1px solid #aa7c70;
-  background: #211c2a;
+  background: #271e19;
   padding: 16px 20px;
   border-radius: 8px;
   color: #ffcfbe;
@@ -225,7 +232,7 @@ h1 {
 }
 
 #controls {
-  background: #161e30;
+  background: #111110;
   border-top: 1px solid var(--line);
   display: flex;
   align-items: center;
@@ -245,8 +252,8 @@ button,input {
 
 button {
   border-radius: 5px;
-  border: 1px solid #45526b;
-  background: #202a40;
+  border: 1px solid #49453d;
+  background: #211f1c;
   color: var(--ink);
   padding: 7px 10px;
   font-size: 12px;
@@ -270,7 +277,7 @@ button:focus-visible,input:focus-visible,summary:focus-visible {
 
 #play {
   background: var(--gold);
-  color: #151b29;
+  color: #17140e;
   border-color: var(--gold);
   font-weight: 650;
   min-width: 51px;
@@ -312,7 +319,7 @@ label,#duration,#transport-status {
 
 #exact-time {
   width: 80px;
-  background: #101625;
+  background: #121210;
   color: var(--ink);
   border: 1px solid var(--line);
   border-radius: 4px;
@@ -342,7 +349,7 @@ label,#duration,#transport-status {
   width: min(330px,70vw);
   max-height: 35vh;
   overflow: auto;
-  background: #182135;
+  background: #1c1b18;
   border: 1px solid var(--line);
   border-radius: 5px;
   padding: 10px 12px 10px 25px;
@@ -422,7 +429,7 @@ label,#duration,#transport-status {
 /* Preserve the titles, values and time axis when four measurements share a short stage. */
 @container (max-height:650px) {
   #panels:has(.readout:nth-child(4)) {
-    gap: 4px;
+    gap: 0;
   }
   #panels:has(.readout:nth-child(4)) .readout {
     padding: 5px 8px;
@@ -456,3 +463,5 @@ label,#duration,#transport-status {
     bottom: 12%;
   }
 }
+
+#roadmap-return { color: #edcb8a; pointer-events: auto; margin-right: 1em; }

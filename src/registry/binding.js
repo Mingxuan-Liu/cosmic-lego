@@ -1,3 +1,4 @@
+import { cacheByRevision } from '../core/project.js';
 import { Project, validateProject } from '../core/index.js';
 import { copyData, isRecord } from '../core/data.js';
 import { createDataflow, checkPort, unit, value } from '../dataflow/index.js';
@@ -88,22 +89,23 @@ export function bindRegistry(records, capabilities, registryLimits, limits = {},
       outputs: node => resolvePorts(record.manifest, node).outputs,
       validate: node => validateRecord(record, node),
       evaluate: argument => {
-        if (execute) return invoke(data => execute(Object.freeze({ ...data, manifest: record.manifest, implementation: record.implementation })), argument);
+        // F02 already passes detached frozen inputs and checks/copies this return.
+        if (execute) return execute(Object.freeze({ ...argument, manifest: record.manifest, implementation: record.implementation }));
         requireThat(record.manifest.runtime.paths.includes('analytic'), 'RUNTIME_REQUIRED', `${record.manifest.id} needs a stateful runtime; synchronous registry evaluation does not advance state.`);
-        return invoke(record.implementation.evaluate, argument);
+        return record.implementation.evaluate(argument);
       },
     };
   }
   const flow = createDataflow({ models, limits });
   const requirements = graph => inspectRequirements(graph, records, capabilities);
-  const inspect = input => {
+  const inspect = (input, project) => {
     try {
       const graph = copyData(input);
       const core = validateProject(graph);
       if (!core.valid) return core;
       const required = requirements(graph);
       if (!required.valid) return { valid: false, errors: required.errors };
-      const described = flow.describe(graph);
+      const described = flow.describe(project ?? graph);
       if (!described.valid) return { valid: false, errors: described.errors };
       const errors = [];
       for (const node of graph.nodes) {
@@ -114,6 +116,93 @@ export function bindRegistry(records, capabilities, registryLimits, limits = {},
       return { valid: !errors.length, errors };
     } catch (error) { return { valid: false, errors: [issue(error)] }; }
   };
+  const accepted = cacheByRevision(project => {
+    const graph = project.snapshot();
+    const checked = inspect(graph, project);
+    return { graph, checked, ports: new Map(), outputs: checked.valid ? flow.describe(project).outputs : {} };
+  });
+  function prepareProduction(options) {
+    keys(options, ['time', 'results'], 'artifact request');
+    const requestedTime = copyData(options.time ?? { value: 0, unit: 's' });
+    keys(requestedTime, ['value', 'unit'], 'request.time');
+    const timeUnit = unit(requestedTime.unit);
+    requireThat(Number.isFinite(requestedTime.value) && Number.isFinite(requestedTime.value * timeUnit.scale) && JSON.stringify(timeUnit.dimensions) === JSON.stringify(unit('s').dimensions), 'INVALID_TIME', 'Artifact inputs need a finite physical time.');
+    const request = { time: { value: requestedTime.value, unit: timeUnit } };
+    const supplied = options.results === undefined ? null : new Map();
+    if (options.results !== undefined) {
+      requireThat(Array.isArray(options.results), 'RESULT_REQUIRED', 'Supplied scientific results must be an array.');
+      for (const entry of copyData(options.results)) {
+        requireThat(isRecord(entry.producer) && typeof entry.producer.nodeId === 'string' && typeof entry.producer.port === 'string', 'RESULT_REQUIRED', 'Each result needs its producing node and port.');
+        const key = JSON.stringify([entry.producer.nodeId, entry.producer.port]);
+        requireThat(!supplied.has(key), 'RESULT_REQUIRED', 'Duplicate scientific result for one node/port.');
+        supplied.set(key, entry);
+      }
+    }
+    return { request, supplied };
+  }
+  function produceOne(project, id, options, frame) {
+    requireThat(project instanceof Project, 'PROJECT_REQUIRED', 'Use an accepted F01 Project.');
+    const identity = project.token, { graph, checked, outputs, ports } = accepted(project);
+    const node = graph.nodes.find(item => item.id === id);
+    const result = { identity, producer: { nodeId: id, implementation: copyData(records.get(node?.type)?.manifest.implementation ?? null) }, valid: false, artifact: null, diagnostics: [] };
+    try {
+      const { request, supplied } = frame ?? prepareProduction(options);
+      if (!checked.valid) { result.diagnostics = copyData(checked.errors); return result; }
+      requireThat(tokenEqual(identity, project.token) && (!frame || tokenEqual(frame.identity, identity)), 'STALE_RESULT', 'Project changed during artifact validation.');
+      requireThat(node, 'UNKNOWN_ID', `Unknown artifact node ${id}.`);
+      const memo = new Map();
+      let totalEntries = 0;
+      const create = current => {
+        if (memo.has(current.id)) return memo.get(current.id);
+        const record = records.get(current.type);
+        requireThat(record?.manifest.artifact, 'ARTIFACT_REQUIRED', `${current.id} is not an artifact/view extension.`);
+        const inputs = Object.create(null), assets = Object.create(null);
+        if (!ports.has(current.id)) ports.set(current.id, resolvePorts(record.manifest, current).inputs);
+        const expected = ports.get(current.id);
+        for (const [slot, declaration] of Object.entries(current.data.inputs)) {
+          const sourceId = current.references[`input.${slot}`];
+          let evaluated = !supplied
+            ? flow.evaluate(project, sourceId, { ...request, port: declaration.port })
+            : supplied.get(JSON.stringify([sourceId, declaration.port]));
+          requireThat(evaluated, 'RESULT_REQUIRED', `A checked snapshot for ${sourceId}.${declaration.port} is required; visual production does not recompute missing snapshots.`);
+          if (!supplied && evaluated.valid !== true) {
+            const error = evaluated.diagnostics.find(item => item.severity !== 'warning') ?? evaluated.diagnostics[0];
+            reject(error.code, error.message, error.path);
+          }
+          requireThat(tokenEqual(identity, project.token) && (supplied || tokenEqual(identity, evaluated.identity)), 'STALE_RESULT', 'Artifact input belongs to a different project snapshot.');
+          if (supplied) {
+            const source = graph.nodes.find(item => item.id === sourceId);
+            const installed = records.get(source.type)?.manifest.implementation ?? { id: 'cosmic-lego.dataflow', version: '1' };
+            const sourceDescription = outputs[sourceId]?.[declaration.port];
+            requireThat(sourceDescription, 'OUTPUT_PORT', 'A supplied result must name an installed scientific output.');
+            evaluated = validateSuppliedResult(evaluated, { identity, nodeId: sourceId, port: declaration.port,
+              implementation: installed, descriptor: sourceDescription, time: request.time });
+          }
+          const normalizedValue = value(evaluated.value);
+          const errors = checkPort(normalizedValue, expected[slot]);
+          if (errors.length) reject(errors[0].code, errors[0].message, errors[0].path);
+          result.diagnostics.push(...evaluated.diagnostics);
+          inputs[slot] = normalizedValue;
+        }
+        for (const slot of Object.keys(record.manifest.assets ?? {})) {
+          assets[slot] = create(graph.nodes.find(item => item.id === current.references[`asset.${slot}`]));
+        }
+        const data = invoke(record.implementation.create, { node: current, inputs, assets, request });
+        const size = artifactSize(data);
+        totalEntries += size;
+        requireThat(totalEntries <= registryLimits.maxArtifactEntries, 'ARTIFACT_BUDGET', `Artifacts exceed ${registryLimits.maxArtifactEntries} entries/string characters.`);
+        const errors = validateData(record.manifest.artifact.schema, data, `${current.id}.artifact`);
+        if (errors.length) reject('ARTIFACT_SCHEMA', errors[0].message, errors[0].path);
+        const artifact = { kind: record.manifest.artifact.kind, format: record.manifest.artifact.format, data, provenance: copyData(record.manifest.artifact.provenance) };
+        memo.set(current.id, artifact);
+        return artifact;
+      };
+      result.artifact = create(node);
+      requireThat(tokenEqual(identity, project.token), 'STALE_RESULT', 'Project changed during artifact production.');
+      result.valid = true;
+    } catch (error) { result.artifact = null; result.diagnostics.push(issue(error, id)); }
+    return result;
+  }
   const binding = {
     flow,
     // Executable handles are available only to the trusted composition root and
@@ -124,7 +213,7 @@ export function bindRegistry(records, capabilities, registryLimits, limits = {},
       .map(record => Object.freeze({ manifest: record.manifest, implementation: record.implementation }))),
     validators: Object.freeze({ structure: Object.freeze([graph => inspect(graph).errors]) }),
     requirements,
-    inspect,
+    inspect: graph => inspect(graph),
     author(draft) {
       return Object.freeze({ ...flow.author(draft), instantiate(id, options = {}) {
         keys(options, ['id', 'parameters', 'inputs', 'assets'], 'instance options');
@@ -141,91 +230,21 @@ export function bindRegistry(records, capabilities, registryLimits, limits = {},
     evaluate(project, id, request = {}) {
       requireThat(project instanceof Project, 'PROJECT_REQUIRED', 'Use an accepted F01 Project.');
       const identity = project.token;
-      const checked = inspect(project.snapshot());
+      const { checked } = accepted(project);
       if (!checked.valid || !tokenEqual(identity, project.token)) return {
         identity, producer: { nodeId: id, port: request.port ?? 'value', implementation: null }, request: copyData(request),
-        value: null, valid: false, diagnostics: checked.valid ? [diagnostic('STALE_RESULT', 'Project changed during validation.')] : checked.errors,
+        value: null, valid: false, diagnostics: checked.valid ? [diagnostic('STALE_RESULT', 'Project changed during validation.')] : copyData(checked.errors),
         metadata: { approximation: [], sampling: {}, implementations: [], work: 0 },
       };
       return flow.evaluate(project, id, request);
     },
-    produce(project, id, options = {}) {
+    produce(project, id, options = {}) { return produceOne(project, id, options); },
+    // Capture and index supplied snapshots once per visual frame. Each root
+    // retains its own artifact budget, identity check and detached output.
+    prepareProduction(project, options = {}) {
       requireThat(project instanceof Project, 'PROJECT_REQUIRED', 'Use an accepted F01 Project.');
-      const identity = project.token, graph = project.snapshot();
-      const node = graph.nodes.find(item => item.id === id);
-      const result = { identity, producer: { nodeId: id, implementation: copyData(records.get(node?.type)?.manifest.implementation ?? null) }, valid: false, artifact: null, diagnostics: [] };
-      try {
-        keys(options, ['time', 'results'], 'artifact request');
-        const requestedTime = copyData(options.time ?? { value: 0, unit: 's' });
-        keys(requestedTime, ['value', 'unit'], 'request.time');
-        const timeUnit = unit(requestedTime.unit);
-        requireThat(Number.isFinite(requestedTime.value) && Number.isFinite(requestedTime.value * timeUnit.scale) && JSON.stringify(timeUnit.dimensions) === JSON.stringify(unit('s').dimensions), 'INVALID_TIME', 'Artifact inputs need a finite physical time.');
-        const request = { time: { value: requestedTime.value, unit: timeUnit } };
-        const checked = inspect(graph);
-        if (!checked.valid) { result.diagnostics = checked.errors; return result; }
-        requireThat(tokenEqual(identity, project.token), 'STALE_RESULT', 'Project changed during artifact validation.');
-        requireThat(node, 'UNKNOWN_ID', `Unknown artifact node ${id}.`);
-        const supplied = new Map();
-        if (options.results !== undefined) {
-          requireThat(Array.isArray(options.results), 'RESULT_REQUIRED', 'Supplied scientific results must be an array.');
-          for (const entry of copyData(options.results)) {
-            requireThat(isRecord(entry.producer) && typeof entry.producer.nodeId === 'string' && typeof entry.producer.port === 'string', 'RESULT_REQUIRED', 'Each result needs its producing node and port.');
-            const key = JSON.stringify([entry.producer.nodeId, entry.producer.port]);
-            requireThat(!supplied.has(key), 'RESULT_REQUIRED', 'Duplicate scientific result for one node/port.');
-            supplied.set(key, entry);
-          }
-        }
-        const memo = new Map();
-        let totalEntries = 0;
-        const create = current => {
-          if (memo.has(current.id)) return memo.get(current.id);
-          const record = records.get(current.type);
-          requireThat(record?.manifest.artifact, 'ARTIFACT_REQUIRED', `${current.id} is not an artifact/view extension.`);
-          const inputs = Object.create(null), assets = Object.create(null);
-          const expected = resolvePorts(record.manifest, current).inputs;
-          for (const [slot, declaration] of Object.entries(current.data.inputs)) {
-            const sourceId = current.references[`input.${slot}`];
-            let evaluated = options.results === undefined
-              ? flow.evaluate(project, sourceId, { ...request, port: declaration.port })
-              : supplied.get(JSON.stringify([sourceId, declaration.port]));
-            requireThat(evaluated, 'RESULT_REQUIRED', `A checked snapshot for ${sourceId}.${declaration.port} is required; visual production does not recompute missing snapshots.`);
-            if (options.results === undefined && evaluated.valid !== true) {
-              const error = evaluated.diagnostics.find(item => item.severity !== 'warning') ?? evaluated.diagnostics[0];
-              reject(error.code, error.message, error.path);
-            }
-            requireThat(tokenEqual(identity, project.token) && (options.results !== undefined || tokenEqual(identity, evaluated.identity)), 'STALE_RESULT', 'Artifact input belongs to a different project snapshot.');
-            if (options.results !== undefined) {
-              const source = graph.nodes.find(item => item.id === sourceId);
-              const installed = records.get(source.type)?.manifest.implementation ?? { id: 'cosmic-lego.dataflow', version: '1' };
-              const sourceDescription = flow.describe(graph).outputs[sourceId]?.[declaration.port];
-              requireThat(sourceDescription, 'OUTPUT_PORT', 'A supplied result must name an installed scientific output.');
-              evaluated = validateSuppliedResult(evaluated, { identity, nodeId: sourceId, port: declaration.port,
-                implementation: installed, descriptor: sourceDescription, time: request.time });
-            }
-            const normalizedValue = value(evaluated.value);
-            const errors = checkPort(normalizedValue, expected[slot]);
-            if (errors.length) reject(errors[0].code, errors[0].message, errors[0].path);
-            result.diagnostics.push(...evaluated.diagnostics);
-            inputs[slot] = normalizedValue;
-          }
-          for (const slot of Object.keys(record.manifest.assets ?? {})) {
-            assets[slot] = create(graph.nodes.find(item => item.id === current.references[`asset.${slot}`]));
-          }
-          const data = invoke(record.implementation.create, { node: current, inputs, assets, request });
-          const size = artifactSize(data);
-          totalEntries += size;
-          requireThat(totalEntries <= registryLimits.maxArtifactEntries, 'ARTIFACT_BUDGET', `Artifacts exceed ${registryLimits.maxArtifactEntries} entries/string characters.`);
-          const errors = validateData(record.manifest.artifact.schema, data, `${current.id}.artifact`);
-          if (errors.length) reject('ARTIFACT_SCHEMA', errors[0].message, errors[0].path);
-          const artifact = { kind: record.manifest.artifact.kind, format: record.manifest.artifact.format, data, provenance: copyData(record.manifest.artifact.provenance) };
-          memo.set(current.id, artifact);
-          return artifact;
-        };
-        result.artifact = create(node);
-        requireThat(tokenEqual(identity, project.token), 'STALE_RESULT', 'Project changed during artifact production.');
-        result.valid = true;
-      } catch (error) { result.artifact = null; result.diagnostics.push(issue(error, id)); }
-      return result;
+      const frame = { identity: project.token, ...prepareProduction(options) };
+      return id => produceOne(project, id, undefined, frame);
     },
   };
   return Object.freeze(binding);

@@ -4,11 +4,12 @@ import { cpSync, existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, wr
 import { dirname, resolve, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
+import { Worker } from 'node:worker_threads';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import { Project } from '../src/core/index.js';
 import { value } from '../src/dataflow/index.js';
-import { createRuntime } from '../src/runtime/index.js';
+import { createRuntime, RUNTIME_LIMITS } from '../src/runtime/index.js';
 import { createRegistry } from './fixtures/runtime-host.mjs';
 
 const registryModule = new URL('./fixtures/runtime-host.mjs', import.meta.url);
@@ -496,4 +497,54 @@ test('runtime static imports stay shared and the sole dynamic import uses explic
     assert.doesNotMatch(source, /\b(?:require\s*\(|eval\s*\(|new\s+Function\s*\()/);
   }
   for (const name of ['index.js', 'worker.js', 'engine.js']) inspect(resolve(sourceRoot, 'runtime', name));
+});
+
+test('fixed-grid analytic results survive display seeks but invalidate on edit, Undo, load and project switch', async () => {
+  const { binding, project } = deterministic();
+  const edit = project.begin();
+  binding.author(edit).sample('accumulator', { times: [0, 1, 2], unit: 's' }, { id: 'history' });
+  edit.accept();
+  const runtime = createRuntime({ registryModule });
+  const read = async (p, t) => valid(await runtime.submit(p, 'history', { time: time(t) }).promise, p);
+  try {
+    const first = await read(project, 5), warm = await read(project, -10);
+    assert.ok(first.metadata.work > 0);
+    assert.equal(warm.metadata.work, 0);
+    assert.deepEqual(warm.value, first.value);
+    assert.equal(warm.request.time.value, -10);
+    assert.equal(warm.metadata.runtime.achievedTime.value, -10);
+    assert.notEqual(first.metadata.runtime.jobId, warm.metadata.runtime.jobId);
+    const revised = project.begin();
+    revised.get('rate').set({ data: { value: rateValue(5) } }); revised.accept();
+    const edited = await read(project, 5);
+    assert.ok(edited.metadata.work > 0);
+    assert.deepEqual(edited.value.data, [1, 6, 11]);
+    project.undo(project.token);
+    assert.ok((await read(project, 5)).metadata.work > 0);
+    project.load(project.snapshot(), project.token);
+    assert.ok((await read(project, 5)).metadata.work > 0);
+    const other = Project.from(project.snapshot(), { validators: binding.validators });
+    assert.ok((await read(other, 5)).metadata.work > 0);
+  } finally { await runtime.dispose(); }
+});
+
+test('an already-running companion can still launch the previous one-shot worker protocol', { timeout: 5000 }, async () => {
+  const { project } = deterministic();
+  const worker = new Worker(new URL('../src/runtime/worker.js', import.meta.url), {
+    execArgv: [], workerData: { graph: project.snapshot(), identity: project.token, registryModule: registryModule.href,
+      nodeId: 'accumulator', request: { port: 'value', time: time(2), mode: 'analytic', settings: {} }, cached: [], limits: RUNTIME_LIMITS },
+  });
+  try {
+    const messages = [];
+    await new Promise((resolve, reject) => {
+      worker.on('message', message => messages.push(message));
+      worker.once('error', reject);
+      worker.once('exit', code => code === 0 ? resolve() : reject(new Error('Worker exited with ' + code)));
+    });
+    const results = messages.filter(message => message.kind === 'result');
+    assert.equal(results.length, 1);
+    assert.equal(results[0].result.valid, true, JSON.stringify(results[0].result.diagnostics));
+    assert.deepEqual(results[0].result.identity, project.token);
+    assert.equal(results[0].result.value.data, 5);
+  } finally { await worker.terminate(); }
 });

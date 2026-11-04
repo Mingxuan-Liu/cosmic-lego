@@ -351,17 +351,17 @@ export function createThreeSceneResources({ limits: options, createCanvas } = {}
 }
 
 /** A WebGL2 browser renderer. Coordinates passed to pick are canvas-local CSS pixels. */
-export function createThreeAdapter({ canvas, onSelect = () => {}, onCameraChange = () => {}, onDiagnostic = () => {}, limits: options, reducedMotion = false } = {}) {
+export function createThreeAdapter({ canvas, onSelect = () => {}, onCameraChange = () => {}, onDiagnostic = () => {}, limits: options, reducedMotion = false, fitShortAxis = false } = {}) {
   const limits = checkedLimits(options);
   ensure(canvas?.addEventListener && canvas?.getBoundingClientRect, 'A browser canvas is required.');
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false }); }
   catch (error) { const issue = { code: 'RENDERER_UNAVAILABLE', path: '', message: `WebGL2 initialization failed: ${error.message}` }; onDiagnostic(issue); throw Object.assign(new Error(issue.message), issue); }
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.setClearColor('#101423');
+  renderer.setClearColor('#050505');
   const resources = createThreeSceneResources({ limits, createCanvas: () => canvas.ownerDocument.createElement('canvas') });
   const scene = new THREE.Scene();
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x30364f, 2));
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x363636, 2));
   const keyLight = new THREE.DirectionalLight(0xffffff, 2.5); keyLight.position.set(4, 8, 6); scene.add(keyLight);
   const raycaster = new THREE.Raycaster(); raycaster.params.Line.threshold = 0.08;
   let activeCamera = null, cameraId = null, controls = null, selection = null;
@@ -370,7 +370,7 @@ export function createThreeAdapter({ canvas, onSelect = () => {}, onCameraChange
   const emitCamera = () => onCameraChange(getCameraState());
   function projection(camera) {
     if (camera.isPerspectiveCamera) camera.aspect = width / height;
-    else { const half = camera.userData.span / 2; camera.left = -half * width / height; camera.right = half * width / height; camera.top = half; camera.bottom = -half; }
+    else { const half = camera.userData.span / (2 * (fitShortAxis ? Math.min(1, width / height) : 1)); camera.left = -half * width / height; camera.right = half * width / height; camera.top = half; camera.bottom = -half; }
     camera.updateProjectionMatrix();
   }
   function getCameraState() {
@@ -465,12 +465,9 @@ export function createThreeAdapter({ canvas, onSelect = () => {}, onCameraChange
           serial(prior.nodes.get(oldCamera.id)?.userData.spec) === serial(staged.nodes.get(oldCamera.id)?.userData.spec) &&
           prior.cameras.get(oldCamera.id)?.matrixWorld.equals(staged.cameras.get(oldCamera.id)?.matrixWorld);
         scene.remove(prior?.root); staged.commit(); scene.add(staged.root);
-        setCamera(staged.cameras.has(cameraId) ? cameraId : staged.cameras.keys().next().value);
-        if (keepCamera) {
-          activeCamera.position.fromArray(oldCamera.position); activeCamera.zoom = oldCamera.zoom;
-          if (oldCamera.span != null) activeCamera.userData.span = oldCamera.span;
-          controls.target.fromArray(oldCamera.target); projection(activeCamera); controls.update();
-        }
+        // Navigation belongs to the viewer. Replacing controls on an ordinary
+        // timestep also discards an orbit or pinch gesture in progress.
+        if (!keepCamera) setCamera(staged.cameras.has(cameraId) ? cameraId : staged.cameras.keys().next().value);
         if (selection) select(prior && namespace(prior.identity) === namespace(staged.identity) ? selection : null);
         else refreshSelection();
         return { valid: true, diagnostics: [] };
@@ -499,7 +496,7 @@ export function createThreeAdapter({ canvas, onSelect = () => {}, onCameraChange
         const angle = Math.atan(Math.tan(THREE.MathUtils.degToRad(activeCamera.fov / 2)) * Math.min(1, width / height));
         activeCamera.position.copy(center).addScaledVector(direction, radius * 1.2 / Math.sin(angle));
       } else {
-        activeCamera.userData.span = 2.4 * radius / Math.min(1, width / height); activeCamera.zoom = 1;
+        activeCamera.userData.span = 2.4 * radius / (fitShortAxis ? 1 : Math.min(1, width / height)); activeCamera.zoom = 1;
         activeCamera.position.copy(center).addScaledVector(direction, radius * 3);
       }
       controls.target.copy(center); projection(activeCamera); controls.update(); emitCamera(); return true;

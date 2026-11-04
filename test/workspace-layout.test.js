@@ -235,3 +235,20 @@ test('multiple manager instances use unique accessible labels in one document', 
   assert.notEqual(find(container, 'workspace-panel').getAttribute('aria-labelledby'), parts(context).panel.getAttribute('aria-labelledby'));
   other.dispose(); context.manager.dispose();
 });
+
+test('a docked workspace fixes each view to its instrument or inspection rail without persisting navigation gestures', () => {
+  const { document, container } = harness();
+  const left = document.createElement('aside'), right = document.createElement('aside'); container.append(left, right);
+  const changes = [];
+  const docked = createOverlayManager({ container, rails: { left, right }, onChange: (id, patch) => changes.push({ id, patch }) });
+  docked.render([overlay('chat'), overlay('curve', { kind: 'plot' })]);
+  const panel = find(left, 'workspace-panel'), header = find(panel, 'workspace-panel-header');
+  assert.equal(panel.dataset.overlayId, 'curve'); assert.equal(find(right, 'workspace-panel').dataset.overlayId, 'chat');
+  assert.equal(find(container, 'workspace-panel-resize'), null);
+  header.emit('pointerdown'); header.emit('pointermove', { clientX: 120 }); header.emit('pointerup');
+  header.emit('keydown', { key: 'ArrowRight' }); assert.deepEqual(changes, []);
+  assert.equal(panel.style.left, undefined);
+  find(panel, 'workspace-panel-fold').emit('click');
+  assert.deepEqual(changes, [{ id: 'curve', patch: { folded: true } }]);
+  docked.dispose();
+});

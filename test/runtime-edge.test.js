@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Project } from '../src/core/index.js';
 import { value } from '../src/dataflow/index.js';
 import { ExtensionRegistry } from '../src/registry/index.js';
-import { runComputation } from '../src/runtime/engine.js';
+import { prepareComputation, runComputation } from '../src/runtime/engine.js';
 import { limitsOf } from '../src/runtime/contracts.js';
 
 const object = (properties = {}, required = Object.keys(properties)) => ({ type: 'object', properties, required, additionalProperties: false });
@@ -110,4 +110,33 @@ test('a job needs numerical settings only for its requested dependency closure',
   const unknown = compute(registry, project, 'requested', { settings: { missing: {} } });
   assert.equal(unknown.valid, false);
   assert.ok(unknown.diagnostics.some(error => error.code === 'RUNTIME_SETTINGS'));
+});
+
+test('bounded analytic caches respect sample units, numerical settings, eviction, and detached results', () => {
+  const settings = object({ factor: { type: 'number', default: 1 } });
+  const calls = [];
+  const registry = new ExtensionRegistry().register({
+    manifest: manifest('edge.scaled-clock', {}, { value: scalarPort }, 'analytic', settings),
+    implementation: { evaluate({ request, settings }) {
+      calls.push(request.time.unit.symbol);
+      return { value: number(request.time.value * request.time.unit.scale * settings.factor, request.time) };
+    } },
+  });
+  const binding = registry.bind(), project = new Project({ validators: binding.validators }), draft = project.begin();
+  const author = binding.author(draft), clock = author.instantiate('edge.scaled-clock', { id: 'clock' });
+  author.sample(clock, { times: [0, 60], unit: 's' }, { id: 'sec' });
+  author.sample(clock, { times: [0, 1], unit: 'min' }, { id: 'min' }); draft.accept();
+  const limits = limitsOf({ maxSnapshots: 1 }), plan = prepareComputation(registry, project.snapshot(), limits);
+  const read = (nodeId, time, factor) => {
+    const r = runComputation({ plan, nodeId, identity: project.token, limits, cached: [], progress() {},
+      request: { port: 'value', time: { value: time, unit: 's' }, mode: 'auto', settings: { clock: { factor } } } });
+    assert.equal(r.valid, true, JSON.stringify(r.diagnostics)); return r;
+  };
+  const first = read('sec', 3, 2); first.value.data[1] = -5;
+  assert.deepEqual(read('sec', -3, 2).value.data, [0, 120]);
+  assert.deepEqual(calls, ['s', 's']);
+  assert.deepEqual(read('sec', -3, 3).value.data, [0, 180]);
+  assert.deepEqual(read('min', 0, 3).value.data, [0, 180]);
+  assert.ok(read('sec', 1, 3).metadata.work > 0, 'The one permitted cache slot cannot retain both curves.');
+  assert.deepEqual(calls, ['s', 's', 's', 's', 'min', 'min', 's', 's']);
 });

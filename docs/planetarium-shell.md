@@ -1,9 +1,9 @@
 # Planetarium workspace
 
-F06 puts the F05 scene on the main stage and adds movable, foldable inspector,
-plot, provenance, and conversation overlays. These views use the accepted F01
-project and current F04 scientific results. The initial windows are examples;
-public handles and checked local operations can create additional views.
+The workspace puts the navigable simulation on a near-black, full-window canvas.
+Scientific instruments and plots float on the left. Inspection, provenance and
+conversation share the right. The HUD presents the accepted F01 project and its
+current F04 scientific results. Public handles can create additional views.
 
 The [workspace recipe](../examples/workspace.mjs) uses generic moving points and
 static scalar/vector fields. No astronomy package is loaded. F01–F10 are
@@ -32,19 +32,23 @@ object or plot sample to select its stable ID. Fit and Reset recover camera view
 Changing the presentation camera does not change physical observer geometry or
 scientific values.
 
-Drag a window header to move it and its corner handle to resize it. Fold keeps
-the header; Hide removes the window from pointer and keyboard interaction. The
-Views menu restores hidden windows and can create another independently bound
-plot from an installed scientific output. Remove is a graph edit with Undo;
-hide/fold/layout edits also use accepted transactions.
+The **Instruments** and **Inspection** buttons independently open or close their
+sides on desktop. At viewport widths up to 760 pixels both drawers initially
+close, and opening one closes the other. The canvas keeps the same dimensions.
+Fold a panel to retain its title or hide it and restore it through **Views**.
+The Views menu can also create another bound plot. Fold, hide, removal and
+restoration are project edits with Undo. Opening a rail is local to the viewer.
 
-Scene only temporarily hides all windows while retaining their layout, folds,
-visibility flags, and composer drafts. Its always-visible button restores the
-workspace. `V` toggles this mode, `F` fits the scene, and Escape restores or returns
-focus to the stage. Shortcuts do not consume ordinary text entry. On a focused
-window header, arrow keys move by 10 pixels, Alt selects 1-pixel increments, and
-Shift+arrows resizes. The resize handle also accepts arrow keys. Display geometry
-is clamped to the viewport, and reduced-motion preferences disable camera damping.
+**Scene only** temporarily hides both sides and retains folds, visibility and
+composer drafts. Press **V** to toggle it, **F** to fit the scene, or **Escape**
+to close a menu or return focus to the stage. Tab reaches the rail and panel
+controls. In portrait the workspace's orthographic camera maintains the authored
+span on the shorter axis. Timeline captures retain their authored camera framing.
+
+During playback the clock and measurements advance together when a scientific
+sample arrives. Analytic playback samples the elapsed clock with at most one
+playback read in flight per tab. Stateful playback retains its requested steps.
+See the [timing experiments](workspace-performance.md) for the measured presets.
 
 ## Author views through the project
 
@@ -93,7 +97,7 @@ The author methods are:
 | `remove(overlay, {cascade?})` | Remove the overlay and its source relationship through F01 operations. |
 
 Options include `id`, `title`, `x`, `y`, `width`, `height`, `folded`, and `hidden`.
-Plots additionally have `component`: `-1` means all vector components; `0`, `1`,
+Portable files retain the historical rectangle fields. The shared HUD assigns each panel by purpose and lays it out at the current screen size. Plots additionally have `component`: `-1` means all vector components; `0`, `1`,
 and `2` select X, Y, and Z. Scalar sources accept `-1` or `0`.
 
 A plot binding is an ordinary F01 relationship of type `workspace.plot-source`:
@@ -222,8 +226,7 @@ draft, and cannot un-revoke a stopped local turn.
 
 Workspace defaults allow 16 overlays and 10,000 numeric/missing plot entries.
 Titles allow 160 characters. Authored layouts use nonnegative coordinates up to
-100,000, and widths/heights 1–2,000. The window manager uses 220×140 display minima
-when space allows, shrinking to smaller viewports so controls remain reachable.
+100,000, and widths/heights 1–2,000. The HUD scrolls each rail when its open panels exceed the available height.
 Existing scene/registry/runtime budgets still apply.
 Conversation state retains at most 200 messages/turn IDs and 24 composer drafts;
 message/draft text is limited to 12,000 characters. HTTP request bodies are

@@ -1,8 +1,8 @@
-import { Project, validateProject } from '../core/index.js';
+import { Project } from '../core/index.js';
 import { copyData } from '../core/data.js';
 import { value, instant, timeEqual, checkPort, convertValue, binaryValue, mapValue, reduceValue, fieldValue } from './values.js';
 import { TYPES, builtinImplementation, countValues, diagnostic, exactKeys, insist, invoke, issue, reject } from './contracts.js';
-import { analyze, descriptor, inputId, membersOf } from './graph.js';
+import { descriptor, inputId, membersOf } from './graph.js';
 
 const identical = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 export function producerOf(node, environment) {
@@ -33,14 +33,12 @@ function collect(node, graph, get, charge) {
   return value(base);
 }
 
-export function evaluate(project, nodeId, options, environment) {
+export function evaluate(project, nodeId, options, environment, prepare) {
   insist(project instanceof Project, 'PROJECT_REQUIRED', 'Evaluate an accepted F01 Project instance.');
   const identity = project.token;
-  const graph = project.snapshot();
-  const node = graph.nodes.find(item => item.id === nodeId);
   const port = options.port ?? 'value';
   const envelope = {
-    identity: copyData(identity), producer: { nodeId, port, implementation: copyData(producerOf(node, environment)) },
+    identity: copyData(identity), producer: { nodeId, port, implementation: null },
     request: null, value: null, valid: false, diagnostics: [],
     metadata: { approximation: [], sampling: { policy: 'declared-coordinates' }, implementations: [], work: 0 },
   };
@@ -51,10 +49,10 @@ export function evaluate(project, nodeId, options, environment) {
     exactKeys(timeInput, ['value', 'unit'], 'request.time');
     const request = { time: instant(timeInput) };
     envelope.request = request;
-    const structural = validateProject(graph);
-    if (!structural.valid) { envelope.diagnostics = structural.errors; return envelope; }
-    const inspected = analyze(graph, environment);
-    if (!inspected.valid) { envelope.diagnostics = inspected.errors; return envelope; }
+    const { graph, inspected } = prepare(project);
+    const node = inspected.nodes?.get(nodeId);
+    envelope.producer.implementation = copyData(producerOf(node, environment));
+    if (!inspected.valid) { envelope.diagnostics = copyData(inspected.errors); return envelope; }
     insist(node, 'UNKNOWN_ID', `Unknown producing node ${nodeId}.`);
     const used = new Map();
     let work = 0;
@@ -115,7 +113,7 @@ export function evaluate(project, nodeId, options, environment) {
           default: {
             const model = environment.models[current.type];
             insist(model, 'IMPLEMENTATION_MISSING', `No evaluator is installed for ${current.type}.`);
-            const requirements = model.inputs ? invoke(model.inputs, current) : {};
+            const requirements = inspected.inputPorts.get(id);
             for (const [slot, requirement] of Object.entries(requirements)) {
               const errors = checkPort(inputs[slot], requirement);
               if (errors.length) reject(errors[0].code, errors[0].message);

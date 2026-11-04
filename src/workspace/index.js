@@ -1,3 +1,5 @@
+import { cacheByRevision } from '../core/project.js';
+
 import { KernelError, Project, validateProject } from '../core/index.js';
 import { copyData, freezeData, isRecord, isId } from '../core/data.js';
 import { checkPort, unit } from '../dataflow/index.js';
@@ -73,6 +75,10 @@ export function createWorkspaceLayer(binding, { limits: inputLimits = {}, scene:
     return errors;
   }
   const validators = Object.freeze({ structure: Object.freeze([...scene.validators.structure, workspaceErrors]) });
+  const accepted = cacheByRevision(project => {
+    const graph = project.snapshot();
+    return { graph, validation: validateProject(graph, validators) };
+  });
   const layer = {
     limits: Object.freeze(limits), validators, scene,
     author(draft) {
@@ -157,7 +163,7 @@ export function createWorkspaceLayer(binding, { limits: inputLimits = {}, scene:
     },
     async compile(project, { results = [], time = { value: 0, unit: 's' }, capabilities } = {}) {
       insist(project instanceof Project, 'PROJECT_REQUIRED', 'Use an accepted F01 Project.');
-      const identity = project.token, graph = project.snapshot();
+      const identity = project.token, { graph, validation } = accepted(project);
       const output = { valid: false, identity, time: null, scene: { valid: false, identity, time: null, nodes: [], assets: [], bindings: [], diagnostics: [] }, overlays: [], diagnostics: [] };
       try {
         results = copyData(results); time = copyData(time);
@@ -166,8 +172,7 @@ export function createWorkspaceLayer(binding, { limits: inputLimits = {}, scene:
         const normalized = unit(time.unit);
         insist(Number.isFinite(time.value) && Number.isFinite(time.value * normalized.scale) && JSON.stringify(normalized.dimensions) === JSON.stringify(unit('s').dimensions), 'INVALID_TIME', 'Workspace samples need finite physical time.');
         output.time = { value: time.value, unit: normalized };
-        const checked = validateProject(graph, validators);
-        if (!checked.valid) { output.diagnostics.push(...checked.errors); return freezeData(copyData(output)); }
+        if (!validation.valid) { output.diagnostics.push(...validation.errors); return freezeData(copyData(output)); }
         const supplied = new Map();
         for (const result of results) {
           insist(isRecord(result) && isRecord(result.producer) && isId(result.producer.nodeId) && isId(result.producer.port), 'RESULT_REQUIRED', 'Snapshots must identify producing nodes and ports.');
@@ -178,8 +183,9 @@ export function createWorkspaceLayer(binding, { limits: inputLimits = {}, scene:
         output.scene = await scene.compile(project, { results, time: output.time, ...(capabilities === undefined ? {} : { capabilities }) });
         output.diagnostics.push(...output.scene.diagnostics);
         insist(output.scene.valid && sameIdentity(identity, project.token), output.scene.valid ? 'STALE_RESULT' : 'SCENE_FAILED', 'Scene compilation failed or the project changed.');
+        const produce = binding.prepareProduction(project, { results, time: output.time });
         for (const node of graph.nodes.filter(overlayKind)) {
-          const produced = binding.produce(project, node.id, { results, time: output.time });
+          const produced = produce(node.id);
           if (!produced.valid) {
             const error = produced.diagnostics.find(item => item.severity !== 'warning') ?? produced.diagnostics[0];
             fail(error.code, error.message, error.path);

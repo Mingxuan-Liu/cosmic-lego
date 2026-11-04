@@ -9,7 +9,7 @@ async function contentHash(data) {
 
 // Local finite geometry/material/RGBA data only. There is no URL, path, shader,
 // download, or source-code resolver on this data boundary.
-export async function resolveAssets(project, binding, graph, limits, { results, time }) {
+export async function resolveAssets(binding, graph, limits, { results, produce }) {
   const manifests = new Map(binding.visuals.map(record => [record.manifest.id, record.manifest]));
   const assetNodes = graph.nodes.filter(node => {
     const artifact = manifests.get(node.type)?.artifact;
@@ -25,7 +25,7 @@ export async function resolveAssets(project, binding, graph, limits, { results, 
     const dependencies = Object.entries(node.references).filter(([slot]) => slot.startsWith('asset.')).map(([, id]) => id);
     const childAssets = [];
     for (const child of dependencies) childAssets.push(await resolve(child));
-    const result = binding.produce(project, id, { results, time });
+    const result = produce(id);
     if (!result.valid) {
       const error = result.diagnostics.find(item => item.severity !== 'warning') ?? result.diagnostics[0];
       insist(false, error.code, error.message, error.path);

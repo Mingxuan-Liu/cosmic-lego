@@ -12,7 +12,7 @@ import { createCodexAdapter } from '../src/agent-session/codex.js';
 import { buildExample, registryModule } from '../examples/scene-and-assets.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.png': 'image/png' };
+const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.png': 'image/png' };
 const same = (a, b) => a && b && ['projectId', 'generation', 'revision'].every(key => a[key] === b[key]);
 const error = (code, message) => Object.assign(new Error(message), { code });
 function keys(data, fields) {
@@ -107,7 +107,7 @@ function legacyRequest(context, input, workspace) {
 // The local user endpoint owns a host-issued authority; it does not mint agent
 // sessions/turns from HTTP labels. Loopback guards are not an OS sandbox.
 export async function startSceneServer({ workspace = false, port = workspace ? 4326 : 4325, host = '127.0.0.1',
-  codexExecutable, agentWorkspace, agentAdapters = [], projectDirectory, composition } = {}) {
+  codexExecutable, agentWorkspace, agentAdapters = [], projectDirectory, composition, staticAliases = {}, studies = {} } = {}) {
   if (typeof workspace !== 'boolean' || host !== '127.0.0.1' || !Number.isInteger(port) || port < 0 || port > 65535) throw error('SERVER_CONFIG', 'Use a loopback host, boolean workspace mode and valid port.');
   const setup = composition ?? (workspace ? await import('../examples/workspace.mjs') : { buildExample, registryModule });
   const context = await setup.buildExample(), runtime = createRuntime({ registryModule: setup.registryModule });
@@ -115,6 +115,7 @@ export async function startSceneServer({ workspace = false, port = workspace ? 4
   if (projectDirectory !== undefined && (!workspace || typeof projectDirectory !== 'string' || !path.isAbsolute(projectDirectory))) throw error('SERVER_CONFIG', 'Choose an absolute project directory in workspace mode.');
   const directory = projectDirectory ?? path.join(root, '.local/projects');
   let portable, player, handleTimelineRequest;
+  const studyPlayers = new Map();
   const gateway = createCommandGateway({ ...context, runtime, getPlaybackDefaults: () => portable?.playback ?? {} });
   const prefix = workspace ? '/api/workspace' : '/api/scene';
   if (!Array.isArray(agentAdapters)) throw error('SERVER_CONFIG', 'Agent adapters are trusted host declarations.');
@@ -145,6 +146,12 @@ export async function startSceneServer({ workspace = false, port = workspace ? 4
     const timelineHttp = await import('./timeline-http.mjs');
     handleTimelineRequest = timelineHttp.handleTimelineRequest;
     player = timelineHttp.createTimelineService({ ...context, registryModule: setup.registryModule, getSource: () => portable.timelineSource() });
+    // These read-only studies use trusted recipes and their own timeline evaluators.
+    // The editing workspace may contain a completely different project.
+    for (const [slug, buildManifest] of Object.entries(studies)) {
+      const source = { key: slug, manifest: buildManifest };
+      studyPlayers.set(slug, timelineHttp.createTimelineService({ ...context, registryModule: setup.registryModule, getSource: () => source }));
+    }
     const store = await createPortableStore({ directory });
     let source = context.source ?? null;
     if (!composition) {
@@ -171,6 +178,33 @@ export async function startSceneServer({ workspace = false, port = workspace ? 4
         ...(typeof item.path === 'string' ? { path: item.path.slice(0, 256) } : {}), ...(typeof item.severity === 'string' ? { severity: item.severity.slice(0, 32) } : {}) }));
     return outcome;
   }
+  // Keep interactive viewers on the one bounded worker. A fast slider can
+  // replace its pending sample without taking a second turn ahead of other tabs.
+  const waitingViews = new Map();
+  let servingView = false, closing = false;
+  async function drainViews() {
+    if (servingView) return;
+    servingView = true;
+    try {
+      while (waitingViews.size) {
+        const [id, task] = waitingViews.entries().next().value;
+        waitingViews.delete(id);
+        try { task.resolve(await task.run()); } catch (e) { task.reject(e); }
+      }
+    } finally { servingView = false; }
+  }
+  function scheduleView(id, run) {
+    if (!id) return run(); // Compatibility clients use latest-request-wins.
+    if (!/^[a-f0-9-]{36}$/i.test(id)) throw error('REQUEST', 'Use a valid browser view ID.');
+    if (closing) throw error('SUPERSEDED', 'The workspace is closing.');
+    const previous = waitingViews.get(id);
+    if (previous) previous.reject(error('SUPERSEDED', 'A newer sample from this view is queued.'));
+    else if (waitingViews.size >= 16) throw error('VIEW_BUSY', 'The local workspace has 16 waiting views. Retry shortly.');
+    return new Promise((resolve, reject) => {
+      waitingViews.set(id, { run, resolve, reject });
+      void drainViews();
+    });
+  }
   const server = http.createServer(async (request, response) => {
     const send = (status, value) => { response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); response.end(JSON.stringify(value)); };
     const isGatewayRoute = request.url?.split('?')[0].startsWith('/api/gateway');
@@ -186,6 +220,12 @@ export async function startSceneServer({ workspace = false, port = workspace ? 4
       if (request.headers.host !== expectedHost) return transportFailure(403, 'HOST', 'Use this server’s loopback address.', 'unauthorized');
       if (request.headers.origin && request.headers.origin !== `http://${expectedHost}`) return transportFailure(403, 'ORIGIN', 'Cross-origin requests are not supported.', 'unauthorized');
       const url = new URL(request.url, `http://${expectedHost}`);
+      const studyRoute = /^\/studies\/([a-z0-9-]+)\/(|api\/timeline(?:\/frame)?)$/.exec(url.pathname);
+      if (studyRoute && studyPlayers.has(studyRoute[1])) {
+        const playerUrl = new URL(url);
+        playerUrl.pathname = studyRoute[2] ? '/' + studyRoute[2] : '/timeline/';
+        if (await handleTimelineRequest(request, response, playerUrl, studyPlayers.get(studyRoute[1]))) return;
+      }
       if (workspace && await handleTimelineRequest(request, response, url, player)) return;
       if (isProjectRoute) {
         if (!portable) return transportFailure(404, 'NOT_FOUND', 'Project files belong to workspace mode.');
@@ -246,13 +286,20 @@ export async function startSceneServer({ workspace = false, port = workspace ? 4
         const input = await body(request);
         if (url.pathname.endsWith('/evaluate')) {
           keys(input, ['identity', 'time', 'capabilities']);
-          const sequence = ++evaluation;
-          const outcome = await dispatch({ command: 'render', expected: input.identity, args: {
-            ...(input.time === undefined ? {} : { time: input.time }), ...(input.capabilities === undefined ? {} : { capabilities: input.capabilities }) } });
-          if (!outcome.ok) return send(gatewayStatus(outcome), { ...outcome.error, identity: context.project.token, gateway: outcome });
-          const result = { identity: outcome.identity, time: outcome.result.snapshot.time, ...outcome.result };
-          if (sequence !== evaluation || !same(input.identity, context.project.token)) return send(409, { code: 'STALE_RESULT', message: 'A newer request or edit superseded this snapshot.' });
-          return send(200, result);
+          const render = async () => {
+            if (response.destroyed || closing) throw error('SUPERSEDED', 'This viewer closed.');
+            const sequence = ++evaluation;
+            const outcome = await dispatch({ command: 'render', expected: input.identity, args: {
+              ...(input.time === undefined ? {} : { time: input.time }), ...(input.capabilities === undefined ? {} : { capabilities: input.capabilities }) } });
+            if (!outcome.ok) return send(gatewayStatus(outcome), { ...outcome.error, identity: context.project.token, gateway: outcome });
+            if (sequence !== evaluation || !same(input.identity, context.project.token)) return send(409, { code: 'STALE_RESULT', message: 'A newer request or edit superseded this snapshot.' });
+            return send(200, { identity: outcome.identity, time: outcome.result.snapshot.time, ...outcome.result });
+          };
+          try { return await scheduleView(workspace && request.headers['x-workspace-view'], render); }
+          catch (e) {
+            if (e.code === 'SUPERSEDED' || e.code === 'VIEW_BUSY') return send(e.code === 'VIEW_BUSY' ? 429 : 409, { code: e.code, message: e.message });
+            throw e;
+          }
         }
         const outcome = await dispatch(legacyRequest(context, input, workspace));
         if (!outcome.ok) return send(gatewayStatus(outcome), { ...outcome.error, identity: context.project.token, gateway: outcome });
@@ -275,6 +322,7 @@ export async function startSceneServer({ workspace = false, port = workspace ? 4
           '/src/workspace/browser.js': 'src/workspace/browser.js', '/src/workspace/session.js': 'src/workspace/session.js',
           '/src/workspace/project-files.js': 'src/workspace/project-files.js',
         } : {}),
+        ...staticAliases,
       };
       if (!Object.hasOwn(aliases, url.pathname)) return transportFailure(404, 'NOT_FOUND', 'Unknown local resource.');
       const file = await realpath(path.join(root, aliases[url.pathname]));
@@ -292,7 +340,7 @@ export async function startSceneServer({ workspace = false, port = workspace ? 4
   });
   await new Promise((resolve, reject) => { server.once('error', reject); server.listen(port, host, resolve); });
   return { server, url: `http://${host}:${server.address().port}`, workspace, get project() { return context.project; }, context, gateway, agentSession, portable,
-    async close() { ++evaluation; portable?.dispose(); await player?.close(); unsubscribeAgent(); await agentSession.dispose(); await runtime.dispose(); await new Promise(resolve => { server.close(resolve); server.closeAllConnections(); }); } };
+    async close() { closing = true; ++evaluation; portable?.dispose(); await Promise.all([player?.close(), ...[...studyPlayers.values()].map(study => study.close())]); unsubscribeAgent(); await agentSession.dispose(); await runtime.dispose(); await new Promise(resolve => { server.close(resolve); server.closeAllConnections(); }); } };
 }
 export function parseSceneFlags(args) {
   const options = {};

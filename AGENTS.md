@@ -12,9 +12,16 @@ prompts for new architecture work; earlier numbered prompts are superseded.
   import domain packages. The composition root registers installed extensions.
   Prove the architecture with generic fixtures and no astronomy package loaded;
   migrate the existing exoplanet model only afterward.
-- Make the simulation the central, navigable stage. Information, plots, inspectors
-  and conversation float above it and can be moved, folded, hidden and restored.
-  Permanent dashboard columns are not the default layout.
+- User clarification, 2026-11-04: use a near-black planetarium stage with a
+  translucent, fixed-position HUD. Instruments and plots occupy the left rail.
+  Inspection, provenance and conversation occupy the right. Keep the canvas
+  full-size, allow fold/hide/restore, and show one drawer at a time on phones.
+- The opening astronomy roadmap belongs to the product. Give its domains and
+  phenomena short beginner-facing names, questions, and study status. Use
+  reference books for background. Size stars by how many other topics they
+  help explain, weighted by learning distance. Use dashed lines for shared
+  diagrams and dim nonmatching stars when students search. Open in the rotatable
+  3D cluster and keep the flat 2D overview and table aligned on the same topics.
 - Conversation with the user's compatible agent belongs inside the application.
   Keep the session bridge provider-independent and distinguish conversation
   protocols from checked construction tools. One real adapter is foundation work;

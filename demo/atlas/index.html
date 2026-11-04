@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en" data-projection="3d">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="application-name" content="Cosmic Lego roadmap">
+  <title>Astronomy roadmap · Cosmic Lego</title>
+  <link rel="icon" href="/assets/branding/cosmic-lego-galaxy.png">
+  <link rel="stylesheet" href="/atlas/style.css">
+</head>
+<body>
+  <a class="skip" href="#query">Skip to roadmap controls</a>
+  <header class="masthead">
+    <a class="brand" href="/" aria-label="Cosmic Lego home">
+      <img src="/assets/branding/cosmic-lego-galaxy.png" alt="" width="36" height="36">
+      <span>Cosmic Lego</span>
+    </a>
+    <nav aria-label="Application">
+      <span class="current-page" aria-current="page">Roadmap</span>
+      <a id="workspace-link" href="/workspace/">Open workspace <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+
+  <main class="atlas">
+    <header class="atlas-heading">
+      <div>
+        <div class="eyebrow guide-kicker"><i aria-hidden="true"></i> Learning map</div>
+        <h1>Explore astronomy</h1>
+        <p>Pick a star to explore a question, from why the Moon has phases to how stars shine.</p>
+      </div>
+      <details id="method" class="method">
+        <summary><span class="info-mark" aria-hidden="true">i</span> How to read the map</summary>
+        <div class="method-copy">
+          <h2>What can I explore?</h2>
+          <p>Each star is a topic or a phenomenon. Select one to see a question, read a short explanation, and open an interactive study where one is available.</p>
+          <h3>What makes a star large?</h3>
+          <p id="method-rank">Ideas that help explain more of the map have larger stars closer to the center. An idea gets more credit for topics that build directly on it than for topics several steps away.</p>
+          <h3>Where does a line lead?</h3>
+          <p id="method-edges">Follow a dashed line to see how the same diagram can help explain two topics. Select the line to compare them.</p>
+          <h3>Further reading</h3>
+          <a id="method-source" href="https://assets.cambridge.org/97811084/22161/toc/9781108422161_toc.pdf">Carroll &amp; Ostlie, <cite>An Introduction to Modern Astrophysics</cite> <span aria-hidden="true">↗</span></a>
+        </div>
+      </details>
+    </header>
+
+    <section class="atlas-controls" aria-label="Explore the roadmap">
+      <div class="view-switch" role="group" aria-label="Roadmap view">
+        <button type="button" id="graph-mode" aria-pressed="true" aria-controls="graph-panel"><span class="cluster-icon" aria-hidden="true"></span>3D cluster</button>
+        <button type="button" id="plan-mode" aria-pressed="false" aria-controls="graph-panel"><span class="plan-icon" aria-hidden="true"></span>2D overview</button>
+        <button type="button" id="table-mode" aria-pressed="false" aria-controls="table-panel"><span class="table-icon" aria-hidden="true"></span>Table</button>
+      </div>
+      <label class="query-field">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8" cy="8" r="5.3"></circle><path d="m12 12 4.5 4.5"></path></svg>
+        <span class="sr-only">Search topics, questions, and diagrams</span>
+        <input id="query" type="search" autocomplete="off" placeholder="Find a topic…" aria-describedby="search-hint">
+      </label>
+      <span class="sr-only" id="search-hint">Matching stars stay bright. Other stars fade so you can still see where they are.</span>
+      <div class="map-filters">
+        <label class="select-field"><span>Show</span>
+          <select id="level"><option value="domain">Topic groups</option><option value="phenomenon">Phenomena</option></select>
+        </label>
+        <label class="select-field field-filter"><span>Field</span>
+          <select id="category"><option value="">All fields</option></select>
+        </label>
+        <label class="select-field"><span>Study</span>
+          <select id="availability"><option value="">All topics</option><option value="available">Available now</option><option value="planned">Study planned</option></select>
+        </label>
+      </div>
+      <div class="scope" id="scope-chip" hidden><span id="scope-label">Within domain</span><button type="button" id="scope-clear" aria-label="Clear domain filter">×</button></div>
+    </section>
+
+    <div class="atlas-body" id="atlas-body">
+      <section class="chart-panel" id="graph-panel" aria-label="Interactive astronomy roadmap">
+        <div class="canvas-frame">
+          <canvas id="atlas-canvas" tabindex="0" aria-label="3D phenomenon cluster" aria-describedby="chart-gestures chart-keys">Browse the same topics using Table.</canvas>
+          <div class="chart-register" aria-hidden="true"><span class="for-flat">2D overview</span><span class="for-cluster">3D cluster</span></div>
+          <span class="register-cross" aria-hidden="true"></span>
+          <div id="graph-empty" class="empty-state" hidden>
+            <h2>No matching topics</h2><p>Try another word or reset your filters.</p>
+            <button type="button" id="clear-filters" data-clear-filters>Clear filters</button>
+          </div>
+        </div>
+        <div class="camera-bar">
+          <p class="chart-gestures" id="chart-gestures">
+            <span class="for-flat"><span class="mouse-hint">Drag to pan · Scroll to zoom</span><span class="touch-hint">Drag to pan · Pinch to zoom</span></span><span class="for-cluster"><span class="mouse-hint">Drag to orbit · Shift-drag to pan · Scroll to zoom</span><span class="touch-hint">Drag to orbit · Two fingers to pan · Pinch to zoom</span></span> · Select a star or line
+          </p>
+          <div class="orbit-controls for-cluster" role="group" aria-label="Orbit the cluster">
+            <span aria-hidden="true">Orbit</span>
+            <button id="orbit-left" type="button" aria-label="Orbit left" title="Orbit left">←</button>
+            <button id="orbit-right" type="button" aria-label="Orbit right" title="Orbit right">→</button>
+            <button id="orbit-up" type="button" aria-label="Orbit up" title="Orbit up">↑</button>
+            <button id="orbit-down" type="button" aria-label="Orbit down" title="Orbit down">↓</button>
+          </div>
+          <div class="zoom-controls" role="group" aria-label="Camera distance">
+            <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+            <output id="zoom-level" aria-label="Zoom level">100%</output>
+            <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+            <button id="fit" type="button" title="Reset this view">Fit</button>
+          </div>
+        </div>
+        <div class="chart-key">
+          <div id="legend" class="legend" aria-label="Science fields"></div>
+          <span class="diagram-key">Shared diagram</span>
+          <div class="rank-key"><span class="rank-stars" aria-hidden="true"><i></i><i></i><i></i></span><span>Larger stars help explain more topics</span></div>
+        </div>
+      </section>
+
+      <section id="table-panel" class="table-panel" aria-label="Roadmap table" hidden>
+        <div class="table-scroll" tabindex="0" aria-label="Scrollable topic table">
+          <table id="atlas-table" role="table"><caption class="sr-only">Astronomy domains and phenomena</caption><thead id="table-head"></thead><tbody id="table-body"></tbody></table>
+        </div>
+        <div id="table-empty" class="empty-state" hidden><h2>No matching topics</h2><p>Try another word or reset your filters.</p><button type="button" data-clear-filters>Clear filters</button></div>
+      </section>
+
+      <aside id="detail" class="detail" aria-labelledby="detail-title" hidden>
+        <div class="detail-top"><span class="eyebrow"><i aria-hidden="true"></i> Explore this idea</span><button type="button" id="detail-close" aria-label="Close topic details">×</button></div>
+        <p id="detail-type" class="detail-type"></p>
+        <h2 id="detail-title" tabindex="-1"></h2>
+        <p id="detail-summary"></p>
+        <div id="detail-meta"></div><div id="detail-links"></div>
+      </aside>
+    </div>
+    <footer class="atlas-footer">
+      <span id="result-count" role="status" aria-live="polite">Loading roadmap…</span>
+      <span id="chart-keys"><span class="for-flat">W/A/S/D pan</span><span class="for-cluster">W/A/S/D orbit <i>·</i> Shift + W/A/S/D pan</span> <i>·</i> Arrows browse stars <i>·</i> Enter selects <i>·</i> + / − zoom <i>·</i> Home resets</span>
+    </footer>
+  </main>
+  <script type="module" src="/atlas/app.js"></script>
+</body>
+</html>

@@ -6,7 +6,11 @@
 
 When two planets cross the face of a star, how much light do they block? At astronomical distances we often have a light curve and cannot see either shadow. In Cosmic Lego you can move an observer, follow each planet, and compare the shadows on the stellar disk with the signal that observer would measure.
 
-The default local workspace opens **When shadows overlap**. At conjunction the modeled star retains 97.9302% of its unobscured flux. Summing the individual transit depths instead predicts 97.2544% because the smaller foreground shadow lies inside the larger one. Inspect the geometry, change the system, and see both measurements update. [Open the workspace](docs/getting-started.md) · [Reproduce the study](docs/exoplanet-authoring.md)
+The **astronomy learning map** opens as a 3D star cluster. Pick *Light & color* to see what starlight can tell you, or search for *Moon phases* to explore why the Moon changes shape. Larger stars mark ideas that help explain more topics. Follow a dashed line to see how the same diagram helps explain two topics. You can rotate the 3D cluster, pan across the 2D map, or browse the same topics in a table. Choose **Planetary transits** to try the playable study. [Launch the map](docs/getting-started.md) · [How the stars are sized](docs/atlas-sources.md)
+
+![The astronomy learning map in 3D cluster view. Light & color sits near the center, and dashed lines connect topics you can explore with the same diagram.](docs/evidence/roadmap-3d.png)
+
+Choose **Open workspace** to explore **When shadows overlap**. At conjunction the modeled star retains 97.9302% of its unobscured flux. Summing the individual transit depths instead predicts 97.2544% because the smaller foreground shadow lies inside the larger one. Inspect the geometry, change the system, and see both measurements update. [Open the workspace](docs/getting-started.md) · [Reproduce the study](docs/exoplanet-authoring.md)
 
 Cosmic Lego aims to let students, teachers, and creators assemble stars, planets, gas, light, and observers with their own agents. The first installed astronomy package supplies independent Kepler orbits and transit photometry. The other astronomy questions below guide future model development. A saved study can be explored and replayed locally without connecting an agent.
 

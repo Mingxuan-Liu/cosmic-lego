@@ -1,4 +1,5 @@
-import { validateProject } from '../core/index.js';
+import { cacheByRevision } from '../core/project.js';
+import { Project, validateProject } from '../core/index.js';
 import { copyData, isRecord } from '../core/data.js';
 import { DEFAULT_LIMITS, exactKeys, implementation, insist, issue } from './contracts.js';
 import { analyze, descriptor } from './graph.js';
@@ -27,6 +28,14 @@ export function createDataflow({ models = {}, adapters = {}, limits = {} } = {})
     environment.adapters[id] = Object.freeze({ implementation: Object.freeze(implementation(adapter)), input: descriptor(adapter.input), output: descriptor(adapter.output), apply: adapter.apply });
   }
   Object.freeze(environment.models); Object.freeze(environment.adapters); Object.freeze(environment.limits);
+  const prepareGraph = graph => {
+    const structural = validateProject(graph);
+    return structural.valid ? analyze(graph, environment) : structural;
+  };
+  const prepared = cacheByRevision(project => {
+    const graph = project.snapshot();
+    return { graph, inspected: prepareGraph(graph) };
+  });
   const inspect = input => {
     try {
       const graph = copyData(input);
@@ -45,11 +54,9 @@ export function createDataflow({ models = {}, adapters = {}, limits = {} } = {})
     // without letting those layers invent a second scientific descriptor system.
     describe(input, { includeDependencies = false } = {}) {
       try {
-        const graph = copyData(input);
-        const structural = validateProject(graph);
-        if (!structural.valid) return { ...structural, outputs: {} };
-        const inspected = analyze(graph, environment);
-        const result = { valid: inspected.valid, errors: inspected.errors, outputs: copyData(Object.fromEntries(inspected.outputs)) };
+        const inspected = input instanceof Project ? prepared(input).inspected : prepareGraph(copyData(input));
+        if (!inspected.outputs) return { ...copyData(inspected), outputs: {} };
+        const result = { valid: inspected.valid, errors: copyData(inspected.errors), outputs: copyData(Object.fromEntries(inspected.outputs)) };
         if (includeDependencies) result.dependencies = Object.fromEntries(
           [...inspected.dependencies].map(([id, dependencies]) => [id, [...dependencies].sort()]));
         return result;
@@ -63,6 +70,6 @@ export function createDataflow({ models = {}, adapters = {}, limits = {} } = {})
       insist(inspected.dependencies.has(id), 'UNKNOWN_ID', `Unknown node ${id}.`);
       return [...inspected.dependencies.get(id)].sort();
     },
-    evaluate: (project, id, options = {}) => evaluate(project, id, options, environment),
+    evaluate: (project, id, options = {}) => evaluate(project, id, options, environment, prepared),
   });
 }

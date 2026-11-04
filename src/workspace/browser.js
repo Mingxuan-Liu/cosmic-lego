@@ -26,7 +26,7 @@ export function clampLayout(layout, viewport, options = {}) {
 }
 
 /** Flat overlay records: {id,kind,title,x,y,width,height,folded,hidden}. */
-export function createOverlayManager({ container, restoreContainer, onChange, onFocus, onRemove, renderContent, onError } = {}) {
+export function createOverlayManager({ container, rails, revealRail, restoreContainer, onChange, onFocus, onRemove, renderContent, onError } = {}) {
   if (!container?.ownerDocument || typeof onChange !== 'function') throw new TypeError('An overlay container and onChange callback are required.');
   const document = container.ownerDocument, window = document.defaultView;
   const prefix = `workspace-${++managerSerial}`;
@@ -44,7 +44,7 @@ export function createOverlayManager({ container, restoreContainer, onChange, on
   const current = record => ({ ...record.accepted, ...record.pending, ...record.preview });
   const fallback = () => container.focus({ preventScroll: true });
   function raise(record) {
-    record.panel.style.zIndex = String(++stacking);
+    if (!rails) record.panel.style.zIndex = String(++stacking);
     if (activeId !== record.id) { activeId = record.id; onFocus?.(record.id); }
   }
   function remember(record) {
@@ -52,6 +52,7 @@ export function createOverlayManager({ container, restoreContainer, onChange, on
   }
   function focusRecord(record) {
     if (!record || sceneOnly || current(record).hidden) return false;
+    if (rails) revealRail?.(record.accepted.kind);
     raise(record);
     const target = !current(record).folded && record.lastFocused && !record.lastFocused.disabled && record.panel.contains(record.lastFocused)
       ? record.lastFocused : record.header;
@@ -59,26 +60,33 @@ export function createOverlayManager({ container, restoreContainer, onChange, on
     return true;
   }
   function paint(record) {
-    const model = current(record), layout = clampLayout(model, viewport());
-    record.layout = layout;
-    record.panel.style.left = `${layout.x}px`; record.panel.style.top = `${layout.y}px`;
-    record.panel.style.width = `${layout.width}px`;
-    record.panel.style.height = `${model.folded ? Math.min(DEFAULTS.headerHeight, Math.max(1, container.clientHeight)) : layout.height}px`;
+    const model = current(record);
+    if (rails) {
+      const parent = model.kind === 'plot' ? rails.left : rails.right;
+      if (record.panel.parentNode !== parent) parent.append(record.panel);
+    } else {
+      const layout = clampLayout(model, viewport());
+      record.layout = layout;
+      record.panel.style.left = `${layout.x}px`; record.panel.style.top = `${layout.y}px`;
+      record.panel.style.width = `${layout.width}px`;
+      record.panel.style.height = `${model.folded ? Math.min(DEFAULTS.headerHeight, Math.max(1, container.clientHeight)) : layout.height}px`;
+    }
     visibility(record.panel, sceneOnly || !!model.hidden);
     record.panel.inert = record.panel.hidden;
     record.panel.style.pointerEvents = record.panel.hidden ? 'none' : 'auto';
     record.panel.dataset.folded = String(!!model.folded);
     visibility(record.body, !!model.folded); record.body.inert = !!model.folded;
-    visibility(record.resize, !!model.folded);
+    if (record.resize) visibility(record.resize, !!model.folded);
     record.title.textContent = model.title;
     record.panel.dataset.kind = model.kind;
-    record.header.setAttribute('aria-label', `${model.title}. Arrow keys move; Shift and arrow keys resize.`);
+    record.header.setAttribute('aria-label', rails ? model.title : `${model.title}. Arrow keys move; Shift and arrow keys resize.`);
     record.fold.setAttribute('aria-label', `${model.folded ? 'Expand' : 'Fold'} ${model.title}`);
     record.fold.setAttribute('aria-expanded', String(!model.folded));
     record.fold.textContent = model.folded ? '+' : '−';
     record.hide.setAttribute('aria-label', `Hide ${model.title}`);
     record.remove.setAttribute('aria-label', `Remove ${model.title}`);
-    record.resize.setAttribute('aria-label', `Resize ${model.title}. Use arrow keys.`);
+    for (const action of [record.fold, record.hide, record.remove]) action.title = action.getAttribute('aria-label');
+    if (record.resize) record.resize.setAttribute('aria-label', `Resize ${model.title}. Use arrow keys.`);
     record.restore.textContent = `Restore ${model.title}`;
     visibility(record.restore, !model.hidden);
   }
@@ -162,8 +170,8 @@ export function createOverlayManager({ container, restoreContainer, onChange, on
   function build(model) {
     const record = { id: model.id, accepted: model, pending: {}, pendingVersions: {}, preview: null, version: 0, listeners: [], lastFocused: null, gesture: null };
     record.panel = create('section', 'workspace-panel'); record.panel.dataset.overlayId = model.id;
-    record.panel.setAttribute('role', 'region'); record.panel.style.position = 'absolute';
-    record.header = create('header', 'workspace-panel-header'); record.header.tabIndex = 0; record.header.style.touchAction = 'none';
+    record.panel.setAttribute('role', 'region'); if (!rails) record.panel.style.position = 'absolute';
+    record.header = create('header', 'workspace-panel-header'); record.header.tabIndex = 0; if (!rails) record.header.style.touchAction = 'none';
     record.title = create('span', 'workspace-panel-title'); record.title.id = `${prefix}-title-${++serial}`;
     record.panel.setAttribute('aria-labelledby', record.title.id);
     record.actions = create('div', 'workspace-panel-actions');
@@ -173,9 +181,9 @@ export function createOverlayManager({ container, restoreContainer, onChange, on
     record.actions.append(record.fold, record.hide, record.remove); record.header.append(record.title, record.actions);
     record.body = create('div', 'workspace-panel-body'); record.body.id = `${prefix}-body-${serial}`;
     record.fold.setAttribute('aria-controls', record.body.id);
-    record.resize = button('workspace-panel-resize'); record.resize.textContent = '↘'; record.resize.style.touchAction = 'none';
+
     record.restore = button('workspace-restore-button'); record.restore.dataset.overlayId = model.id;
-    record.panel.append(record.header, record.body, record.resize); container.append(record.panel); restoreList?.append(record.restore);
+    record.panel.append(record.header, record.body); if (!rails) container.append(record.panel); restoreList?.append(record.restore);
     listen(record.panel, 'focusin', () => { remember(record); raise(record); }, record.listeners);
     listen(record.panel, 'pointerdown', () => raise(record), record.listeners);
     listen(record.panel, 'keydown', event => {
@@ -200,8 +208,12 @@ export function createOverlayManager({ container, restoreContainer, onChange, on
         if (outcome && typeof outcome.then === 'function') Promise.resolve(outcome).catch(error => onError?.(error, record.id));
       } catch (error) { onError?.(error, record.id); }
     }, record.listeners);
-    gesture(record, record.header, 'move'); gesture(record, record.resize, 'resize');
-    keyboard(record, record.header, 'move'); keyboard(record, record.resize, 'resize');
+    if (!rails) {
+      record.resize = button('workspace-panel-resize'); record.resize.textContent = '↘'; record.resize.style.touchAction = 'none';
+      record.panel.append(record.resize);
+      gesture(record, record.header, 'move'); gesture(record, record.resize, 'resize');
+      keyboard(record, record.header, 'move'); keyboard(record, record.resize, 'resize');
+    }
     paint(record);
     renderContent?.(model.id, record.body);
     return record;
@@ -213,9 +225,9 @@ export function createOverlayManager({ container, restoreContainer, onChange, on
     if (focused) fallback();
   }
   function resize() { if (!disposed) for (const record of records.values()) paint(record); }
-  const observer = window?.ResizeObserver ? new window.ResizeObserver(resize) : null;
+  const observer = !rails && window?.ResizeObserver ? new window.ResizeObserver(resize) : null;
   observer?.observe(container);
-  if (window) listen(window, 'resize', resize);
+  if (!rails && window) listen(window, 'resize', resize);
   return Object.freeze({
     render(overlays) {
       if (disposed) throw new Error('Overlay manager is disposed.');

@@ -42,9 +42,9 @@ arrange views. Authorized changes appear with diagnostics and Undo. Ordinary
 code recipes retain loops, functions, and reusable construction logic.
 
 The stage fills the viewport, with actual 3D navigation, depth, selection, and
-object inspection. Conversation, plots, equations, and inspectors occupy movable,
-foldable floating windows. Scene-only mode has an obvious way to restore them.
-Permanent dashboard columns must not determine the visual experience. A plot or
+object inspection. The current black planetarium HUD groups measurements on the left, with inspection
+and conversation on the right. Both float above the full-size canvas. Individual
+panels fold, and scene-only mode has an always-visible restore control. A plot or
 other 2D representation can become the main view when the question benefits;
 immersive does not mean every concept needs 3D.
 

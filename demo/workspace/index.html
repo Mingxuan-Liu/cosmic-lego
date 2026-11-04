@@ -2,21 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
   <title>Workspace · Cosmic Lego</title>
   <link rel="icon" href="/assets/branding/cosmic-lego-galaxy.png">
   <link rel="stylesheet" href="/workspace/style.css">
   <script type="importmap">{"imports":{"three":"/vendor/three/three.module.js","three/addons/controls/OrbitControls.js":"/vendor/three/OrbitControls.js"}}</script>
 </head>
 <body>
-  <main id="stage" aria-label="Cosmic Lego workspace">
+  <main id="stage" aria-label="Cosmic Lego workspace" data-left-open="true" data-right-open="true">
     <canvas id="scene" aria-label="3D scene. Drag to orbit, right drag to pan, scroll to zoom. Press F to fit." tabindex="0"></canvas>
     <header class="topbar">
-      <div class="brand"><img src="/assets/branding/cosmic-lego-galaxy.png" alt="Cosmic Lego" width="38" height="38"><div><strong>Cosmic Lego</strong><span id="workspace-title">Workspace</span></div></div>
+      <a class="brand" href="/" aria-label="Cosmic Lego home">
+        <img src="/assets/branding/cosmic-lego-galaxy.png" alt="" width="40" height="40">
+        <div class="brand-titles"><strong>Cosmic Lego</strong><span id="workspace-title">Workspace</span></div>
+      </a>
       <nav aria-label="Workspace controls">
         <button id="project-toggle" aria-expanded="false" aria-controls="project-menu">Project<span id="project-dirty-dot" aria-hidden="true" hidden></span></button>
         <button id="views-toggle" aria-expanded="false" aria-controls="view-menu">Views <span id="view-count"></span></button>
         <button id="scene-only" aria-pressed="false" title="Toggle scene only (V)">Scene only <kbd>V</kbd></button>
-        <button id="help-toggle" aria-expanded="false" aria-controls="help">?</button>
+        <button id="help-toggle" aria-label="Workspace help" aria-expanded="false" aria-controls="help">?</button>
       </nav>
     </header>
     <section id="project-menu" class="popover" aria-label="Project files" hidden>
@@ -55,15 +59,39 @@
     <section id="help" class="popover" aria-label="Workspace shortcuts" hidden>
       <h2>Explore the scene</h2><p>Drag to orbit · right drag to pan · scroll to zoom.<br>Touch: one finger orbits; two fingers pan and pinch.</p>
       <p><kbd>V</kbd> Scene only / restore · <kbd>F</kbd> Fit scene<br><kbd>Escape</kbd> Close menu or restore workspace</p>
-      <p>Tab to a window title; arrow keys move it. Shift + arrows resize. Every window can be folded or hidden, then restored from Views.</p>
+      <p>Use Instruments and Inspection to collapse either rail. Fold individual views at their headings. Restore hidden views from Views.</p>
     </section>
+    <div class="rail-switches" aria-label="Workspace rails">
+      <button id="left-rail-toggle" class="rail-toggle" aria-controls="left-rail" aria-expanded="true">
+        <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M2 16h16M4 13V8m5 5V4m5 9V6" /></svg>
+        <span>Instruments</span><span class="rail-chevron" aria-hidden="true"></span>
+      </button>
+      <button id="right-rail-toggle" class="rail-toggle" aria-controls="right-rail" aria-expanded="true">
+        <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M3 3.5h14v10H9l-4 3v-3H3zM6 7h8m-8 3h5" /></svg>
+        <span>Inspection</span><span class="rail-chevron" aria-hidden="true"></span>
+      </button>
+    </div>
     <div class="camera-tools" aria-label="Presentation camera"><label class="sr-only" for="projection">Projection</label><select id="projection"><option value="perspective">Perspective</option><option value="orthographic">Orthographic</option></select><button id="fit">Fit <kbd>F</kbd></button><button id="reset">Reset</button></div>
-    <div class="stage-caption"><span class="live-dot"></span> Model <span class="caption-detail">· evaluated at the displayed physical time</span></div>
+    <div class="stage-caption"><span class="live-dot" aria-hidden="true"></span><span>Model</span> <span class="caption-detail">/ Physical time</span></div>
     <div id="diagnostics" role="alert" hidden></div>
-    <div id="overlays" aria-label="Floating views" tabindex="-1"></div>
-    <footer class="timeline">
-      <button id="play" aria-label="Play physical time">▶</button><label for="time">Physical time</label><input id="time" type="range" min="0" max="8" step="0.25" value="0"><output id="time-output">0.00 s</output>
-      <span class="timeline-divider"></span><button id="undo" disabled title="Undo accepted edit">Undo</button><button id="redo" disabled title="Redo accepted edit">Redo</button><span id="status" role="status">Opening…</span>
+    <div id="overlays" aria-label="Workspace views" tabindex="-1">
+      <aside id="left-rail" class="hud-rail" aria-labelledby="left-rail-heading">
+        <h2 id="left-rail-heading" class="rail-heading sr-only">Instruments and measurements</h2>
+        <div id="left-panels" class="rail-panels"></div>
+      </aside>
+      <aside id="right-rail" class="hud-rail" aria-labelledby="right-rail-heading">
+        <h2 id="right-rail-heading" class="rail-heading sr-only">Inspection and conversation</h2>
+        <div id="right-panels" class="rail-panels"></div>
+      </aside>
+    </div>
+    <footer class="timeline" aria-label="Physical time and edit history">
+      <div class="time-controls">
+        <button id="play" aria-label="Play physical time">▶</button>
+        <div class="clock-label"><label for="time">Physical time</label><output id="time-output" for="time">0.00 s</output></div>
+        <input id="time" type="range" min="0" max="8" step="0.25" value="0">
+      </div>
+      <div class="timeline-state"><span id="status" role="status">Opening…</span></div>
+      <div class="history-controls"><button id="undo" disabled title="Undo accepted edit">Undo</button><button id="redo" disabled title="Redo accepted edit">Redo</button></div>
     </footer>
   </main>
   <script type="module" src="/workspace/app.js"></script>

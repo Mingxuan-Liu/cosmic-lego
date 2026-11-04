@@ -1,3 +1,4 @@
+import { cacheByRevision } from '../core/project.js';
 import { Project, validateProject } from '../core/index.js';
 import { copyData, freezeData } from '../core/data.js';
 import { unit, descriptorOf } from '../dataflow/index.js';
@@ -50,6 +51,10 @@ export function createSceneLayer(binding, { limits: inputLimits = {}, additional
     return errors;
   }
   const validators = Object.freeze({ structure: Object.freeze([...binding.validators.structure, sceneErrors]) });
+  const accepted = cacheByRevision(project => {
+    const graph = project.snapshot();
+    return { graph, validation: validateProject(graph, validators) };
+  });
   return Object.freeze({
     limits, validators,
     author(draft) {
@@ -79,7 +84,7 @@ export function createSceneLayer(binding, { limits: inputLimits = {}, additional
     },
     async compile(project, { results = [], time = { value: 0, unit: 's' }, capabilities } = {}) {
       insist(project instanceof Project, 'PROJECT_REQUIRED', 'Compile an accepted F01 Project.');
-      const identity = project.token, graph = project.snapshot();
+      const identity = project.token, { graph, validation } = accepted(project);
       const snapshot = { valid: false, identity, time: null, nodes: [], assets: [], bindings: [], diagnostics: [] };
       try {
         results = copyData(results); time = copyData(time);
@@ -88,16 +93,16 @@ export function createSceneLayer(binding, { limits: inputLimits = {}, additional
         const timeUnit = unit(time.unit);
         insist(Number.isFinite(time.value) && Number.isFinite(time.value * timeUnit.scale) && JSON.stringify(timeUnit.dimensions) === JSON.stringify(unit('s').dimensions), 'INVALID_TIME', 'Scene snapshots need a finite physical time.');
         snapshot.time = { value: time.value, unit: timeUnit };
-        const validated = validateProject(graph, validators);
-        if (!validated.valid) { snapshot.diagnostics = validated.errors; return snapshot; }
+        if (!validation.valid) { snapshot.diagnostics = copyData(validation.errors); return snapshot; }
         for (const node of graph.nodes) {
           const artifact = manifests.get(node.type)?.artifact;
           insist(!artifact || artifact.kind !== 'view' || isNode(node) || isBinding(node) || externalViews.has(artifact.format), 'RENDER_CAPABILITY', `No scene adapter consumes ${artifact?.format}.`, node.id);
         }
-        snapshot.assets = await resolveAssets(project, binding, graph, limits, { results, time });
+        const produce = binding.prepareProduction(project, { results, time });
+        snapshot.assets = await resolveAssets(binding, graph, limits, { results, produce });
         const produced = [];
         for (const node of graph.nodes.filter(node => isNode(node) || isBinding(node))) {
-          const artifact = binding.produce(project, node.id, { time, results });
+          const artifact = produce(node.id);
           if (!artifact.valid) {
             const error = artifact.diagnostics.find(item => item.severity !== 'warning') ?? artifact.diagnostics[0];
             insist(false, error.code, error.message, error.path);

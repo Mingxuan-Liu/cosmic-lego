@@ -1,6 +1,6 @@
 # Computation runtime
 
-F04 runs registered analytic and stateful scientific components in disposable
+F04 runs registered analytic and stateful scientific components in interruptible
 Node workers. It reuses F01 projects/identity, F02 Values/dataflow, and F03 manifests
 and implementations. Extensions own equations, integration steps, settings, and
 random procedures; the runtime schedules them and checks the resulting contracts.
@@ -72,10 +72,29 @@ throw before a job is created. Reported computation/cancellation failures resolv
 `job.promise` with `valid: false`, rather than pretending to return a numeric zero.
 
 There is one active request per runtime. A newer submission supersedes the older
-one with `SUPERSEDED`. Its worker starts after previously terminated workers have
-exited. Each job gets a fresh disposable worker; there is no worker pool or
-high-throughput guarantee. Callers wanting other scheduling policies must implement
-them deliberately rather than submitting competing snapshots to one runtime.
+one with `SUPERSEDED`. A replacement waits for terminated workers to exit.
+After a successful analytic job, the runtime retains one worker for the current
+accepted project, generation and revision. It closes the worker after 30 idle
+seconds, a project change, cancellation, failure, a completed stateful job or
+disposal. Each stateful job uses its own lifecycle state and checkpoint rules.
+
+The worker prepares the graph's checked scientific ports and dependency order
+once per revision. Its analytic cache keys whole model output maps by the
+transitive input identity, numerical settings and the actual sample time and
+unit. An explicitly scheduled analytic series has its own physical clock. It
+can be reused at another display time, with fresh job identity, request and
+achieved-time metadata. Stored series and model snapshots share the entry and
+byte limits below. Short-lived model outputs are evicted before scheduled
+series. The visual compiler also reuses validation for an accepted revision and
+indexes supplied snapshots once per frame. It checks their identity, producer,
+port contract and time on consumption.
+
+Run `bash scripts/node.sh scripts/benchmark-workspace.mjs` to measure the
+exoplanet preset's complete scientific source list and workspace compilation at
+0, 60, 120 and 180 seconds. The first frame includes worker startup. Each frame
+reports its total, per-source timings and a SHA-256 digest of the returned
+scientific Values. Browser rendering, gateway serialization and network latency
+are measured separately.
 
 Progress includes phases such as `validating`, `advancing`, and `extracting`,
 aggregate `steps` and `work`, a component ID, requested time, and the last reported

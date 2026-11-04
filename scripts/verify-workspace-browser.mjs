@@ -55,14 +55,15 @@ const camera = page => page.evaluate(() => cosmicWorkspace.adapter.getCameraStat
 const shot = (page, name) => page.screenshot({ path: `${output}${name}.png` });
 const bounds = async page => {
   const data = await page.evaluate(() => {
-    const region = document.querySelector('#overlays').getBoundingClientRect();
-    return { region: region.toJSON(), viewport: { width: innerWidth, height: innerHeight }, scrollWidth: document.documentElement.scrollWidth,
-      panels: [...document.querySelectorAll('.workspace-panel')].filter(node => !node.hidden).map(node => ({ id: node.dataset.overlayId, rect: node.getBoundingClientRect().toJSON() })) };
+    return { viewport: { width: innerWidth, height: innerHeight }, scrollWidth: document.documentElement.scrollWidth,
+      panels: [...document.querySelectorAll('.workspace-panel')].filter(node => node.getClientRects().length).map(node => ({
+        id: node.dataset.overlayId, kind: node.dataset.kind, side: node.closest('aside').id, rect: node.getBoundingClientRect().toJSON(),
+      })) };
   });
   assert.equal(data.scrollWidth, data.viewport.width, 'Workspace must not overflow horizontally.');
   for (const item of data.panels) {
-    assert.ok(item.rect.left >= data.region.left - 1 && item.rect.top >= data.region.top - 1, item.id);
-    assert.ok(item.rect.right <= data.region.right + 1 && item.rect.bottom <= data.region.bottom + 1, item.id);
+    assert.equal(item.side, item.kind === 'plot' ? 'left-rail' : 'right-rail', item.id);
+    assert.ok(item.rect.left >= 0 && item.rect.right <= data.viewport.width + 1, item.id);
   }
   return data;
 };
@@ -90,21 +91,18 @@ try {
   report.checks.push('Real generic workspace opens with disconnected conversation and checked scientific snapshots');
 
   let before = await revision(page);
-  await drag(page, header(page, 'positions-plot'), -600, -600); await changed(page, before);
-  const dragged = await page.evaluate(() => cosmicWorkspace.snapshot.overlays.find(view => view.id === 'positions-plot'));
-  assert.equal(dragged.x, 0); assert.equal(dragged.y, 0); await bounds(page);
-  before = await revision(page);
-  await drag(page, panel(page, 'positions-plot').locator('.workspace-panel-resize'), 1800, 1600, true); await changed(page, before);
-  await bounds(page); await shot(page, 'desktop-resize-bounds');
-  await page.evaluate(() => cosmicWorkspace.views.update('positions-plot', { x: 30, y: 20, width: 390, height: 270 })); await ready(page);
-  before = await revision(page); await header(page, 'positions-plot').focus(); await page.keyboard.press('ArrowRight'); await changed(page, before);
-  assert.equal(await page.evaluate(() => cosmicWorkspace.snapshot.overlays.find(view => view.id === 'positions-plot').x), 40);
-  before = await revision(page); await page.keyboard.press('Shift+ArrowDown'); await changed(page, before);
-  assert.equal(await page.evaluate(() => cosmicWorkspace.snapshot.overlays.find(view => view.id === 'positions-plot').height), 280);
-  assert.equal(await page.evaluate(() => document.activeElement.classList.contains('workspace-panel-header')), true);
-  await page.keyboard.press('Escape'); assert.equal(await page.evaluate(() => document.activeElement.id), 'overlays');
-  assert.equal(await science(page), initialValues);
-  report.checks.push('Desktop pointer drag/resize clamp offscreen coordinates; keyboard move/resize and focus work without changing science');
+  const initialRect = await header(page, 'positions-plot').boundingBox();
+  await drag(page, header(page, 'positions-plot'), 250, 130);
+  await header(page, 'positions-plot').focus(); await page.keyboard.press('Shift+ArrowDown');
+  assert.deepEqual(await header(page, 'positions-plot').boundingBox(), initialRect);
+  assert.equal(await revision(page), before); assert.equal(await page.locator('.workspace-panel-resize').count(), 0);
+  const canvasBox = await page.locator('#scene').boundingBox();
+  await page.locator('#left-rail-toggle').click(); assert.equal(await page.locator('#left-rail').isVisible(), false);
+  assert.equal(await page.locator('#right-rail').isVisible(), true);
+  assert.deepEqual(await page.locator('#scene').boundingBox(), canvasBox);
+  await page.locator('#left-rail-toggle').click();
+  await bounds(page); assert.equal(await science(page), initialValues);
+  report.checks.push('Desktop instrument and inspection rails retain their assignments; hiding instruments leaves the canvas, selection and project revision intact.');
 
   before = await revision(page); await panel(page, 'conversation').getByRole('button', { name: 'Fold Conversation', exact: true }).click(); await changed(page, before);
   assert.equal(await panel(page, 'conversation').getByRole('textbox').isVisible(), false);
@@ -225,15 +223,14 @@ try {
   await header(page, 'positions-plot').focus();
   const cdp = await narrow.newCDPSession(page);
   const touch = (type, points) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: points.map(([id, x, y]) => ({ id, x, y, radiusX: 2, radiusY: 2, force: 1 })) });
-  let box = await header(page, 'positions-plot').boundingBox();
-  const startX = box.x + 55, startY = box.y + box.height / 2;
-  before = await revision(page); const narrowScience = await science(page);
-  await touch('touchStart', [[1, startX, startY]]);
-  for (let i = 1; i <= 10; i++) await touch('touchMove', [[1, startX + i * 5, startY + i * 15]]);
-  await touch('touchEnd', []); await changed(page, before); await bounds(page);
-  const moved = await page.evaluate(() => cosmicWorkspace.snapshot.overlays.find(view => view.id === 'positions-plot'));
-  assert.ok(moved.x >= 45 && moved.y >= 145); assert.equal(await science(page), narrowScience);
-  await shot(page, 'narrow-touch-drag');
+  assert.equal(await page.locator('#left-rail').isVisible(), true);
+  assert.equal(await page.locator('#right-rail').isVisible(), false);
+  const narrowScience = await science(page), untouchedRevision = await revision(page);
+  await page.locator('#right-rail-toggle').tap();
+  assert.equal(await page.locator('#left-rail').isVisible(), false);
+  assert.equal(await page.locator('#right-rail').isVisible(), true);
+  assert.equal(await revision(page), untouchedRevision);
+  await bounds(page);
   await page.locator('#scene-only').tap();
   const orbitBefore = await camera(page);
   await touch('touchStart', [[2, 145, 400]]);
@@ -250,7 +247,7 @@ try {
   await shot(page, 'narrow-touch-scene');
   await page.locator('#scene-only').tap(); await bounds(page);
   await page.locator('#views-toggle').tap(); await shot(page, 'narrow-restore-menu');
-  report.checks.push('390×844 reduced-motion context: real CDP touch drags overlay, orbits and pinches scene; bounds and numerical values remain intact');
+  report.checks.push('390×844 reduced-motion context: fixed HUD switches sides; real CDP touch orbits and pinches the scene; numerical values remain intact');
   await checkConsoleErrors(); assert.deepEqual(report.errors, []);
   report.passed = true;
 } catch (error) {

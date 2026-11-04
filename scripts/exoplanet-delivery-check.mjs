@@ -129,7 +129,7 @@ export async function verifyExoplanetDelivery({ browser, slots, savedFile, outpu
       return route.continue();
     });
     const tab = await context.newPage(); tab.on('pageerror', error => browserErrors.push(error.message)); tab.on('console', message => { if (message.type() === 'error') browserErrors.push(message.text()); });
-    await tab.goto(app.url); await tab.waitForFunction(() => globalThis.cosmicWorkspace?.snapshot?.valid, null, { timeout: 120000 });
+    await tab.goto(app.url + '/workspace/'); await tab.waitForFunction(() => globalThis.cosmicWorkspace?.snapshot?.valid, null, { timeout: 120000 });
     await tab.locator('#project-toggle').click(); await tab.locator('#project-list').selectOption('shadow-study'); await tab.locator('#project-open').click();
     await tab.waitForFunction(() => document.querySelector('#project-feedback').textContent === 'Opened shadow-study.', null, { timeout: 120000 });
     assert.deepEqual(app.project.snapshot(), native.graph); assert.notEqual(app.project.token.generation, native.savedFrom.generation);

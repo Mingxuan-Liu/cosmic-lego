@@ -21,6 +21,22 @@ function tokenOf(state) {
   return Object.freeze({ projectId: state.content.id, generation: state.generation, revision: state.revision });
 }
 
+// Internal preparation for immutable accepted revisions. Drafts never enter this
+// cache. A load, edit or history change invalidates even identical graph data.
+export function cacheByRevision(prepare) {
+  const entries = new WeakMap();
+  return project => {
+    const state = projects.get(project);
+    if (!state) fail('PROJECT_REQUIRED', 'Use an accepted project.');
+    const { generation, revision } = state;
+    const known = entries.get(project);
+    if (known?.generation === generation && known.revision === revision) return known.value;
+    const value = prepare(project);
+    if (state.generation === generation && state.revision === revision) entries.set(project, { generation, revision, value });
+    return value;
+  };
+}
+
 function checkToken(state, input) {
   let token;
   try { token = copyData(input); } catch { fail('STALE_TOKEN', 'Supply the complete current project token.'); }

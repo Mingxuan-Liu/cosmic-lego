@@ -125,7 +125,7 @@ function validateDefinition(node, environment) {
   }
 }
 
-function getOutputs(node, graph, environment, outputs) {
+function getOutputs(node, graph, environment, outputs, inputPorts) {
   const source = slot => {
     const id = inputId(node, slot), port = node.data.inputs[slot].port;
     const found = outputs.get(id)?.[port];
@@ -198,6 +198,7 @@ function getOutputs(node, graph, environment, outputs) {
   if (!model) return {};
   const required = model.inputs ? invoke(model.inputs, node) : {};
   insist(isRecord(required), 'INPUT_PORT', 'Model inputs must return a port map.');
+  inputPorts.set(node.id, required);
   const provided = Object.keys(node.data.inputs);
   insist(provided.length === Object.keys(required).length && provided.every(slot => Object.hasOwn(required, slot)), 'MISSING_INPUT', `Inputs for ${node.id} must match declared ports ${Object.keys(required).join(', ')}.`);
   for (const [slot, requirement] of Object.entries(required)) {
@@ -214,10 +215,10 @@ function getOutputs(node, graph, environment, outputs) {
 
 export function analyze(graph, environment) {
   const errors = [];
-  const outputs = new Map();
+  const outputs = new Map(), inputPorts = new Map();
   const dependencies = new Map(graph.nodes.map(node => [node.id, [...node.dependsOn]]));
   const nodes = new Map(graph.nodes.map(node => [node.id, node]));
-  const result = () => ({ valid: errors.length === 0, errors, outputs, dependencies, nodes });
+  const result = () => ({ valid: errors.length === 0, errors, outputs, dependencies, nodes, inputPorts });
   if (graph.nodes.length > environment.limits.maxNodes) {
     errors.push(diagnostic('GRAPH_BUDGET', `Project exceeds ${environment.limits.maxNodes} nodes.`));
     return result();
@@ -251,7 +252,7 @@ export function analyze(graph, environment) {
         unsampleable.add(id);
       }
       if (isManaged(node, environment)) {
-        const declared = getOutputs(node, graph, environment, outputs);
+        const declared = getOutputs(node, graph, environment, outputs, inputPorts);
         for (const d of Object.values(declared)) {
           const count = d.kind === 'series' && d.coordinates
             ? d.coordinates.values.length * (1 + (d.shape[1] ?? 1))

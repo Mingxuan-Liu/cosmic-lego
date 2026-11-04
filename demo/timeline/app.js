@@ -2,6 +2,13 @@ import { createThreeAdapter } from '/src/scene/three-adapter.js';
 import { plotRows, seriesPaths, plotFraction } from '/src/workspace/plot-samples.js';
 
 const $ = id => document.getElementById(id);
+const studySlug = /^\/studies\/([a-z0-9-]+)\/$/.exec(location.pathname)?.[1];
+const timelineApi = studySlug ? './api/timeline' : '/api/timeline';
+const returnLink = document.getElementById('roadmap-return');
+if (studySlug) {
+  returnLink.href = '/?phenomenon=' + encodeURIComponent(studySlug);
+  returnLink.hidden = false;
+}
 const capture = new URLSearchParams(location.search).get('capture') === '1';
 document.body.classList.toggle('capture', capture);
 const canvas = $('scene'), logo = $('brand'), controls = $('controls');
@@ -160,7 +167,7 @@ async function seek(time, fromPlayback = false) {
     if (ticket !== sequence || disposed) throw failure('SUPERSEDED', 'A newer seek is current.');
     pending = new AbortController();
     try {
-      return await request('/api/timeline/frame', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      return await request(timelineApi + '/frame', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ time, snapshotId }), signal: pending.signal });
     } finally { pending = null; }
   });
@@ -180,7 +187,7 @@ async function load() {
   pause(); invalidate(); const ticket = sequence;
   for (const id of ['play', 'previous', 'next', 'scrub', 'exact-time', 'go']) $(id).disabled = true;
   try {
-    const result = await request('/api/timeline');
+    const result = await request(timelineApi);
     if (disposed || ticket !== sequence) return;
     metadata = result;
     $('scrub').max = String(result.duration); $('exact-time').max = String(result.duration); $('duration').textContent = `${seconds(result.duration)} s`;

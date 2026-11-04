@@ -38,7 +38,7 @@ async function main() {
   const app = await startExoplanetServer(parseSceneFlags(flags));
   try { await app.portable.action('import', { document: manifest, expected: app.project.token }); }
   catch (error) { await app.close(); throw error; }
-  console.log('Cosmic Lego workspace: ' + app.url + '/workspace/');
+  console.log('Cosmic Lego: ' + app.url + '/');
   for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, async () => { await app.close(); process.exit(0); });
 }
 try { await main(); } catch (error) { console.error(error.message); process.exitCode = 1; }

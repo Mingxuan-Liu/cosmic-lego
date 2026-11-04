@@ -113,7 +113,7 @@ async function live() {
     } else report.browserErrors.push(`${response.status()} ${route} ${scrub(body.error?.code ?? body.code)}`);
   });
   page.on('console', message => { if (message.type() === 'error') consoleErrors.push({ text: scrub(message.text()), route: new URL(message.location().url || app.url).pathname }); });
-  await page.goto(app.url); await ready(); const baseline = app.project.snapshot();
+  await page.goto(app.url + '/workspace/'); await ready(); const baseline = app.project.snapshot();
   const first = await snapshot(); verifyConjunction(first, false, false); recordSample('baseline', first);
   panel = page.locator('[data-overlay-id="conversation"]');
   await shot('baseline');

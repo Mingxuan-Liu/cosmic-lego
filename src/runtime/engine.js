@@ -14,9 +14,42 @@ function mergeMetadata(...items) {
   return { warnings: [...warnings.values()], approximation: [...approximation] };
 }
 
-// Runs entirely in a disposable worker. It schedules registered model steps;
+// One worker owns one immutable project revision and a bounded analytic cache.
+// Stateful checkpoints and per-job counters remain separate from this plan.
+export function prepareComputation(registry, graph, limits) {
+  const base = registry.bind(), project = Project.from(graph, { validators: base.validators });
+  const nodes = new Map(graph.nodes.map(node => [node.id, node]));
+  const records = new Map(base.computations.map(record => [record.manifest.id, record]));
+  const analysis = base.flow.describe(project, { includeDependencies: true });
+  insist(analysis.valid, 'INVALID_PROJECT', analysis.errors[0]?.message ?? 'Cannot resolve scientific dependencies.');
+  const dependencies = new Map(Object.entries(analysis.dependencies));
+  const samples = new Map(), models = new Map();
+  let size = 0;
+  const plan = {
+    project, nodes, records, dependencies, execute: null,
+    binding: registry.bind({ execute: args => plan.execute(args) }),
+    get(key) { return (samples.get(key) ?? models.get(key))?.data; },
+    put(key, data, dataBytes, series = false) {
+      const entryBytes = dataBytes + Buffer.byteLength(key, 'utf8');
+      const target = series ? samples : models;
+      if (entryBytes > limits.maxResultBytes || target.has(key)) return;
+      // A fixed grid remains useful across display instants. Do not let the
+      // many short-lived model snapshots from a second grid flush the first.
+      while (models.size + samples.size >= limits.maxSnapshots || size + entryBytes > limits.maxResultBytes) {
+        const evict = models.size ? models : samples;
+        if (!series && !models.size) return;
+        const oldest = evict.keys().next().value;
+        size -= evict.get(oldest).size; evict.delete(oldest);
+      }
+      target.set(key, { data, size: entryBytes }); size += entryBytes;
+    },
+  };
+  return plan;
+}
+
+// Runs entirely in a bounded worker. It schedules registered model steps;
 // equations, random generators and integration algorithms stay in extensions.
-export function runComputation({ registry, graph, identity, nodeId, request, cached, limits, progress }) {
+export function runComputation({ registry, graph, plan, identity, nodeId, request, cached, limits, progress }) {
   const requested = seconds(request.time), targetPort = request.port;
   const runtime = { requestedTime: timeOf(requested), achievedTime: null, path: request.mode,
     steps: 0, work: 0, inputIdentity: null, settings: {}, components: [] };
@@ -35,14 +68,9 @@ export function runComputation({ registry, graph, identity, nodeId, request, cac
   const call = (fn, argument) => { charge(1); return invoke(fn, argument); };
   try {
     report('validating');
-    const base = registry.bind();
-    const project = Project.from(graph, { validators: base.validators });
-    const nodes = new Map(graph.nodes.map(node => [node.id, node]));
+    plan ??= prepareComputation(registry, graph, limits);
+    const { project, nodes, records, dependencies, binding } = plan;
     insist(nodes.has(nodeId), 'UNKNOWN_ID', `Unknown producing node ${nodeId}.`);
-    const records = new Map(base.computations.map(record => [record.manifest.id, record]));
-    const analysis = base.flow.describe(graph, { includeDependencies: true });
-    insist(analysis.valid, 'INVALID_PROJECT', analysis.errors[0]?.message ?? 'Cannot resolve scientific dependencies for this project.');
-    const dependencies = new Map(Object.entries(analysis.dependencies));
     const pathFor = node => {
       const record = records.get(node.type);
       const preferred = node.id === nodeId ? request.mode : 'auto';
@@ -136,7 +164,6 @@ export function runComputation({ registry, graph, identity, nodeId, request, cac
       memo.set(idKey, { nodeId: id, snapshot });
       return snapshot;
     }
-    let binding;
     const evaluated = new Map();
     const read = (id, port, time) => {
       const cacheKey = JSON.stringify([id, port, time]);
@@ -209,11 +236,15 @@ export function runComputation({ registry, graph, identity, nodeId, request, cac
     }
     const modelOutputs = new Map();
     let modelBytes = 0;
-    binding = registry.bind({ execute: ({ manifest, implementation, node, inputs, request: evaluationRequest }) => {
+    plan.execute = ({ manifest, implementation, node, inputs, request: evaluationRequest }) => {
       // F02 memoizes a graph evaluation; this cache shares whole model output
       // maps across the scheduler's separate port/dependency reads at one time.
       const outputKey = key(node.id, seconds(evaluationRequest.time));
-      if (modelOutputs.has(outputKey)) return modelOutputs.get(outputKey).outputs;
+      const persistentKey = stateful.length ? null : JSON.stringify(['model', inputIdentity(node.id), evaluationRequest.time]);
+      if (persistentKey) {
+        const previous = plan.get(persistentKey);
+        if (previous) return previous;
+      } else if (modelOutputs.has(outputKey)) return modelOutputs.get(outputKey).outputs;
       let outputs;
       if (pathFor(node) === 'stateful') {
         const snapshot = ensure(node, seconds(evaluationRequest.time));
@@ -229,6 +260,7 @@ export function runComputation({ registry, graph, identity, nodeId, request, cac
         metadata: mergeMetadata(output.metadata, ...Object.values(inputs).map(input => input.metadata)) })]));
       const size = bytes(normalized);
       insist(size <= limits.maxResultBytes, 'RESULT_BUDGET', 'Model output snapshot exceeds the byte limit.');
+      if (persistentKey) { plan.put(persistentKey, normalized, size); return normalized; }
       while (modelOutputs.size >= limits.maxSnapshots || modelBytes + size > limits.maxResultBytes) {
         const oldest = modelOutputs.keys().next().value;
         modelBytes -= modelOutputs.get(oldest).size;
@@ -236,7 +268,7 @@ export function runComputation({ registry, graph, identity, nodeId, request, cac
       }
       modelOutputs.set(outputKey, { outputs: normalized, size }); modelBytes += size;
       return normalized;
-    } });
+    };
     // First find actual stateful coordinates, then evaluate the complete result
     // at one coherent scientific time. Incompatible grids require an adapter;
     // the scheduler never relabels a sample or invents interpolation.
@@ -248,7 +280,14 @@ export function runComputation({ registry, graph, identity, nodeId, request, cac
     insist(snapshots.every(([, snapshot]) => closeTime(seconds(snapshot.time), achieved)), 'SNAPSHOT_TIME_MISMATCH', 'Stateful dependencies reached different times; supply an explicit alignment model.');
     runtime.achievedTime = timeOf(achieved);
     report('extracting', nodeId, achieved);
-    const result = binding.evaluate(project, nodeId, { port: targetPort, time: timeOf(achieved) });
+    // A sampler owns an explicit grid. Its value and sampling metadata are
+    // independent of the surrounding display clock, including on backwards seeks.
+    const seriesKey = !stateful.length && nodes.get(nodeId).type === 'dataflow.sample'
+      ? JSON.stringify(['series', runtime.inputIdentity, targetPort]) : null;
+    const previous = seriesKey && plan.get(seriesKey);
+    const result = previous ? copyData(previous) : binding.evaluate(project, nodeId, { port: targetPort, time: timeOf(achieved) });
+    if (previous) result.metadata.work = 0;
+    else if (seriesKey && result.valid) plan.put(seriesKey, copyData(result), bytes(result), true);
     charge(result.metadata.work);
     result.identity = copyData(identity);
     result.request = { time: copyData(request.time) };
@@ -278,5 +317,5 @@ export function runComputation({ registry, graph, identity, nodeId, request, cac
     const result = failed(identity, nodeId, request, error);
     result.metadata.runtime = runtime;
     return result;
-  }
+  } finally { if (plan) plan.execute = null; }
 }

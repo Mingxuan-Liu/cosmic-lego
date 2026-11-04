@@ -193,7 +193,8 @@ export function createAgentClient({ conversation, fetch: fetcher = globalThis.fe
     finally { polling = false; }
   }
   function next() {
-    if (!disposed && started) timer = schedule(async () => { await poll(); next(); }, interval);
+    if (!disposed && started) timer = schedule(async () => { await poll(); next(); },
+      view.status === 'disconnected' && !busy ? Math.max(interval, 2000) : interval);
   }
   async function action(route, input, status) {
     if (disposed || busy && !['stop', 'disconnect'].includes(route)) throw new Error('Agent connection is busy.');

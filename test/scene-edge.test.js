@@ -101,3 +101,16 @@ test('bindings cannot leave authored per-instance colors misaligned with replace
   assert.equal(snapshot.valid, false, 'A compiled valid scene must keep per-instance arrays aligned.');
   assert.ok(snapshot.diagnostics.length);
 });
+
+test('a prepared artifact frame detaches its inputs, isolates outputs and expires on a new revision', () => {
+  const { binding, project, result } = setup(), time = { value: 0, unit: 's' };
+  const frame = binding.prepareProduction(project, { results: [result], time });
+  result.value.data[0] = 800; time.value = 40;
+  const first = frame('field-colors');
+  assert.equal(first.valid, true, JSON.stringify(first.diagnostics));
+  assert.equal(first.artifact.data.clipped, 0);
+  first.artifact.data.colors[0] = [1, 0, 0];
+  assert.deepEqual(frame('field-colors').artifact.data.colors[0], [0, 0, 0]);
+  project.load(project.snapshot(), project.token);
+  rejected(frame('field-colors'), 'STALE_RESULT');
+});

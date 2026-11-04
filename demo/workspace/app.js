@@ -9,7 +9,7 @@ const element = (tag, text, className) => { const node = document.createElement(
 const button = (text, action) => { const node = element('button', text); node.type = 'button'; node.addEventListener('click', action); return node; };
 const number = value => value == null ? 'Missing' : Number(value).toLocaleString('en-US', { maximumSignificantDigits: 5 });
 let state, snapshot, results = [], selection = null, queued = Promise.resolve(), sequence = 0, sceneOnly = false, disposed = false;
-let playing = false, timer, scrubTimer, syncingSelection = false, initial;
+let playing = false, playSession = 0, timer, scrubTimer, drawRequest, syncingSelection = false, initial;
 let pendingEdits = 0, polling = false, lastSummary = '', activeRefreshes = 0, refreshNeeded = true;
 let retryAt = 0, supersessions = 0;
 const sameIdentity = (a, b) => a && b && ['projectId', 'generation', 'revision'].every(key => a[key] === b[key]);
@@ -17,10 +17,15 @@ const sameLoad = (a, b) => a && b && a.projectId === b.projectId && a.generation
 const summaryText = summary => typeof summary === 'string' ? summary : ['created', 'updated', 'removed']
   .filter(key => summary?.[key]?.length).map(key => `${key[0].toUpperCase() + key.slice(1)} ${summary[key].length === 1 ? summary[key][0] : `${summary[key].length} objects`}`).join(' · ');
 const composers = new Map();
+const viewId = crypto.randomUUID();
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const showError = error => { $('diagnostics').hidden = false; $('diagnostics').textContent = `${error.code ?? 'Workspace'}: ${error.message}`; $('status').textContent = 'Needs attention'; };
+function requestDraw() {
+  if (disposed || drawRequest) return;
+  drawRequest = requestAnimationFrame(() => { drawRequest = null; if (!disposed) adapter.render(); });
+}
 let adapter;
-try { adapter = createThreeAdapter({ canvas, onSelect: picked => { if (!syncingSelection) select(picked, false); }, onDiagnostic: showError, reducedMotion: motion.matches }); }
+try { adapter = createThreeAdapter({ canvas, onSelect: picked => { if (!syncingSelection) select(picked, false); }, onDiagnostic: showError, onCameraChange: requestDraw, fitShortAxis: true, reducedMotion: motion.matches }); }
 catch (error) { showError(error); throw error; }
 let agentClient;
 const conversation = createConversation({ onEvent: event => {
@@ -31,21 +36,45 @@ let agentState = agentClient.snapshot();
 // A native range control can round a saved double when it serializes its value.
 let physicalTime = 0;
 const getTime = () => ({ value: physicalTime, unit: 's' });
-const projectFiles = createProjectFiles({ getIdentity: () => state?.identity, getTime, enqueue: enqueueProject,
+const projectFiles = createProjectFiles({ getIdentity: () => state?.identity, getTime: () => snapshot?.time ?? getTime(), enqueue: enqueueProject,
   onLoad: async opened => {
     adoptState(await api('state')); await refresh();
     if (!sameLoad(opened.identity, state.identity)) throw new Error('Another project opened before the workspace refreshed.');
   } });
-const manager = createOverlayManager({ container: $('overlays'),
+const narrow = matchMedia('(max-width: 760px)');
+const wideRails = { left: true, right: true }, narrowRails = { left: false, right: false };
+const sideFor = kind => kind === 'plot' ? 'left' : 'right';
+function railState() { return narrow.matches ? narrowRails : wideRails; }
+function syncRails() {
+  for (const side of ['left', 'right']) {
+    const open = railState()[side];
+    $('stage').dataset[side + 'Open'] = String(open);
+    $(side + '-rail').hidden = !open || sceneOnly;
+    const toggle = $(side + '-rail-toggle');
+    toggle.setAttribute('aria-expanded', String(open && !sceneOnly));
+  }
+}
+function setRail(side, open) {
+  railState()[side] = open;
+  if (open && narrow.matches) railState()[side === 'left' ? 'right' : 'left'] = false;
+  syncRails(); updateContent();
+}
+narrow.addEventListener('change', () => { syncRails(); updateContent(); });
+for (const side of ['left', 'right']) $(side + '-rail-toggle').addEventListener('click', () => setRail(side, !railState()[side]));
+syncRails();
+const manager = createOverlayManager({ container: $('overlays'), rails: { left: $('left-panels'), right: $('right-panels') },
+  revealRail: kind => { const side = sideFor(kind); if (!railState()[side]) setRail(side, true); },
   onChange: (id, parameters) => edit({ action: 'overlay.update', id, parameters }),
   onRemove: id => edit({ action: 'overlay.remove', id }).catch(showError), onError: showError,
 });
-const resize = () => { if (!disposed && canvas.clientWidth && canvas.clientHeight) adapter.resize(canvas.clientWidth, canvas.clientHeight, devicePixelRatio); };
+const resize = () => {
+  if (disposed || !canvas.clientWidth || !canvas.clientHeight) return;
+  adapter.resize(canvas.clientWidth, canvas.clientHeight, devicePixelRatio); requestDraw();
+};
 const observer = new ResizeObserver(resize); observer.observe(canvas); resize();
-const draw = () => { if (!disposed) { adapter.render(); requestAnimationFrame(draw); } }; requestAnimationFrame(draw);
 motion.addEventListener('change', event => adapter.setReducedMotion(event.matches));
 async function api(path, input) {
-  const response = await fetch(`/api/workspace/${path}`, input === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
+  const response = await fetch(`/api/workspace/${path}`, input === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json', ...(path === 'evaluate' ? { 'X-Workspace-View': viewId } : {}) }, body: JSON.stringify(input) });
   const result = await response.json(); if (!response.ok) throw Object.assign(new Error(result.message), result); return result;
 }
 function context() {
@@ -69,11 +98,11 @@ function select(next, updateRenderer = true) {
     if (renderable && !accepted) next = null; else if (accepted) next = accepted;
   }
   selection = next ? structuredClone(next) : null;
-  context(); updateContent();
+  context(); updateContent(); requestDraw();
   window.dispatchEvent(new CustomEvent('cosmic:selection', { detail: { selection: structuredClone(selection), identity: snapshot?.identity, time: snapshot?.time } }));
   return structuredClone(selection);
 }
-function stopPlayback() { playing = false; clearTimeout(timer); $('play').textContent = '▶'; $('play').setAttribute('aria-label', 'Play physical time'); }
+function stopPlayback() { ++playSession; playing = false; clearTimeout(timer); $('play').textContent = '▶'; $('play').setAttribute('aria-label', 'Play physical time'); if (snapshot?.valid && !refreshNeeded) readyStatus(); }
 function listenToAgent() {
   agentClient.subscribe(next => { agentState = next; const session = conversation.snapshot(); for (const id of composers.keys()) updateComposer(id, session); });
   agentClient.start();
@@ -118,13 +147,18 @@ function syncControls() {
   if (camera) $('projection').value = camera.data.parameters.projection;
   $('undo').disabled = !state?.history?.canUndo; $('redo').disabled = !state?.history?.canRedo;
 }
+function readyStatus() {
+  $('status').textContent = playing ? 'Playing' : lastSummary ? `${lastSummary} · ready` : `${snapshot.overlays.length} views · ready`;
+}
 async function refresh({ retry = false } = {}) {
   if (!state || disposed) return;
   if (!retry) { retryAt = 0; supersessions = 0; }
   activeRefreshes++; refreshNeeded = true;
   const mine = ++sequence, time = getTime();
-  const displayed = Number(time.value.toFixed(2)) === time.value ? time.value.toFixed(2) : String(time.value);
-  $('time-output').textContent = `${displayed} s`; $('time-output').title = `${time.value} s`; $('status').textContent = 'Computing…'; projectFiles.render();
+  if (snapshot && !sameIdentity(snapshot.identity, state.identity)) $('status').textContent = 'Applying edit…';
+  const slow = setTimeout(() => {
+    if (mine === sequence && !disposed) $('status').textContent = snapshot ? 'Updating sample…' : 'Loading scene…';
+  }, 450);
   try {
     const computed = await api('evaluate', { identity: state.identity, time, capabilities: adapter.capabilities });
     if (disposed || mine !== sequence) return;
@@ -134,26 +168,33 @@ async function refresh({ retry = false } = {}) {
     const applied = adapter.apply(computed.snapshot.scene);
     syncingSelection = false;
     if (!applied.valid) throw applied.diagnostics[0];
+    const changed = !sameIdentity(snapshot?.identity, computed.snapshot.identity);
     snapshot = computed.snapshot; results = computed.results;
+    const exact = snapshot.time.value;
+    $('time-output').textContent = Math.abs(exact) >= 1e9 ? exact.toExponential(3) + ' s' : exact.toFixed(2) + ' s';
+    $('time-output').title = `${exact} s`; projectFiles.render();
     canvas.style.visibility = '';
     refreshNeeded = false; retryAt = 0; supersessions = 0;
-    manager.render(snapshot.overlays);
-    for (const id of composers.keys()) if (!snapshot.overlays.some(view => view.id === id)) { composers.delete(id); conversation.forgetDraft(id); }
-    syncControls(); renderMenu();
+    if (changed) {
+      manager.render(snapshot.overlays);
+      for (const id of composers.keys()) if (!snapshot.overlays.some(view => view.id === id)) { composers.delete(id); conversation.forgetDraft(id); }
+      syncControls(); renderMenu();
+    }
     try { select(priorSelection && state.graph.nodes.some(node => node.id === priorSelection.nodeId) ? priorSelection : null); }
     catch (error) { if (error.code === 'INVALID_SELECTION') select(null); else throw error; }
-    $('diagnostics').hidden = true; $('status').textContent = lastSummary ? `${lastSummary} · ready` : `${snapshot.overlays.length} views · ready`;
+    $('diagnostics').hidden = true; readyStatus();
   } catch (error) {
     syncingSelection = false;
     if (!disposed && mine === sequence) {
-      if (['STALE_TOKEN', 'STALE_RESULT', 'SUPERSEDED'].includes(error.code)) {
+      if (['STALE_TOKEN', 'STALE_RESULT', 'SUPERSEDED', 'VIEW_BUSY'].includes(error.code)) {
+        stopPlayback();
         // Let the competing view finish before retrying this read.
         retryAt = Date.now() + Math.min(16000, 1000 * 2 ** Math.min(supersessions++, 4) + Math.random() * 500);
         $('status').textContent = 'Waiting for current sample…';
       }
-      else { refreshNeeded = false; showError(error); }
+      else { stopPlayback(); refreshNeeded = false; showError(error); }
     }
-  } finally { activeRefreshes--; }
+  } finally { clearTimeout(slow); activeRefreshes--; }
 }
 function edit(operation) {
   stopPlayback();
@@ -214,7 +255,9 @@ function preserveFocus(body, render) {
   if (active) [...body.querySelectorAll('[data-focus]')].find(node => node.dataset.focus === active)?.focus({ preventScroll: true });
 }
 function updateContent() {
+  if (sceneOnly) return;
   for (const view of snapshot?.overlays ?? []) {
+    if (view.hidden || view.folded || !railState()[sideFor(view.kind)]) continue;
     const body = manager.body(view.id); if (!body) continue;
     if (view.kind === 'conversation') { if (!composers.has(view.id)) buildComposer(view, body); updateComposer(view.id, conversation.snapshot()); }
     else preserveFocus(body, () => {
@@ -288,11 +331,11 @@ function renderPlot(view, body) {
   }
   const coordinates = rows.map(row => row.x);
   const xmax = coordinates.length ? Math.max(...coordinates) : 0, xmin = coordinates.length ? Math.min(...coordinates) : 0;
-  const px = x => 48 + plotFraction(x, xmin, xmax) * 284, py = y => 120 - (y - low) / (high - low) * 102;
+  const px = x => 64 + plotFraction(x, xmin, xmax) * 267, py = y => 120 - (y - low) / (high - low) * 102;
   for (let i = 0; i <= 3; i++) {
     const y = 18 + i * 34;
-    shape('line', { x1: 44, x2: 336, y1: y, y2: y, stroke: '#34455f', 'stroke-width': 0.7 });
-    shape('text', { x: 38, y: y + 3, fill: '#9eafc9', 'font-size': 10, 'text-anchor': 'end' }, number(high - i / 3 * (high - low)));
+    shape('line', { x1: 61, x2: 334, y1: y, y2: y, stroke: '#464642', 'stroke-width': 0.7 });
+    shape('text', { x: 55, y: y + 3, fill: '#b5b5af', 'font-size': 10, 'text-anchor': 'end' }, number(high - i / 3 * (high - low)));
   }
   const bound = snapshot.scene.bindings.find(binding => binding.source.nodeId === source.nodeId && binding.source.port === source.port);
   if (value.kind === 'series') {
@@ -309,9 +352,13 @@ function renderPlot(view, body) {
       tabindex: 0, role: 'button', 'aria-label': `${row.objectId ?? row.label}: ${number(row.y)} ${value.unit.symbol}`, 'data-focus': `sample-${index}`, 'data-object-id': row.objectId ?? '' });
     const choose = () => select(bound && row.objectId ? { nodeId: bound.target, objectId: row.objectId } : { nodeId: source.nodeId, port: source.port, ...(row.objectId ? { objectId: row.objectId } : {}) });
     dot.addEventListener('click', choose); dot.addEventListener('keydown', event => { if (['Enter', ' '].includes(event.key)) { event.preventDefault(); choose(); } });
-    if ((view.component !== -1 || row.series == null || row.series === 0) && (rows.length <= 10 || index % Math.ceil(rows.length / 7) === 0)) shape('text', { x: px(row.x), y: 137, fill: '#a5b7d0', 'font-size': 10, 'text-anchor': 'middle' }, row.label);
+    if (value.kind !== 'series' && (view.component !== -1 || row.series == null || row.series === 0) && (rows.length <= 8 || index % Math.ceil(rows.length / 4) === 0)) shape('text', { x: px(row.x), y: 137, fill: '#b5b5af', 'font-size': 10, 'text-anchor': 'middle' }, row.label);
   });
-  shape('text', { x: 190, y: 153, fill: '#a5b7d0', 'font-size': 10, 'text-anchor': 'middle' }, value.kind === 'series' ? 'Physical time / ' + value.coordinates.unit.symbol : value.kind === 'vector' ? 'Vector component' : value.kind === 'scalar' ? 'Derived value' : 'Sample index (source IDs retained)');
+  if (value.kind === 'series' && coordinates.length) {
+    const ticks = xmin === xmax ? [xmin] : [xmin, xmin / 2 + xmax / 2, xmax];
+    for (const x of ticks) shape('text', { x: px(x), y: 137, fill: '#b5b5af', 'text-anchor': x === xmax ? 'end' : x === xmin ? 'start' : 'middle' }, number(x));
+  }
+  shape('text', { x: 190, y: 153, fill: '#b5b5af', 'font-size': 10, 'text-anchor': 'middle' }, value.kind === 'series' ? 'Physical time / ' + value.coordinates.unit.symbol : value.kind === 'vector' ? 'Vector component' : value.kind === 'scalar' ? 'Derived value' : 'Sample index (source IDs retained)');
   container.append(svg, element('p', `${source.nodeId}.${source.port}${view.component >= 0 && value.shape.at(-1) === 3 ? ` · component ${['X', 'Y', 'Z'][view.component]}` : ''}`, 'plot-source'));
   if (view.component === -1 && value.shape.length === 2) container.append(element('p', 'X: teal · Y: gold · Z: violet', 'plot-source'));
   const missing = rows.filter(row => row.y === null).length;
@@ -468,7 +515,7 @@ function renderMenu() {
   if ([...$('plot-source').options].some(option => option.value === selected)) $('plot-source').value = selected;
 }
 function closeMenus() { for (const id of ['project-menu', 'view-menu', 'help']) $(id).hidden = true; for (const id of ['project-toggle', 'views-toggle', 'help-toggle']) $(id).setAttribute('aria-expanded', 'false'); }
-function setSceneOnly(next) { sceneOnly = !!next; closeMenus(); manager.setSceneOnly(sceneOnly); $('stage').classList.toggle('scene-only', sceneOnly); $('scene-only').setAttribute('aria-pressed', String(sceneOnly)); $('scene-only').textContent = sceneOnly ? 'Restore workspace · V' : 'Scene only · V'; $('scene-only').focus({ preventScroll: true }); }
+function setSceneOnly(next) { sceneOnly = !!next; closeMenus(); manager.setSceneOnly(sceneOnly); syncRails(); if (!sceneOnly) updateContent(); $('stage').classList.toggle('scene-only', sceneOnly); $('scene-only').setAttribute('aria-pressed', String(sceneOnly)); $('scene-only').textContent = sceneOnly ? 'Restore workspace · V' : 'Scene only · V'; $('scene-only').focus({ preventScroll: true }); }
 $('views-toggle').addEventListener('click', () => { const open = $('view-menu').hidden; closeMenus(); $('view-menu').hidden = !open; $('views-toggle').setAttribute('aria-expanded', String(open)); });
 $('project-toggle').addEventListener('click', () => {
   const open = $('project-menu').hidden; closeMenus(); $('project-menu').hidden = !open;
@@ -491,15 +538,29 @@ $('projection').addEventListener('change', () => {
 $('fit').addEventListener('click', () => adapter.frameAll());
 $('reset').addEventListener('click', () => { const camera = snapshot?.scene.nodes.find(node => node.kind === 'camera'); if (camera) adapter.setCamera(camera.id); });
 $('undo').addEventListener('click', () => edit({ action: 'undo' }).catch(showError)); $('redo').addEventListener('click', () => edit({ action: 'redo' }).catch(showError));
-$('time').addEventListener('input', event => { physicalTime = Number(event.target.value); clearTimeout(scrubTimer); scrubTimer = setTimeout(refresh, 70); });
-async function advance() {
-  if (!playing) return;
-  const input = $('time'), next = physicalTime + Number(input.dataset.advance ?? 0.25);
-  physicalTime = next > Number(input.max) ? Number(input.min) : next; input.value = String(physicalTime);
-  await refresh();
-  if (playing) timer = setTimeout(advance, 120);
+$('time').addEventListener('input', event => { stopPlayback(); ++sequence; physicalTime = Number(event.target.value); clearTimeout(scrubTimer); scrubTimer = setTimeout(refresh, 70); });
+function play() {
+  if (playing) { stopPlayback(); return; }
+  if (!snapshot || refreshNeeded) return;
+  const session = ++playSession, input = $('time');
+  const step = Number(input.dataset.advance ?? 0.25);
+  const analytic = state.portable?.playback?.mode === 'analytic';
+  const period = analytic ? 1000 / 30 : 120;
+  const from = physicalTime, start = performance.now();
+  playing = true; readyStatus(); $('play').textContent = 'Ⅱ'; $('play').setAttribute('aria-label', 'Pause physical time');
+  async function advance() {
+    if (session !== playSession || disposed) return;
+    const began = performance.now(), min = Number(input.min), max = Number(input.max);
+    const next = analytic ? from + (began - start) * step / 120 : physicalTime + step;
+    physicalTime = next <= max ? next : analytic ? min + (next - min) % (max - min) : min;
+    input.value = String(physicalTime);
+    await refresh();
+    if (session === playSession && !disposed) timer = setTimeout(advance, Math.max(0, period - (performance.now() - began)));
+  }
+  timer = setTimeout(advance, period);
 }
-$('play').addEventListener('click', () => { if (playing) stopPlayback(); else { playing = true; $('play').textContent = 'Ⅱ'; $('play').setAttribute('aria-label', 'Pause physical time'); advance(); } });
+$('play').addEventListener('click', play);
+document.addEventListener('visibilitychange', () => { if (document.hidden && playing) stopPlayback(); });
 window.addEventListener('keydown', event => {
   if (event.isComposing) return;
   const editing = event.target.matches('input,textarea,select,[contenteditable=true]');
@@ -508,7 +569,7 @@ window.addEventListener('keydown', event => {
   if (event.key.toLowerCase() === 'v') { event.preventDefault(); setSceneOnly(!sceneOnly); }
   if (event.key.toLowerCase() === 'f') { event.preventDefault(); adapter.frameAll(); }
 });
-window.addEventListener('pagehide', () => { disposed = true; ++sequence; stopPlayback(); clearTimeout(scrubTimer); clearInterval(changeTimer); observer.disconnect(); manager.dispose(); adapter.dispose(); agentClient.dispose(); });
+window.addEventListener('pagehide', () => { disposed = true; ++sequence; cancelAnimationFrame(drawRequest); stopPlayback(); clearTimeout(scrubTimer); clearInterval(changeTimer); observer.disconnect(); manager.dispose(); adapter.dispose(); agentClient.dispose(); });
 globalThis.cosmicWorkspace = Object.freeze({ adapter, conversation, get agent() { return agentClient; }, refresh, edit, select, setSceneOnly,
   get snapshot() { return snapshot; }, get results() { return results; },
   get state() { return { selection: structuredClone(selection), identity: state?.identity, time: snapshot?.time, sceneOnly }; },
