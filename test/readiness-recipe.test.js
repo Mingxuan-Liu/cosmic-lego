@@ -45,7 +45,7 @@ test('timing gate rebuilds with the same graph, attributed fields, and held meas
 test('the saved four-puck project continues its seeded control from the held sample in a fresh worker', async () => {
   const registry = createRegistry(), binding = registry.bind();
   const { project, manifest } = openPortableManifest(
-    await readFile(new URL('../docs/evidence/readiness-saved.json', import.meta.url), 'utf8'),
+    await readFile(new URL('./fixtures/four-puck-project.json', import.meta.url), 'utf8'),
     { registry, binding, layer: createWorkspaceLayer(binding) },
   );
   const registryModule = new URL('../examples/fixtures/workspace-registry.js', import.meta.url);

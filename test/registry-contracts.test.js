@@ -123,7 +123,7 @@ test('manifest scientific metadata is complete and reviewed evidence remains a d
     m => { m.science.assumptions = []; }, m => { m.science.evaluation.mode = 'stateful'; },
     m => { m.science.review.status = 'reviewed'; }, m => { m.documentation.summary = ''; },
   ]) { const m = manifest(); change(m); fails(() => prepareManifest(m)); }
-  const reviewed = manifest(); reviewed.science.review = { status: 'reviewed', notes: 'A supplied review record, not registry certification.', evidence: [{ title: 'Contract review', locator: 'docs/review.md', reviewer: 'Fixture reviewer', date: '2026-11-03' }] };
+  const reviewed = manifest(); reviewed.science.review = { status: 'reviewed', notes: 'A supplied review record, not registry certification.', evidence: [{ title: 'Contract review', locator: 'test/registry-contracts.test.js', reviewer: 'Fixture reviewer', date: '2026-11-03' }] };
   assert.equal(prepareManifest(reviewed).science.review.evidence[0].reviewer, 'Fixture reviewer');
   reviewed.science.review.evidence[0].date = '2026-02-30'; fails(() => prepareManifest(reviewed));
 });

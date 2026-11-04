@@ -163,7 +163,7 @@ export async function exportFrames({ manifest, directory, schedule, signal, onFr
 // Fixed deployment inventory. Project resource names, recipe text and module
 // identifiers never select a filesystem path or contribute executable code.
 const playerFiles = [
-  'LICENSE', 'docs/third-party-notices.md', 'assets/branding/cosmic-lego-galaxy.png',
+  'LICENSE', 'THIRD-PARTY-NOTICES.md', 'assets/branding/cosmic-lego-galaxy.png',
   'scripts/timeline-server.mjs', 'scripts/timeline-http.mjs',
   ...['index.html', 'style.css', 'app.js'].map(name => 'demo/timeline/' + name),
   ...['workspace-registry', 'registry-extensions', 'runtime-extensions'].map(name => 'examples/fixtures/' + name + '.js'),
@@ -199,7 +199,7 @@ associations. Its author recipes, scene text, data and compact accepted-command
 summaries remain inspectable. The delivery inventory lists SHA-256
 digests of the packaged files. Original Cosmic Lego code uses the BSD-3-Clause
 license in LICENSE. Three.js and OrbitControls carry their MIT license under
-node_modules/three/LICENSE and docs/third-party-notices.md.
+node_modules/three/LICENSE and THIRD-PARTY-NOTICES.md.
 `;
 
 export async function packagePlayer({ manifest, directory, composition } = {}) {

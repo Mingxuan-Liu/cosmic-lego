@@ -1,6 +1,6 @@
 /** Independent star-dominated Kepler orbits and uniform-disk photometry.
  * The fixed star supplies GM; planets do not perturb it or each other.
- * See docs/physics.md. No rendering or display-scale values enter this module.
+ * No rendering or display-scale values enter this module.
  */
 const TAU = 2 * Math.PI;
 const G = 6.67430e-11;

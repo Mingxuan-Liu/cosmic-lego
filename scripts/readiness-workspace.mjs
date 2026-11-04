@@ -40,7 +40,7 @@ async function inventory(root) {
   }
   return [...sharedFiles, ...entryScripts, ...fixtures, 'examples/workspace.mjs', 'examples/scene-and-assets.mjs',
     ...pages.flatMap(page => ['index.html', 'app.js', 'style.css'].map(name => 'demo/' + page + '/' + name)),
-    'LICENSE', 'docs/third-party-notices.md', 'assets/branding/cosmic-lego-galaxy.png',
+    'LICENSE', 'THIRD-PARTY-NOTICES.md', 'assets/branding/cosmic-lego-galaxy.png',
     three + 'package.json', three + 'LICENSE', ...Object.values(threeEntries), three + 'build/three.core.js',
     ...(await exists(path.join(root, author)) ? [author] : [])].sort();
 }

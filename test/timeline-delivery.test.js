@@ -91,7 +91,9 @@ test('a copied offline player launches from a clean directory with its own trust
   const inventory = await jsonAt(path.join(directory, 'delivery.json'));
   assert.equal(inventory.status, 'complete'); assert.equal(inventory.snapshotId, manifest.integrity.sha256);
   for (const item of inventory.files) assert.equal(sha(await readFile(path.join(directory, item.file))), item.sha256);
-  assert.ok(inventory.files.some(item => item.file === 'node_modules/three/LICENSE'));
+  for (const notice of ['LICENSE', 'THIRD-PARTY-NOTICES.md', 'node_modules/three/LICENSE']) {
+    assert.ok(inventory.files.some(item => item.file === notice), notice);
+  }
   assert.ok(inventory.files.every(item => !item.file.startsWith('src/agent-session/') && !item.file.includes('recipe.mjs')));
   const script = `
     import {readFile} from 'node:fs/promises';

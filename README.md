@@ -6,13 +6,11 @@
 
 When two planets cross the face of a star, how much light do they block? At astronomical distances we often have a light curve and cannot see either shadow. In Cosmic Lego you can move an observer, follow each planet, and compare the shadows on the stellar disk with the signal that observer would measure.
 
-The **astronomy learning map** opens as a 3D star cluster. Explore an object or a phenomenon, or choose **Observation** or **Simulations** in the Field menu to find a way to study it. For example, start with *Solar neutrinos* to see how a detector can tell us about the Sun’s core. Larger stars mark ideas that help explain more topics. Follow a dashed line to see how the same diagram helps explain two topics. You can rotate the 3D cluster, pan across the 2D map, or browse the same topics in a table. Choose **Planetary transits** to try the playable study. [Launch the map](docs/getting-started.md) · [How the stars are sized](docs/atlas-sources.md)
-
-![The astronomy learning map in 3D cluster view. Light & color sits near the center, and dashed lines connect topics you can explore with the same diagram.](docs/evidence/roadmap-3d.png)
-
-Choose **Open workspace** to explore **When shadows overlap**. At conjunction the modeled star retains 97.9302% of its unobscured flux. Summing the individual transit depths instead predicts 97.2544% because the smaller foreground shadow lies inside the larger one. Inspect the geometry, change the system, and see both measurements update. [Open the workspace](docs/getting-started.md) · [Reproduce the study](docs/exoplanet-authoring.md)
-
 Cosmic Lego aims to let students, teachers, and creators assemble stars, planets, gas, light, and observers with their own agents. The first installed astronomy package supplies independent Kepler orbits and transit photometry. The other astronomy questions below guide future model development. A saved study can be explored and replayed locally without connecting an agent.
+
+![The astronomy learning map in its default 3D cluster view.](assets/roadmap-3d.png)
+
+[Read the Cosmic Lego user manual on the GitHub Wiki](https://github.com/Mingxuan-Liu/cosmic-lego/wiki)
 
 ## The whole idea
 
@@ -177,39 +175,6 @@ with the required notices retained and no implied endorsement by the authors.
 
 Unless otherwise noted, this license covers the project's code, examples,
 documentation, and original assets to the extent the contributors hold the
-relevant rights. Third-party materials and trademarks retain their own rights.
+relevant rights. Third-party materials and trademarks retain their own rights. See the [third-party notices](THIRD-PARTY-NOTICES.md).
 [arXiv's article licenses](https://info.arxiv.org/help/license/index.html) apply
 to manuscripts; any future Cosmic Lego paper would be licensed separately.
-
----
-
-The [getting-started guide](docs/getting-started.md) gives the default astronomy launcher and the separate astronomy-free workspace. The [exoplanet authoring guide](docs/exoplanet-authoring.md) covers the physical model, source recipe, gateway edits, portable delivery and v0.2 imports.
-The implemented generic F01 API has its own [composition guide](docs/composition-kernel.md).
-Scientific values, ports and calculations are covered in the [F02 dataflow guide](docs/scientific-dataflow.md).
-Trusted model, operator, asset and view registration is covered in the [F03 extension guide](docs/extension-registry.md).
-Analytic and stateful worker execution is covered in the [F04 runtime guide](docs/computation-runtime.md).
-Authorable 3D scenes, scientific bindings, and reusable assets are covered in the
-[F05 scene guide](docs/scene-and-assets.md), with a [runnable example](examples/scene-and-assets.mjs)
-and [implementation handoff](docs/handoffs/F05.md).
-The [F06 workspace guide](docs/planetarium-shell.md) covers floating views,
-linked current-sample plots and the conversation UI boundary, with a
-[public recipe](examples/workspace.mjs) and [handoff](docs/handoffs/F06.md).
-The [F07 gateway guide](docs/command-gateway.md) covers discovery, shared SDK/CLI/HTTP
-commands, atomic edits, retry identity and revocable turn permissions, with a
-[public recipe](examples/command-gateway.mjs) and [handoff](docs/handoffs/F07.md).
-The [F08 session guide](docs/in-app-agent-sessions.md) covers the local Codex adapter,
-in-app conversation, scoped tools and Stop, with [verified evidence](docs/handoffs/F08.md).
-The workspace can save named projects and exchange inspectable JSON files. Reopening
-restores the construction and saved physical time with the agent disconnected.
-See the [F09 project-file guide](docs/portable-projects.md), [runnable example](examples/portable-project.mjs)
-and [verification handoff](docs/handoffs/F09.md).
-F10 plays an authored sequence, seeks to a scientific comparison and exports the
-same frames as PNGs. The [timeline guide](docs/authored-timelines.md),
-[example](examples/authored-timeline.mjs) and [F10 handoff](docs/handoffs/F10.md)
-cover the local player, offline package and reproducibility checks.
-An independent author built a three-lane timing gate with no astronomy package installed.
-Adding a fourth puck through the in-app agent changed its measured mean from ⅔ m to 1 m.
-The [F11 evidence](docs/domain-independent-readiness.md) includes the editable project and offline replay commands.
-Current capabilities and evidence belong in the [implementation record](docs/demo-status.md).
-The [shared architecture roadmap](docs/infrastructure-roadmap.md) translates this
-purpose into implementation tasks and agent prompts.

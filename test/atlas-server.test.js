@@ -51,7 +51,7 @@ test('the roadmap study keeps its own timeline while the workspace opens a diffe
     const study = await meta(url + 'api/timeline');
     assert.equal(study.title, 'When shadows overlap');
     assert.match(await (await fetch(url)).text(), /id="scrub"/);
-    const document = JSON.parse(await readFile(new URL('../docs/evidence/F12-shared-shadow.json', import.meta.url)));
+    const document = JSON.parse(await readFile(new URL('./fixtures/shared-shadow-project.json', import.meta.url)));
     await app.portable.action('import', {document, expected: app.project.token});
     const identity = app.project.token;
     assert.notEqual((await meta(app.url+'/api/timeline')).snapshotId, study.snapshotId);

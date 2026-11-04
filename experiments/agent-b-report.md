@@ -10,7 +10,7 @@ loops, structural additions/removals, measurement rewiring, and semantic
 and no physics, scene implementation, renderer, or server was modified. The recipe
 exports its world and a numerical `audit`; it does not publish anything.
 
-During this challenge I read only `docs/agent-interface.md`, `docs/physics.md`, and
+During this challenge I read only the agent-interface and physics guides available at the time and
 `node scripts/agent.mjs tools`. I used only the documented SDK surface. This is a
 separate agent authoring exercise, not a blind novice usability study: the agent
 had worked on the UI earlier in the project and knew the general architecture.

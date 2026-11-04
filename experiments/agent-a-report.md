@@ -4,7 +4,7 @@ Date: 2026-11-02. Recipe: [agent-a-overlap.mjs](agent-a-overlap.mjs).
 
 ## Authoring boundary
 
-I read only `AGENTS.md`, `docs/agent-interface.md`, and `docs/physics.md`, and discovered the public semantic tools through the CLI. I imported the public `World` SDK without reading its implementation or the rebuilt numerical/rendering source. I authored a new case rather than adapting a supplied recipe. I did not change the engine, renderer, documentation, or shared live scene.
+I read only `AGENTS.md` and the agent-interface and physics guides available at the time, and discovered the public semantic tools through the CLI. I imported the public `World` SDK without reading its implementation or the rebuilt numerical/rendering source. I authored a new case rather than adapting a supplied recipe. I did not change the engine, renderer, documentation, or shared live scene.
 
 This is an independent **authoring feasibility** exercise, not independent certification of the physical model. It establishes that this particular composition was expressible and evaluable through the interface.
 

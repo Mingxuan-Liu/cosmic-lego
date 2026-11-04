@@ -1,5 +1,5 @@
 // Printed page starts are bibliographic observations from the publisher's contents.
-// Atlas labels and group descriptions are editorial. See docs/atlas-sources.md.
+// Atlas labels and group descriptions are editorial.
 const bookUrl = 'https://www.cambridge.org/highereducation/books/an-introduction-to-modern-astrophysics/140DDF8A480C3841DCCD76D66984D858';
 const source = {
   title: 'An Introduction to Modern Astrophysics',
@@ -157,8 +157,7 @@ const chapterDefinitions = [
   ]],
 ];
 
-// Search vocabulary. Index locators in docs/atlas-sources.md give examples;
-// these aliases never contribute points or replicate a section's pages.
+// Search aliases have no effect on coverage or page allocations.
 const sectionKeywords = {
   '1.2': ['heliocentrism', 'Copernicus'], '1.3': ['celestial sphere', 'right ascension', 'declination'],
   '2.1': ['ellipse', 'eccentricity', 'semimajor axis'], '2.3': ['Kepler laws'],

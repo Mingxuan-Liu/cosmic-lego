@@ -6,8 +6,8 @@ and arrange interactive visualizations. A fixed experiment with exposed paramete
 is insufficient.
 
 User clarification, 2026-11-03: infrastructure means the domain-independent
-construction framework. Follow `docs/infrastructure-roadmap.md` and its F01–F12
-prompts for new architecture work; earlier numbered prompts are superseded.
+construction framework. Preserve the boundaries verified by the generic fixtures
+and the public authoring examples.
 - Shared core, runtime, renderer, application shell and agent bridge must not
   import domain packages. The composition root registers installed extensions.
   Prove the architecture with generic fixtures and no astronomy package loaded;
@@ -32,20 +32,30 @@ prompts for new architecture work; earlier numbered prompts are superseded.
 
 - Use the project name Cosmic Lego and repository slug cosmic-lego.
 - Use the approved `assets/branding/cosmic-lego-galaxy.png` wherever a project
-  logo appears; preserve its image bytes and transparency. See the branding notes.
+  logo appears. Preserve its image bytes and transparency.
 - The project uses BSD-3-Clause; retain LICENSE and its notices in distributions.
   Preserve separate notices for any third-party materials.
-- Describe the goal as interactive astronomical visualizations. In the README,
-  lead with concrete astronomy questions and the difficulty of accessing cosmic
-  objects and scales; avoid generic interface-design jargon. Keep one central
-  schematic as the visual summary. Reuse should spare beginners unnecessary
-  simulation coding and prompt-engineering work.
+## README and user documentation
 
-- Read README.md first: it defines the enduring purpose and design commitments.
-  It is a blueprint, not a promise that every described capability exists.
-  Practical instructions belong in docs/getting-started.md; current scope and
-  evidence belong in docs/demo-status.md. Read docs/physics.md and
-  docs/agent-interface.md when working with the present model or authoring API.
+- Read `README.md` first. It is the public project blueprint. Explain the astronomy
+  questions, who the project serves, its long-term direction and its scientific
+  and design commitments. Lead with a concrete astronomy question and explain why
+  the objects or scales are difficult to explore directly. Show how reuse spares
+  learners unnecessary simulation coding and prompt engineering. Distinguish
+  ambitions from capabilities readers can try. Keep the central schematic and
+  a representative product image. End with License.
+- Publish the user manual on the [GitHub Wiki](https://github.com/Mingxuan-Liu/cosmic-lego/wiki).
+  Put installation steps, controls, tutorials, worked numerical examples and
+  troubleshooting there. The README should link to the manual once.
+- Keep developer logs, per-commit summaries, implementation handoffs and test
+  reports out of both the README and the manual. Use Git history for changes,
+  and keep reproducible examples and regression fixtures with the code and tests.
+  Keep the repository free of a top-level `docs/` directory.
+- For implementation work, check the relevant package, its public examples,
+  and its tests for supported behavior and physical assumptions.
+
+## Implementation
+
 - The implementation-specific exoplanet rules below apply to that model only.
   They must not become universal restrictions on future domains. New domains
   need their own explicit contracts, coupling rules and independent checks.

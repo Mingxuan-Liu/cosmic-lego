@@ -131,7 +131,7 @@ test('server enforces loopback host, same origin, bounded JSON and static-file a
   const oversized = await post(app, 'edit', { identity: before.identity, action: 'projection', value: 'x'.repeat(70000) });
   assert.equal(oversized.status, 400);
   assert.equal(oversized.body.code, 'REQUEST_BUDGET');
-  for (const route of ['/src/core/index.js', '/AGENTS.md', '/docs/handoffs/F04.md', '/package.json', '/%2e%2e/AGENTS.md']) {
+  for (const route of ['/src/core/index.js', '/AGENTS.md', '/experiments/f11-author.mjs', '/package.json', '/%2e%2e/AGENTS.md']) {
     const denied = await fetch(`${app.url}${route}`);
     assert.equal(denied.status, 404, route);
   }
